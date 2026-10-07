@@ -1,13 +1,12 @@
-<p align="center">
-  <img src="docs/images/hero.png" alt="Kotori日本語入力 — Mozc の安定した変換に、文脈を読む AI を。AJIMEE-Bench 91.5%、日常の文 97.5%、変換 1 回 0.07 秒、ネット通信 0" width="880">
-</p>
+<h1 align="center">Kotori日本語入力</h1>
+<p align="center">Mozcの安定した変換に、文脈を読むローカルAIを。</p>
 
 <p align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest"><img alt="最新版" src="https://img.shields.io/github/v/release/aruiki/KotoriIME-japanese-?include_prereleases&label=%E6%9C%80%E6%96%B0%E7%89%88&color=242C5C"></a>
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest"><img alt="最新版" src="https://img.shields.io/github/v/release/aruiki/KotoriIME-japanese-?label=%E6%9C%80%E6%96%B0%E7%89%88&color=242C5C"></a>
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases"><img alt="ダウンロード数" src="https://img.shields.io/github/downloads/aruiki/KotoriIME-japanese-/total?label=%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89&color=242C5C"></a>
   <img alt="Windows 10 / 11" src="https://img.shields.io/badge/Windows-10%20%2F%2011-242C5C?logo=windows">
   <img alt="オフラインで動作" src="https://img.shields.io/badge/%E3%82%AA%E3%83%95%E3%83%A9%E3%82%A4%E3%83%B3-%E9%80%9A%E4%BF%A1%E3%81%97%E3%81%AA%E3%81%84-F25C2E">
-  <img alt="AJIMEE-Bench 91.5%" src="https://img.shields.io/badge/AJIMEE--Bench-91.5%25-F25C2E">
+  <img alt="実入力 AJIMEE-Bench 88.4%" src="https://img.shields.io/badge/%E5%AE%9F%E5%85%A5%E5%8A%9B%20AJIMEE--Bench-88.4%25-F25C2E">
   <a href="#ライセンス"><img alt="ライセンス" src="https://img.shields.io/badge/license-Apache--2.0%20%2F%20MIT-5B6070"></a>
 </p>
 
@@ -37,6 +36,33 @@
 > MSI をひとつ実行するだけで使えます。AI のモデルと GPU の実行環境も同梱しているので、CUDA などの準備は要りません。
 > GPU がない PC(ノート PC など)でも動きます。
 
+## ほかの IME と比べる
+
+<p align="center"><img src="docs/images/ime-comparison.png" alt="実入力 AJIMEE-Bench 198問: Kotori beta.8 88.4%、Microsoft IME 59.6%、Google日本語入力58.1%。差は28.8、30.3ポイント。2026-10-01、全IME前の文なし。" width="880"></p>
+
+**難しいかな漢字変換198問で、Microsoft IMEより28.8ポイント、Google日本語入力より30.3ポイント高い正解率。**
+
+2026-10-01、RTX 3060。Kotoriは **beta.8 / Unreal**、Microsoft IMEは **Windows 11付属版**、
+Google日本語入力は **3.34.6260**。以下はこの版・環境での測定値で、現在のv1.0.0 / v1.1の再測定ではありません。
+
+Google 日本語入力と Microsoft IME には変換だけを呼び出す方法がないので、**実際に IME で入力して**測りました。
+読みをキーで打ち、Space で変換、Enter で確定した文字を正解と比べます。3 つとも同じ道具・同じ条件です
+([eval/imebench/](eval/imebench/))。
+
+| | AJIMEE-Bench (198問) | 日常の文 (81問) | 同音語 (40問) | 人名・地名・新語 (40問) | 打ち間違い (40問) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| **Kotori日本語入力 beta.8**(Unreal) | **88.4%** | **97.5%** | **97.5%** | **97.5%** | 5.0% |
+| Microsoft IME | 59.6% | 86.4% | 82.5% | 82.5% | 5.0% |
+| Google 日本語入力 | 58.1% | 81.5% | 65.0% | 95.0% | 10.0% |
+
+- 全IMEで前の文なし、Space 1回の第1候補。NFKCで表記を揃え、AJIMEEの入力できない2問は除外しています。
+- 学習は各IMEの既定設定のままです。フォーカスとテキストを問ごとにリセットしています。
+- 下の91.5〜93.0%は前の文を渡す別の評価です。この3製品比較とは条件・問題数が違います。
+- 同音語・人名・打ち間違いのセット(各 40 問)は、このプロジェクトで作ったものです([eval/sets/](eval/sets/))。
+- **打ち間違いの補正**(「ありがとうごさいます」→「ありがとうございます」など)は、どの IME もほとんどできません。
+  このセットではKotoriはMicrosoft IMEと同率で、Google日本語入力を下回りました。改善を進めています。
+- ATOK は手元にないため測っていません。
+
 <p align="center"><img src="docs/images/features.png" alt="特長: 文脈で選ぶ、先回りの予測、待たせない、外に出さない、GPU に優しい、MSI ひとつ" width="880"></p>
 
 ## 変換の例
@@ -61,6 +87,8 @@
 
 ## 変換の正確さ
 
+この節は変換器を直接呼ぶ評価です。前の文を渡すため、上のMicrosoft IME・Google日本語入力との実入力比較とは分けてご覧ください。
+
 <p align="center"><img src="docs/images/accuracy.png" alt="AJIMEE-Bench の第 1 候補の正解率。Kotori日本語入力 Unreal 93.0%、High 92.5%、Standard 91.5%、Low 88.0%、GPU のない PC 83.0%、azooKey + Zenzai 85.0%、Mozc 51.0%。日常の文 81 問は Kotori 97.5%、Mozc 80.2%" width="880"></p>
 
 - [AJIMEE-Bench](https://github.com/azooKey/AJIMEE-Bench) は、かな漢字変換の難しい 200 問(同音異義語、文脈で
@@ -68,26 +96,6 @@
 - 調整に一度も使っていない **最終評価用のセット 300 問**(ニュース・ビジネス・日常・固有名詞・数字など)では、
   Mozc 単体 82.3% → **96.3%**(Standard)。過学習していないかの確認に使っています。
 - 測り方と記録はすべて [eval/README.md](eval/README.md) にあります。
-
-## ほかの IME と比べる
-
-<p align="center"><img src="docs/images/compare.png" alt="実際の IME で同じ条件で比べた正解率。AJIMEE-Bench: Kotori 88.4%、Microsoft IME 59.6%、Google 日本語入力 58.1%。日常の文: 97.5%、86.4%、81.5%。同音語: 97.5%、82.5%、65.0%。人名・地名・新語: 97.5%、82.5%、95.0%" width="880"></p>
-
-Google 日本語入力と Microsoft IME には変換だけを呼び出す方法がないので、**実際に IME で入力して**測りました。
-読みをキーで打ち、Space で変換、Enter で確定した文字を正解と比べます。3 つとも同じ道具・同じ条件です
-([eval/imebench/](eval/imebench/))。
-
-| | AJIMEE-Bench | 日常の文 | 同音語の使い分け | 人名・地名・新語 | 打ち間違いの補正 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| **Kotori日本語入力**(Unreal) | **88.4%** | **97.5%** | **97.5%** | **97.5%** | 5.0% |
-| Microsoft IME | 59.6% | 86.4% | 82.5% | 82.5% | 5.0% |
-| Google 日本語入力 | 58.1% | 81.5% | 65.0% | 95.0% | 10.0% |
-
-- 前の文は渡していません(どの IME も同じ条件)。前の文を渡すと Kotori はさらに上がります(上の 91.5〜93.0%)。
-- 同音語・人名・打ち間違いのセット(各 40 問)は、このプロジェクトで作ったものです([eval/sets/](eval/sets/))。
-- **打ち間違いの補正**(「ありがとうごさいます」→「ありがとうございます」など)は、どの IME もほとんどできません。
-  ATOK が得意とされる所で、Kotori で改善を進めています。
-- ATOK は手元にないため測っていません。
 
 ## 入力中の AI 予測
 
