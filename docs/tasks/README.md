@@ -86,3 +86,5 @@
 
 01〜20 は旧 Rust 版(`crates/`、`frontends/windows`)のカードで、`done/` にある。14(候補ウィンドウの描画)は
 Mozc 版に切り替えたため中止し、`archived/` に移した。
+
+- 49: 実入力3製品比較をREADME冒頭へ。全5セット・条件・CSV・再生成可能な図。CI結果はPR136。
