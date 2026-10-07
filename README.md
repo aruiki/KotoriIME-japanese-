@@ -47,7 +47,7 @@ Google日本語入力は **3.34.6260**。以下はこの版・環境での測定
 
 Google 日本語入力と Microsoft IME には変換だけを呼び出す方法がないので、**実際に IME で入力して**測りました。
 読みをキーで打ち、Space で変換、Enter で確定した文字を正解と比べます。3 つとも同じ道具・同じ条件です
-([eval/imebench/](eval/imebench/))。
+([eval/imebench/](eval/imebench/))。公開済みの結果は[CSVでも取得できます](eval/imebench/comparison-2026-10-01.csv)。
 
 | | AJIMEE-Bench (198問) | 日常の文 (81問) | 同音語 (40問) | 人名・地名・新語 (40問) | 打ち間違い (40問) |
 | --- | ---: | ---: | ---: | ---: | ---: |
