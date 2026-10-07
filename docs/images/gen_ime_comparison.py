@@ -26,7 +26,7 @@ def main():
         font = ImageFont.truetype(str(bold_path if bold else font_path), size)
         draw.text((x, y), value, font=font, fill=color)
 
-    text(72, 52, "同じ読みを、3つのIMEで実入力。", 62, bold=True)
+    text(72, 52, "IME別の変換正解率", 62, bold=True)
     text(76, 147, "AJIMEE-Bench 198問 · Space 1回の第1候補の正解率", 32)
     left, width = 490, 1020
     for tick in range(0, 101, 20):

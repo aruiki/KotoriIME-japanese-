@@ -1,5 +1,5 @@
 <h1 align="center">Kotori日本語入力</h1>
-<p align="center">Mozcの安定した変換に、文脈を読むローカルAIを。</p>
+<p align="center">Windowsで使える、オープンソースの日本語入力ソフトです。</p>
 
 <p align="center">
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest"><img alt="最新版" src="https://img.shields.io/github/v/release/aruiki/KotoriIME-japanese-?label=%E6%9C%80%E6%96%B0%E7%89%88&color=242C5C"></a>
@@ -28,7 +28,7 @@
 
 ---
 
-**Kotori日本語入力**は、Windows 用の日本語入力(IME)です。Google 日本語入力のオープンソース版である
+**Kotori日本語入力**は、無料で使える、オープンソースのWindows用日本語入力ソフト(IME)です。Google 日本語入力のオープンソース版である
 **Mozc** の変換エンジンと辞書をそのまま土台にし、その上で **AI が前後の文脈を読んで候補を選び直します**。
 使い慣れた Mozc の操作はそのままに、同音異義語や言い回しの取り違えを減らします。
 
@@ -40,7 +40,7 @@
 
 <p align="center"><img src="docs/images/ime-comparison.png" alt="実入力 AJIMEE-Bench 198問: Kotori beta.8 88.4%、Microsoft IME 59.6%、Google日本語入力58.1%。差は28.8、30.3ポイント。2026-10-01、全IME前の文なし。" width="880"></p>
 
-**難しいかな漢字変換198問で、Microsoft IMEより28.8ポイント、Google日本語入力より30.3ポイント高い正解率。**
+AJIMEE-Benchの198問で、Kotoriの正解率は88.4%、Microsoft IMEは59.6%、Google日本語入力は58.1%でした。差はそれぞれ28.8、30.3ポイントです。
 
 2026-10-01、RTX 3060。Kotoriは **beta.8 / Unreal**、Microsoft IMEは **Windows 11付属版**、
 Google日本語入力は **3.34.6260**。以下はこの版・環境での測定値で、現在のv1.0.0 / v1.1の再測定ではありません。
@@ -210,7 +210,7 @@ GPU は自動で見つけて使います。ドライバー以外の準備は要�
 | 版 | 主な変更 |
 | --- | --- |
 | [v1.1.0-rc.1](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.1)(リリース候補) | **手を止めると、Space を押す前に AI の変換が出る**。Tab の予測も手を止めると出る |
-| [v1.0.0](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.0.0) | **最初の製品版**(署名は 1.0.x で付ける)。診断情報の書き出し、落ちたときの記録(入力した文字は含まない)、通信の部品を外した、第三者の表示 |
+| [v1.0.0](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.0.0) | **最初の公開版**(署名は 1.0.x で付ける)。診断情報の書き出し、落ちたときの記録(入力した文字は含まない)、通信の部品を外した、第三者の表示 |
 | [v0.3.0-beta.8](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.8) | GPU のない PC で、長い文の変換が速く正確に(打ってすぐ Space の正解 36 → 46 / 60 文) |
 | [v0.3.0-beta.7](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.7) | 10 分使わなければ VRAM を空ける。入力中の GPU の負荷をさらに約 1 割減 |
 | [v0.3.0-beta.6](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.6) | 上書きインストール、予測が邪魔になりにくく、Unreal 93.0%、VRAM 約 170 MB 減 |
