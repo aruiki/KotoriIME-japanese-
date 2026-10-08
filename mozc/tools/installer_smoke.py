@@ -40,7 +40,10 @@ def msi_property(msi, name):
 
 def run_msi(arguments, log):
     """ランナーが停止しても原因の手掛かりが残るようMSIの段階を逐次記録する。"""
+    # CIのホストもTIPを読み込み得るため、Restart Managerにホスト終了を依頼しない。
+    # 使用中ファイルの削除失敗・再起動要求は通常どおり結果に記録する。
     process = subprocess.Popen(["msiexec", *arguments, "/qn", "/norestart",
+                                "MSIRESTARTMANAGERCONTROL=Disable",
                                 "/L*vx!", str(log)])
     start = time.monotonic()
     offset = 0
