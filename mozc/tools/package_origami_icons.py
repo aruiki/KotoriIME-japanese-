@@ -15,17 +15,21 @@ ICON_SIZES = (16, 20, 24, 32, 48, 64, 128, 256)
 PNG_SIZES = ICON_SIZES + (512, 1024)
 
 
-def render_icon(size):
-    source = ASSETS / ("kotori-origami-v3-small.svg" if size <= 32
+def draw_icon(canvas, small=False):
+    source = ASSETS / ("kotori-origami-v3-small.svg" if small
                        else "kotori-origami-v3.svg")
     dom = skia.SVGDOM.MakeFromStream(skia.MemoryStream(source.read_bytes()))
     if dom is None:
         raise ValueError(f"SVGを読み込めない: {source}")
+    dom.render(canvas)
+
+
+def render_icon(size):
     surface = skia.Surface(size * 4, size * 4)
     canvas = surface.getCanvas()
     canvas.clear(skia.ColorTRANSPARENT)
     canvas.scale(size * 4 / 1024, size * 4 / 1024)
-    dom.render(canvas)
+    draw_icon(canvas, size <= 32)
     pixels = surface.makeImageSnapshot().toarray(colorType=skia.kRGBA_8888_ColorType)
     return Image.fromarray(pixels).resize((size, size), Image.Resampling.LANCZOS)
 

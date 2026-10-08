@@ -34,13 +34,25 @@ python mozc/tools/package_origami_icons.py docs/design/2026-10-kotori/icons
 - Windowsのタイトルバー、キーボード操作、倍率、ハイコントラストを保つ。
 - AIの状態や、このPCで処理することを短く表示する。装飾目的のAIマークや決め台詞は加えない。
 
-## 現在の適用範囲
+## 本体への適用
 
-この変更は素材と再生成ツールの準備。公開済みrc.2やインストール済みIMEは変更していない。
-アプリ・言語バー・ツール・インストーラーへの実装は、Mozc資源を同じ素材で更新し、パッチを実ツリーから再生成して行う。
-「こ」の既存アイコンと「あ/A」の入力モード表示は、この変更では置き換えていない。
-新アイコンの実装と設定画面の構造変更は別の検証範囲とする。判断は[ADR0043](../../adr/0043-origami-design.md)。
+素材PR141はmainへ統合済み。カード56で実際のMozc資源をC案へ更新した。
+アプリ・言語バー・ツールの小鳥、設定・辞書のアイコン、インストーラーの背景に適用。
+[実資源の見本](integration/windows-icons.png)、[WiX背景画像](integration/dialog.png)、
+[資源の検証記録](integration/verification.json)を保存した。
 
+```powershell
+python mozc/tools/gen_icons.py <Mozcのsrc/data/images/win> <見本.png> --brand-only
+python mozc/tools/gen_assets.py <Mozcのsrc/data/kotori> --images-only
+```
+
+入力モードを再生成せず、使用許諾とNOTICEも更新しない。
+Mozc作業ツリーから `make_patches.sh` でパッチを再生成する。パッチを手で編集しない。
+本体のWindows資源2ターゲットと設定ツールはビルド成功。
+実行ファイル内の8アイコンも素材と一致した。[取り出したアイコン](integration/embedded-app-icons.png)。
+MSIはPRのCIで確認する。
+公開済みrc.2とインストール済みIMEはまだ変更していない。
+設定画面の構造変更はカード57で扱う。生成された画面見本と実装済み画面を区別する。
 ## 検討過程
 
 [3案の比較](icon-exploration.png)、[B案](bird-study.png)、[B案の縮小見本](bird-study-sizes.png)は履歴として残す。

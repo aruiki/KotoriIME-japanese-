@@ -68,7 +68,7 @@ Windows で手元でビルドする: 作業ツリーの `src` で
 | `../eval_predict.py --warm 秒 --suggest` | 入力中の候補(打鍵ごとの軽い予測)の当たり |
 | `capture_window.py` | 設定画面などのウィンドウだけを PNG に撮る(MSI を `msiexec /a` で展開した exe で) |
 | `dump_icons.py` | exe / dll に入っているアイコンを並べて見る |
-| `gen_icons.py`・`gen_assets.py`・`kotori_mark.py` | アイコン、インストーラの画像と使用許諾を作る |
+| `gen_icons.py`・`gen_assets.py`・`kotori_mark.py`・`package_origami_icons.py` | アイコン、インストーラの画像と使用許諾を作る |
 | `make_patches.sh` | 作業ツリーからパッチを作り直す |
 
 `eval_baseline.py` は、変換器の異常終了・出力不足・時間切れ(`--timeout`)で終了コード 1、`--min-acc` を下回ると 2 を返す。
