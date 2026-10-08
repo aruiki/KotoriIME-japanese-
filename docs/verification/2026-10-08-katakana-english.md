@@ -25,7 +25,11 @@ first_candidate_smoke.pyの--expect-variantで、最初に候補欄が現れた�
 EnglishVariantsRewriterのテストPASS。予測候補の属性、重複、付属語、content_valueの欠落、
 全要求種別、文節境界とAI評価情報を誤ってコピーしないことを確認。
 converter_mainとsession_handler_mainのリリースビルドPASS。
-追加のセッション回帰テストと更新後のMSI CIは実行結果を追記する。
+EnglishVariantsRewriter・LmRewriter・EngineConverter・Sessionの4テストターゲットPASS。
+コマンドはbazelisk test //rewriter:english_variants_rewriter_test //rewriter:lm_rewriter_test
+//engine:engine_converter_test //session:session_test --config release_build
+--repo_env=BAZEL_LLVM=C:/Users/aruik/mz/src/third_party/llvm --test_output=errors。
+ログはC:\Users\aruik\kotori-first-check\english-tests.log。更新後のMSI CIは確認中。
 
 ## 限界
 
