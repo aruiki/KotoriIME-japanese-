@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 
 
 def run(command, timeout=180):
@@ -37,6 +38,35 @@ def msi_property(msi, name):
     return value
 
 
+def run_msi(arguments, log):
+    """ランナーが停止しても原因の手掛かりが残るようMSIの段階を逐次記録する。"""
+    process = subprocess.Popen(["msiexec", *arguments, "/qn", "/norestart",
+                                "/L*vx!", str(log)])
+    start = time.monotonic()
+    offset = 0
+    try:
+        while True:
+            if log.exists():
+                with log.open("r", encoding="utf-16", errors="replace") as stream:
+                    stream.seek(offset)
+                    for line in stream:
+                        if any(key in line for key in ("Action start", "Action ended",
+                                "RESTART MANAGER", "Restart", "Return value 3",
+                                "MainEngineThread")):
+                            print(line.rstrip(), flush=True)
+                    offset = stream.tell()
+            code = process.poll()
+            if code is not None:
+                return code
+            if time.monotonic() - start > 300:
+                raise subprocess.TimeoutExpired("msiexec", 300)
+            time.sleep(1)
+    finally:
+        if process.poll() is None:
+            process.terminate()
+            process.wait(timeout=15)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--msi", type=Path, required=True)
@@ -61,19 +91,28 @@ def main():
               "run_id": os.environ.get("GITHUB_RUN_ID"),
               "install": False, "input": False, "uninstall": False}
     errors = []
+    result["product_code"] = msi_property(msi, "ProductCode")
+
+    def checkpoint(stage):
+        result["stage"] = stage
+        result["errors"] = errors
+        text = json.dumps(result, ensure_ascii=False, indent=2)
+        (out / "result.json").write_text(text, encoding="utf-8")
+        print(text, flush=True)
+
     attempted = False
     try:
         attempted = True
-        p = subprocess.run(["msiexec", "/i", str(msi), "/qn", "/norestart",
-                            "/L*v", str(out / "install.log")], timeout=300)
-        result["install_exit"] = p.returncode
-        if p.returncode != 0:
-            raise RuntimeError(f"導入の終了コード: {p.returncode}（3010は再起動が必要）")
+        checkpoint("installing")
+        code = run_msi(["/i", str(msi)], out / "install.log")
+        result["install_exit"] = code
+        if code != 0:
+            raise RuntimeError(f"導入の終了コード: {code}（3010は再起動が必要）")
         for name in ("mozc_server.exe", "mozc_renderer.exe", "mozc_tip64.dll"):
             if not (install / name).is_file():
                 raise RuntimeError(f"導入後のファイルがありません: {name}")
         result["install"] = True
-        result["product_code"] = msi_property(msi, "ProductCode")
+        checkpoint("installed")
         exe = out / "ImeBench.exe"
         compiler = Path(os.environ["WINDIR"]) / "Microsoft.NET/Framework64/v4.0.30319/csc.exe"
         run([str(compiler), "/nologo", "/target:winexe", "/platform:x64",
@@ -93,28 +132,28 @@ def main():
         if got.get("0") != "日本語" or got.get("1") != "東京":
             raise RuntimeError(f"実入力の結果が一致しません: {got}")
         result["input"] = True
+        checkpoint("input_verified")
     except Exception as exc:
         errors.append(str(exc))
     finally:
         if attempted:
             try:
+                checkpoint("uninstalling")
                 # この検証で入れたフォルダのプロセスだけを停止し、削除時のロックを外す。
                 script = "$root = [IO.Path]::GetFullPath($env:KOTORI_SMOKE_INSTALL) + '\\'; " + \
                          "Get-Process | Where-Object { $_.Path -and $_.Path.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) } | Stop-Process -Force"
                 env = dict(os.environ, KOTORI_SMOKE_INSTALL=str(install))
                 subprocess.run(["powershell", "-NoProfile", "-Command", script], env=env,
                                capture_output=True, timeout=30, check=True)
-                p = subprocess.run(["msiexec", "/x", result["product_code"], "/qn", "/norestart",
-                                    "/L*v", str(out / "uninstall.log")], timeout=300)
-                result["uninstall_exit"] = p.returncode
-                result["uninstall"] = p.returncode == 0 and not (install / "mozc_tip64.dll").exists()
+                code = run_msi(["/x", result["product_code"]], out / "uninstall.log")
+                result["uninstall_exit"] = code
+                result["reboot_required"] = code == 3010
+                result["uninstall"] = code in (0, 3010) and not (install / "mozc_tip64.dll").exists()
                 if not result["uninstall"]:
                     errors.append("アンインストールの完了を確認できません")
             except Exception as exc:
                 errors.append("削除確認: " + str(exc))
-        result["errors"] = errors
-        (out / "result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        checkpoint("finished")
     return 1 if errors else 0
 
 
