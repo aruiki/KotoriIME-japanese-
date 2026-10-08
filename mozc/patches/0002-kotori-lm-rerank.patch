@@ -20600,6 +20600,105 @@ index 4bbcddeca..e8eec4469 100644
 +        "@com_google_absl//absl/synchronization",
 +    ],
 +)
+diff --git a/src/rewriter/english_variants_rewriter.cc b/src/rewriter/english_variants_rewriter.cc
+index b75c03feb..59baedd9a 100644
+--- a/src/rewriter/english_variants_rewriter.cc
++++ b/src/rewriter/english_variants_rewriter.cc
+@@ -35,6 +35,7 @@
+ #include <vector>
+ 
+ #include "absl/container/flat_hash_set.h"
++#include "absl/container/flat_hash_map.h"
+ #include "absl/log/check.h"
+ #include "absl/strings/match.h"
+ #include "absl/strings/str_cat.h"
+@@ -49,6 +50,31 @@
+ 
+ namespace mozc {
+ 
++namespace {
++
++// Mozcの辞書に英字表記がない一般的な外来語だけを、入力中の候補として補う。
++// 大きな辞書を再実装せず、表記が明確な語に限定して誤採用を避ける。
++const char* KatakanaEnglishVariant(absl::string_view value) {
++  static const absl::flat_hash_map<absl::string_view, const char*> kVariants = {
++      {"インデックス", "index"},       {"エフェクト", "effect"},
++      {"インターネット", "internet"}, {"アイフォン", "iPhone"},
++      {"アイフォーン", "iPhone"},     {"コンピューター", "computer"},
++      {"コンピュータ", "computer"},   {"ソフトウェア", "software"},
++      {"ハードウェア", "hardware"},   {"アプリ", "app"},
++      {"アプリケーション", "application"}, {"ブラウザー", "browser"},
++      {"ブラウザ", "browser"},         {"サーバー", "server"},
++      {"サーバ", "server"},            {"ユーザー", "user"},
++      {"ユーザ", "user"},              {"データ", "data"},
++      {"ファイル", "file"},            {"フォルダ", "folder"},
++      {"キーボード", "keyboard"},      {"マウス", "mouse"},
++      {"ディスプレイ", "display"},     {"スクリーン", "screen"},
++  };
++  const auto it = kVariants.find(value);
++  return it == kVariants.end() ? nullptr : it->second;
++}
++
++}  // namespace
++
+ // Add space-prefixed variants to enable Space-joined English words conversion.
+ // 'Google Japan' consists of 'ぐーぐる': 'Google', and 'じゃぱん': 'Japan'
+ // Therefore, when a user types 'ぐーぐるじゃぱん', it will be 'GoogleJapan'
+@@ -166,6 +192,25 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+       continue;
+     }
+ 
++    const char* english =
++        KatakanaEnglishVariant(original_candidate->content_value);
++    if (english != nullptr &&
++        Util::GetScriptType(original_candidate->content_value) ==
++            Util::KATAKANA) {
++      const std::string new_value =
++          absl::StrCat(english, original_candidate->functional_value());
++      if (original_candidates.find(new_value) == original_candidates.end()) {
++        modified = true;
++        converter::Candidate* new_candidate = seg->insert_candidate(i + 1);
++        DCHECK(new_candidate);
++        *new_candidate = *original_candidate;
++        new_candidate->value = new_value;
++        new_candidate->content_value = english;
++        new_candidate->attributes |= converter::Attribute::NO_VARIANTS_EXPANSION;
++      }
++      continue;
++    }
++
+     if (IsT13NCandidate(original_candidate)) {
+       if (!(original_candidate->attributes &
+             converter::Attribute::NO_VARIANTS_EXPANSION)) {
+diff --git a/src/rewriter/english_variants_rewriter_test.cc b/src/rewriter/english_variants_rewriter_test.cc
+index 9c9f95e8f..fd8c3c63e 100644
+--- a/src/rewriter/english_variants_rewriter_test.cc
++++ b/src/rewriter/english_variants_rewriter_test.cc
+@@ -161,6 +161,24 @@ TEST_F(EnglishVariantsRewriterTest, ExpandSpacePrefixedVariants) {
+ }
+ 
+ TEST_F(EnglishVariantsRewriterTest, RewriteTest) {
++  // Common katakana loanwords expose a clear English spelling candidate.
++  {
++    Segments segments;
++    const ConversionRequest request;
++    Segment* seg = segments.push_back_segment();
++    converter::Candidate* candidate = seg->add_candidate();
++    candidate->content_key = "いんでっくす";
++    candidate->key = "いんでっくす";
++    candidate->value = "インデックス";
++    candidate->content_value = "インデックス";
++    candidate->attributes &= ~converter::Attribute::NO_VARIANTS_EXPANSION;
++
++    EXPECT_TRUE(rewriter_->Rewrite(request, &segments));
++    ASSERT_EQ(seg->candidates_size(), 2);
++    EXPECT_EQ(seg->candidate(1).value, "index");
++    EXPECT_EQ(seg->candidate(1).content_value, "index");
++  }
++
+   // T13N
+   {
+     Segments segments;
 diff --git a/src/rewriter/llama_runtime.cc b/src/rewriter/llama_runtime.cc
 new file mode 100644
 index 000000000..b7fd9ece6
