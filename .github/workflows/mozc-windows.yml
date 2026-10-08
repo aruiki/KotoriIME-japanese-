@@ -185,6 +185,21 @@ jobs:
         env:
           ANDROID_NDK_HOME: ""
         run: bazelisk test //rewriter:lm_rewriter_test //base:kotori_diagnostics_test //session:session_test --config release_build --disk_cache=D:\bazel-disk-cache
+      # 実際のMSIで導入・TSF経由の日本語入力・アンインストールを確認する。
+      # 開発者のPCではなく、この使い捨てWindowsランナーだけを変更する。
+      - name: インストーラーの導入・実入力・削除を確かめる
+        shell: pwsh
+        env:
+          KOTORI_DISPOSABLE_RUNNER: ${{ runner.environment }}
+        run: python -X utf8 kotori/mozc/tools/installer_smoke.py --msi mozc-src/src/bazel-bin/win32/installer/Mozc64.msi --out installer-smoke
+      - name: インストーラーの検証ログを保存する
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-smoke
+          path: installer-smoke
+          if-no-files-found: ignore
+          retention-days: 14
       - if: github.ref == 'refs/heads/main'
         uses: actions/cache/save@v4
         with:
