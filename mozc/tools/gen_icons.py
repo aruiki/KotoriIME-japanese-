@@ -3,30 +3,36 @@
 入力モード(あ・カ・A など)はタスクバーの明暗どちらでも読めるよう、
 Windows の IME と同じく白い字に濃い縁取り。
 
-使い方: python mozc/tools/gen_icons.py <Mozc の src/data/images/win> [見本の PNG の出力先]
+使い方: python mozc/tools/gen_icons.py <Mozc の src/data/images/win> [見本の PNG の出力先] [--brand-only]
 """
-import sys
+import argparse
 from pathlib import Path
 
 import skia
 from PIL import Image
 
 from kotori_mark import (SANS, SANS_BOLD, SERIF, SHU, U, WHITE, glyph_path, paint, product,
-                         render, tile, with_dot)
+                         render, paper_tile, with_dot)
 
-out = Path(sys.argv[1])
-preview = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("out", type=Path)
+parser.add_argument("preview", type=Path, nargs="?")
+parser.add_argument("--brand-only", action="store_true", help="入力モードを再生成しない")
+args = parser.parse_args()
+out, preview = args.out, args.preview
+out.mkdir(parents=True, exist_ok=True)
 SIZES = [16, 20, 24, 32, 48, 64, 128, 256]
 OUTLINE = skia.Color(0x1A, 0x1A, 0x1A)
 GRAY = skia.Color(0x9A, 0x9A, 0x9A)
+BRAND_INK = skia.Color(0x28, 0x3C, 0x78)
 
 
 def dictionary(c, small):
-    tile(c, small)
+    paper_tile(c, small)
     if small:
-        with_dot(c, glyph_path(SANS, "辞", 600), 70, 96, shift=0)
+        with_dot(c, glyph_path(SANS, "辞", 600), 70, 96, shift=0, color=BRAND_INK)
     else:
-        with_dot(c, glyph_path(SERIF, "辞", 520), 42, 48, shift=0)
+        with_dot(c, glyph_path(SERIF, "辞", 520), 42, 48, shift=0, color=BRAND_INK)
 
 
 def gear_path(cx, cy, r_out, r_in, r_hole, teeth=8):
@@ -44,9 +50,9 @@ def gear_path(cx, cy, r_out, r_in, r_hole, teeth=8):
 
 
 def properties(c, small):
-    tile(c, small)
+    paper_tile(c, small)
     s = 1.18 if small else 1.0
-    c.drawPath(gear_path(U / 2, U / 2, 300 * s, 236 * s, 110 * s), paint(WHITE))
+    c.drawPath(gear_path(U / 2, U / 2, 300 * s, 236 * s, 110 * s), paint(BRAND_INK))
     c.drawCircle(U / 2, U / 2, 58 * s, paint(SHU))
 
 
@@ -105,7 +111,7 @@ modes = {
     "ms_direct_input": mode("A"),
     "ms_disabled": mode("×", disabled=True),
 }
-for name, draw in modes.items():
+for name, draw in ({} if args.brand_only else modes).items():
     for suffix in ("", "_a"):
         icons[f"{name}{suffix}.ico"] = draw
 

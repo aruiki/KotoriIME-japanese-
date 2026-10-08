@@ -29,7 +29,8 @@ Kotori日本語入力を開発する AI エージェント(Claude Code、Codex �
 6. PR は `.github/pull_request_template.md` の形で出す。コミットは Conventional Commits、本文に関係する REQ ID。
 7. CI が緑ならマージする(マージコミット。下の「はまりどころ」)。カードを `docs/tasks/done/` に移し、
    `docs/HANDOFF.md` を直す。
-8. リリースは Actions の「Mozc (Windows)」を main で手動実行する(版は自動で上がる。`docs/DEVELOPMENT.md`)。
+8. 通常のリリースは Actions の「Mozc (Windows)」を main で手動実行する(版は自動で上がる。`docs/DEVELOPMENT.md`)。
+   検証済みMSIの再利用は ADR0044 の全条件を満たす場合だけ許可する。CIの省略やMSIの改変はしない。
 
 ## 確かめ方(Mozc 版)
 

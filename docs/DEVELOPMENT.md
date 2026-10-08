@@ -80,6 +80,11 @@ bash mozc/tools/make_patches.sh ~/mz <google/mozc の clone(~/mz でよい)>
    前の版より版が上がっているか、同梱物、実行ファイルの版。rc はプレリリースなので、タグを指定する)。NG があればリリースノートに注意を書き、直した版を出す。設定画面は `capture_window.py` で見る。
    実機の確認項目は `docs/ACCEPTANCE.md`。
 
+検証済みCI成果物を再利用する場合はADR0044に従う。全CIと同じMSIの導入・実入力・削除が成功し、
+main統合後の差分が文書だけ、前の版よりProductVersionが大きく、成果物ハッシュが一致する場合に限る。
+CIのソースhead・checkout commit・run IDと公開用commitを残し、CI artifactのMSIを改変せずに公開する。
+公開後のcheck_release.pyは通常と同じく必須。build入力に差がある場合は通常のworkflow_dispatchを使う。
+
 ### 1.6 手元の置き場(リポジトリの外)
 
 - `~/mz`: Mozc の作業ツリー(ビルドの出力を含めて数 GB)。

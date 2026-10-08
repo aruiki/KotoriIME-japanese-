@@ -1,0 +1,87 @@
+{
+  "tag": "v1.1.0-rc.3",
+  "url": "https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.3",
+  "published_at": "2026-10-08T18:32:56Z",
+  "verified_at": "2026-10-08T18:36:47.927265+00:00",
+  "prerelease": true,
+  "latest": false,
+  "code_signed": false,
+  "msi": {
+    "name": "Kotori64.msi",
+    "sha256": "4b95dc0cfbe9cbb642cf21fd33c419e636262a2942c3b0a2921fc1fed405b056",
+    "size_bytes": 1568505856,
+    "product_version": "3.34.6322.100",
+    "previous_product_version": "3.34.6313.100",
+    "public_download_matches_installed_input_ci": true,
+    "check_release_exit": 0
+  },
+  "provenance": {
+    "run_id": 37809776639,
+    "run_number": 83,
+    "workflow_id": 369904962,
+    "source_head": "a5445144e3c6ac9c4924f932617cfd3b3358456b",
+    "checkout_commit": "8377522936e41e3cf33e64eabee1c3018ee07c41",
+    "checkout_tree": "5eb69eeb68c1f3f7ae5ea9169419835cf013a4b6",
+    "release_commit": "18e656368e633fa696e39919c49ceca14ab4ffae",
+    "metadata_only_diff": [
+      "AGENTS.md",
+      "README.md",
+      "docs/DEVELOPMENT.md",
+      "docs/HANDOFF.md",
+      "docs/adr/0044-verified-artifact-release.md",
+      "docs/design/2026-10-kotori/integration/local-msi.json",
+      "docs/tasks/58-origami-release.md",
+      "mozc/release-notes.md"
+    ],
+    "build_inputs_unchanged": true,
+    "preparation_pr": 143,
+    "preparation_merged_at": "2026-10-08T18:13:09Z"
+  },
+  "ci_artifact": {
+    "id": 11570275645,
+    "archive_sha256": "f11af5061230b9a592b5bef1c5f26369e73470404254e93eb6d08f696edcb86c"
+  },
+  "installed_input_ci": {
+    "msi": "Mozc64.msi",
+    "sha256": "4b95dc0cfbe9cbb642cf21fd33c419e636262a2942c3b0a2921fc1fed405b056",
+    "source_commit": "8377522936e41e3cf33e64eabee1c3018ee07c41",
+    "run_id": "37809776639",
+    "install": true,
+    "input": true,
+    "uninstall": true,
+    "product_code": "{9289EBB0-59D5-4001-9B76-AAABD19B368E}",
+    "stage": "finished",
+    "errors": [],
+    "install_exit": 0,
+    "committed_text": {
+      "warm": "日本語",
+      "0": "日本語",
+      "1": "東京"
+    },
+    "uninstall_exit": 3010,
+    "reboot_required": true
+  },
+  "public_app_icons": {
+    "exe_sha256": "c82bc5abc056f3434c053bee504f7a8741fd8a4acaa014de1d411eac22d2b3e5",
+    "icon_sha256": "b2f5f6b5325d81b348e41260597d648f28afd1aca407b4ef0e4ad57c5cb5469e",
+    "embedded_frames": 8,
+    "all_frames_byte_match_selected_icon": true,
+    "execution": "Loaded as data and resource only; application not run",
+    "result": "PASS"
+  },
+  "model_hashes": {
+    "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c",
+    "zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+    "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8"
+  },
+  "model_hashes_match_rc2": true,
+  "not_performed": [
+    "owner-machine install/upgrade/uninstall",
+    "full real-app/GPU/CPU/DPI acceptance"
+  ],
+  "excluded": [
+    "English candidates PR140",
+    "default-off LLM correction prototype",
+    "settings layout redesign"
+  ]
+}
