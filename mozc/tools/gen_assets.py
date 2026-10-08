@@ -1,15 +1,20 @@
 """Kotori日本語入力のインストーラ(WiX UI)の画像とライセンス文を作る。マークは kotori_mark.py(docs/adr/0019)。
-使い方: python gen_assets.py <出力フォルダ>
+使い方: python gen_assets.py <出力フォルダ> [--images-only]
 """
+import argparse
 import math
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from kotori_mark import INK_BOT_RGB, INK_TOP_RGB, SHU_RGB, glyph, product, render
+from kotori_mark import INK_BOT_RGB, INK_TOP_RGB, SHU_RGB, product, render
 
-out = Path(sys.argv[1])
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("out", type=Path)
+parser.add_argument("--images-only", action="store_true", help="使用許諾とNOTICEは更新しない")
+args = parser.parse_args()
+out = args.out
 out.mkdir(parents=True, exist_ok=True)
 FONTS = Path("C:/Windows/Fonts")
 
@@ -35,7 +40,7 @@ glow = Image.new("L", (164, 312), 0)
 ImageDraw.Draw(glow).ellipse([-90, -80, 190, 170], fill=46)
 glow = glow.filter(ImageFilter.GaussianBlur(44))
 panel = Image.composite(Image.new("RGB", (164, 312), (90, 104, 180)), panel, glow)
-mark = render(glyph, 132)
+mark = render(product, 132)
 panel.paste(mark, (16, 44), mark)
 d = ImageDraw.Draw(panel)
 d.text((82, 206), "Kotori", font=font("SegUIVar.ttf", 28), fill=(255, 255, 255), anchor="mm")
@@ -51,6 +56,9 @@ d.rectangle([0, 57, 493, 58], fill=(224, 224, 224))
 icon = render(product, 48)
 ban.paste(icon, (437, 5), icon)
 ban.save(out / "banner.bmp")
+
+if args.images_only:
+    sys.exit(0)
 
 
 # ライセンス(WixUI の同意画面)。RTF は日本語を \uN? で書く。

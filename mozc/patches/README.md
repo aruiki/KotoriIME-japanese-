@@ -27,11 +27,11 @@ Mozc や llama.cpp を上げるときは、この表で「何を守る変更か�
 | `converter/immutable_converter.cc`、`converter/segments.*` | 区切りの違う文全体の候補(`kotori_sentences`)をラティスから出す | 0015 |
 | `protocol/config.proto` | 設定(AI 変換、品質、AI モデル、LLM のファイル、入力中の予測) | 0016、0022 |
 | `gui/config_dialog/*`、`gui/base/util.cc`、`gui/tool/BUILD.bazel` | 設定画面の「AI 変換」タブ、Fluent 風のスタイル、明るい配色の固定、AI の状態 | 0017、0022、0024、0026 |
-| `data/images/win/*`、`win32/base/display_name_resource.h`、`win32/tip/tip_resource.rc` | アイコンと表示名 | 0018、0019 |
+| `data/images/win/*`、`win32/base/display_name_resource.h`、`win32/tip/tip_resource.rc` | アイコンと表示名（C案の折り紙、設定、辞書） | 0018、0019、0043 |
 
 ## 0003-kotori-bundle-model(インストーラと同梱物)
 
 | ファイル | 目的 | ADR |
 | --- | --- | --- |
-| `data/kotori/*` | 同梱するモデル(zenz-v2.5-small・medium、TinySwallow-1.5B。ファイルはビルドの前に置く)、NOTICE、使用許諾、インストーラの画像 | 0016、0017、0024 |
+| `data/kotori/*` | 同梱するモデル(zenz-v2.5-small・medium、TinySwallow-1.5B。ファイルはビルドの前に置く)、NOTICE、使用許諾、インストーラの画像 | 0016、0017、0024、0043 |
 | `win32/installer/*` | モデル・llama.cpp の DLL・ショートカットを MSI に入れる | 0016、0017、0018 |

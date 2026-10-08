@@ -1,12 +1,14 @@
 """Kotori日本語入力のマーク(docs/adr/0019)。gen_icons.py と gen_assets.py が使う。
 
-マークは明朝の「こ」に朱の点(句点・印)。藍のタイルに白で置く。32px 以下は線の細い明朝が潰れるので、
-ゴシックの太字で描き直す。必要: skia-python、Pillow、Noto Serif JP / Noto Sans JP(可変、OFL)。
+製品のマークは白いタイルに折り紙の小鳥(ADR0043)。32px以下は専用SVG。
+設定・辞書は同じ白いタイルと藍の記号。必要: skia-python、Pillow、Noto Serif JP / Noto Sans JP(可変、OFL)。
 """
 from pathlib import Path
 
 import skia
 from PIL import Image
+
+from package_origami_icons import draw_icon, render_icon
 
 FONTS = Path("C:/Windows/Fonts")
 U = 1024  # 1024 単位で描いて縮める
@@ -69,12 +71,12 @@ def tile(c, small):
         c.drawRoundRect(rect.makeInset(2.5, 2.5), rad - 2.5, rad - 2.5, hl)
 
 
-def with_dot(c, path, dot_r, dot_dx, shift=-6.0):
+def with_dot(c, path, dot_r, dot_dx, shift=-6.0, color=WHITE):
     """字と朱の点をまとめて真ん中に置いて描く。"""
     b = path.computeTightBounds()
     left = U / 2 - (b.width() + dot_dx + dot_r) / 2
     path.offset(left - b.left(), U / 2 - (b.top() + b.bottom()) / 2 + shift)
-    c.drawPath(path, paint(WHITE))
+    c.drawPath(path, paint(color))
     b = path.computeTightBounds()
     c.drawCircle(b.right() + dot_dx, b.bottom() - dot_r, dot_r, paint(SHU))
 
@@ -87,13 +89,25 @@ def glyph(c, small):
         with_dot(c, glyph_path(SERIF, "こ", 600), 44, 58)
 
 
+def paper_tile(c, small):
+    inset = 24 if small else 64
+    rect = skia.Rect.MakeLTRB(inset, inset, U - inset, U - inset)
+    radius = 220 if small else 204
+    c.drawRoundRect(rect, radius, radius, paint(skia.Color(0xF7, 0xF8, 0xFC)))
+    edge = skia.Paint(AntiAlias=True, Style=skia.Paint.kStroke_Style,
+                      StrokeWidth=16 if small else 2,
+                      Color=skia.Color(0xC8, 0xCD, 0xDA))
+    c.drawRoundRect(rect, radius, radius, edge)
+
+
 def product(c, small):
-    tile(c, small)
-    glyph(c, small)
+    draw_icon(c, small)
 
 
 def render(draw, size):
     """draw(canvas, small) を size px の PIL 画像にする。"""
+    if draw is product:
+        return render_icon(size)
     surf = skia.Surface(U, U)
     c = surf.getCanvas()
     c.clear(skia.ColorTRANSPARENT)
