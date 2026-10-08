@@ -3,7 +3,8 @@
 ユーザーが「最新版をリリースして本日は終わる」と指示。公開後は追加の機能開発をしない。
 対象はrc.2の改善＋C案のアイコン・WiX背景。英語候補PR140、LLM補正試作、設定画面の構成変更は含めない。
 `codex/origami-release`はPR142（a544514）の上に文書だけを準備する枝。
-PR142の全CI成功・統合後にbaseをmainへ変え、文書CIを確認して統合、mainからchannel=rcで公開する。
+PR142の全CI成功・統合後にbaseをmainへ変え、文書CIを確認して統合。
+ADR0044の条件を確認し、導入・実入力・削除まで検証したCIのMSIを同じファイルのままrc.3へ公開する。
 
 ローカルMSIは1391.631秒（約23分12秒）でbuild成功。
 check_release.py --localで同梱物・容量・ggml-rpcなし・server/MSI版一致を確認し、終了コード0。
@@ -13,7 +14,7 @@ SHA-256は462a9dd1000f05da269d72adc91c053aa12d233087618eabe8e6f0167756a790。
 記録は `docs/design/2026-10-kotori/integration/local-msi.json`。
 公開用CI37809776639はQt完了後、本体のbuild中。通常7チェックは成功。
 
-次はPR142のCI結果、統合、mainからrc.3公開、公開後check_release.py、記録して終了。
+次はPR142のCI結果、統合、CI成果物の出所・ハッシュ・版の確認、rc.3公開、公開後check_release.py、記録して終了。
 
 以下は過去の記録。
 

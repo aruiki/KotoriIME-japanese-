@@ -13,7 +13,7 @@ rc.2の初回候補と候補欄の改善に、C案のアイコンとWiX背景を
 
 1. PR142の全CI（MSI・導入・実入力・削除）を確認してmerge commitで統合する。
 2. この文書用PRをmainへ付け替え、CI成功後に統合する。
-3. mainからMozc (Windows)をchannel=rcで実行する。
+3. ADR0044の条件を確認し、CIで検証した同じMSIを改変せずにrc.3へ公開する。条件不一致なら通常のmainのworkflow_dispatchを使う。
 4. 公開MSIをcheck_release.pyで確認し、ソースコミット・SHA-256・版・検証結果を保存する。
 5. 公開URLを報告し、本日の開発を終える。
 
