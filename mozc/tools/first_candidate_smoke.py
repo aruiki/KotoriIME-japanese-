@@ -21,6 +21,7 @@ def main():
     ap.add_argument("--install", default=r"C:\Program Files (x86)\Kotori")
     ap.add_argument("--romaji", default="ashiwoitametanode")
     ap.add_argument("--warm", type=float, default=12)
+    ap.add_argument("--key-interval", type=float, default=0, help="1文字ずつ送る間隔（秒）")
     ap.add_argument("--expect-variant", help="初回表示・Tab・Spaceに必要な候補")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
@@ -69,7 +70,13 @@ def main():
                 send("SEND_KEY\tON\nSEND_KEYS\tai")
                 time.sleep(args.warm)
                 send("SEND_KEY\tESC")
-                rows = [send("SEND_KEYS\t" + args.romaji)]
+                if args.key_interval > 0:
+                    for char in args.romaji:
+                        last = send("SEND_KEYS\t" + char)
+                        time.sleep(args.key_interval)
+                    rows = [last]
+                else:
+                    rows = [send("SEND_KEYS\t" + args.romaji)]
                 for _ in range(5):
                     callback = re.search(r"delay_millisec: (\d+)", rows[-1]["output"])
                     if not callback:
