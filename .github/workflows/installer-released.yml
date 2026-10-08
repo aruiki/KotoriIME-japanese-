@@ -1,0 +1,34 @@
+name: Released installer check
+on:
+  pull_request:
+    paths:
+      - .github/workflows/installer-released.yml
+      - mozc/tools/installer_smoke.py
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download rc.2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v1.1.0-rc.2 --pattern Kotori64.msi --dir installer
+      - name: Verify released artifact
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash installer/Kotori64.msi -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($hash -ne 'a079db01e45ac0e779feb7b0c2beff1bd2aa6d9ab9575f8f0537df94bfe3ed0b') { throw 'MSI hash mismatch' }
+      - name: Install, type and uninstall
+        env:
+          KOTORI_DISPOSABLE_RUNNER: github-hosted
+        run: python -u -X utf8 mozc/tools/installer_smoke.py --msi installer/Kotori64.msi --out installer-smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: released-installer-smoke
+          path: installer-smoke

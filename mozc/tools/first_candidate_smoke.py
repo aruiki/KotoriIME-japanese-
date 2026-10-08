@@ -69,8 +69,11 @@ def main():
                 time.sleep(args.warm)
                 send("SEND_KEY\tESC")
                 rows = [send("SEND_KEYS\t" + args.romaji)]
-                for delay in (.2, .8, .8, .8, .8):
-                    time.sleep(delay)
+                for _ in range(5):
+                    callback = re.search(r"delay_millisec: (\d+)", rows[-1]["output"])
+                    if callback is None:
+                        break
+                    time.sleep(int(callback.group(1)) / 1000)
                     rows.append(send("KOTORI_REFRESH"))
                 rows.append(send("SEND_KEY\tSpace"))
                 p.stdin.close()
