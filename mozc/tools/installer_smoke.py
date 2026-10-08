@@ -21,6 +21,22 @@ def run(command, timeout=180):
     return p
 
 
+def msi_property(msi, name):
+    # MSI のファイルパスを /x に渡すと、Windows Installer が再び媒体を
+    # 開こうとして時間がかかることがある。ProductCodeで削除する。
+    script = ("$wi=New-Object -ComObject WindowsInstaller.Installer;"
+              "$db=$wi.GetType().InvokeMember('OpenDatabase','InvokeMethod',$null,$wi,@('"
+              + str(msi).replace("'", "''") + "',0));"
+              "$v=$db.OpenView(\"SELECT Value FROM Property WHERE Property='"
+              + name + "'\");$v.Execute();$r=$v.Fetch();$r.StringData(1)")
+    p = subprocess.run(["powershell", "-NoProfile", "-Command", script],
+                       capture_output=True, text=True, check=True, timeout=30)
+    value = p.stdout.strip()
+    if not value:
+        raise RuntimeError(f"MSIの{name}が空です")
+    return value
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--msi", type=Path, required=True)
@@ -57,6 +73,7 @@ def main():
             if not (install / name).is_file():
                 raise RuntimeError(f"導入後のファイルがありません: {name}")
         result["install"] = True
+        result["product_code"] = msi_property(msi, "ProductCode")
         exe = out / "ImeBench.exe"
         compiler = Path(os.environ["WINDIR"]) / "Microsoft.NET/Framework64/v4.0.30319/csc.exe"
         run([str(compiler), "/nologo", "/target:winexe", "/platform:x64",
@@ -87,7 +104,7 @@ def main():
                 env = dict(os.environ, KOTORI_SMOKE_INSTALL=str(install))
                 subprocess.run(["powershell", "-NoProfile", "-Command", script], env=env,
                                capture_output=True, timeout=30, check=True)
-                p = subprocess.run(["msiexec", "/x", str(msi), "/qn", "/norestart",
+                p = subprocess.run(["msiexec", "/x", result["product_code"], "/qn", "/norestart",
                                     "/L*v", str(out / "uninstall.log")], timeout=300)
                 result["uninstall_exit"] = p.returncode
                 result["uninstall"] = p.returncode == 0 and not (install / "mozc_tip64.dll").exists()
