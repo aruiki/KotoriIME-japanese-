@@ -20601,7 +20601,7 @@ index 4bbcddeca..e8eec4469 100644
 +    ],
 +)
 diff --git a/src/rewriter/english_variants_rewriter.cc b/src/rewriter/english_variants_rewriter.cc
-index b75c03feb..59baedd9a 100644
+index b75c03feb..90317214c 100644
 --- a/src/rewriter/english_variants_rewriter.cc
 +++ b/src/rewriter/english_variants_rewriter.cc
 @@ -35,6 +35,7 @@
@@ -20670,6 +20670,16 @@ index b75c03feb..59baedd9a 100644
      if (IsT13NCandidate(original_candidate)) {
        if (!(original_candidate->attributes &
              converter::Attribute::NO_VARIANTS_EXPANSION)) {
+@@ -246,6 +291,9 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+ 
+ int EnglishVariantsRewriter::capability(
+     const ConversionRequest& request) const {
++  if (request.request_type() == ConversionRequest::SUGGESTION) {
++    return RewriterInterface::SUGGESTION;
++  }
+   if (request.request().mixed_conversion()) {
+     return RewriterInterface::ALL;
+   }
 diff --git a/src/rewriter/english_variants_rewriter_test.cc b/src/rewriter/english_variants_rewriter_test.cc
 index 9c9f95e8f..fd8c3c63e 100644
 --- a/src/rewriter/english_variants_rewriter_test.cc
