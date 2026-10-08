@@ -15,6 +15,11 @@
 </h3>
 
 <p align="center">
+  入力中の候補表示の改善と新しい小鳥のアイコンを試せる
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.3">v1.1.0-rc.3（リリース候補・未署名）</a>もあります。
+</p>
+
+<p align="center">
   <a href="#変換の例">変換の例</a> ・
   <a href="#変換の正確さ">正確さ</a> ・
   <a href="#ほかの-ime-と比べる">ほかの IME と比較</a> ・
@@ -209,6 +214,8 @@ GPU は自動で見つけて使います。ドライバー以外の準備は要�
 
 | 版 | 主な変更 |
 | --- | --- |
+| [v1.1.0-rc.3](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.3)(リリース候補) | 折り紙の小鳥のアイコン、設定・辞書のアイコン、インストーラーの背景を更新 |
+| [v1.1.0-rc.2](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.2)(リリース候補) | 最初の候補をAIの評価後に表示。モデル準備中の結果を覚えてしまう問題を修正し、候補欄の余白・選択色・文字種候補の表示を整理 |
 | [v1.1.0-rc.1](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.1)(リリース候補) | **手を止めると、Space を押す前に AI の変換が出る**。Tab の予測も手を止めると出る |
 | [v1.0.0](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.0.0) | **最初の公開版**(署名は 1.0.x で付ける)。診断情報の書き出し、落ちたときの記録(入力した文字は含まない)、通信の部品を外した、第三者の表示 |
 | [v0.3.0-beta.8](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.8) | GPU のない PC で、長い文の変換が速く正確に(打ってすぐ Space の正解 36 → 46 / 60 文) |
