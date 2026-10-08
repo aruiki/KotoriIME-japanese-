@@ -21,6 +21,7 @@ def main():
     ap.add_argument("--install", default=r"C:\Program Files (x86)\Kotori")
     ap.add_argument("--romaji", default="ashiwoitametanode")
     ap.add_argument("--warm", type=float, default=12)
+    ap.add_argument("--expect-variant", help="初回表示・Tab・Spaceに必要な候補")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     exe = args.exe.resolve()
@@ -69,9 +70,15 @@ def main():
                 time.sleep(args.warm)
                 send("SEND_KEY\tESC")
                 rows = [send("SEND_KEYS\t" + args.romaji)]
-                for delay in (.2, .8, .8, .8, .8):
-                    time.sleep(delay)
+                for _ in range(5):
+                    callback = re.search(r"delay_millisec: (\d+)", rows[-1]["output"])
+                    if not callback:
+                        break
+                    time.sleep(int(callback.group(1)) / 1000)
                     rows.append(send("KOTORI_REFRESH"))
+                if args.expect_variant:
+                    rows.append(send("SEND_KEY\tTab"))
+                    rows.append(send("SEND_KEY\tESC"))
                 rows.append(send("SEND_KEY\tSpace"))
                 p.stdin.close()
                 p.wait(timeout=60)
@@ -82,6 +89,13 @@ def main():
                     "events": rows}, ensure_ascii=False, indent=2), encoding="utf-8")
                 for row in rows:
                     print(f'{row["response_ms"]:.1f} ms: {row["first_candidate"]}')
+                if args.expect_variant:
+                    needle = 'value: "' + args.expect_variant + '"'
+                    first = next((r for r in rows if r["first_candidate"]), None)
+                    tab = next(r for r in rows if r["command"] == "SEND_KEY\tTab")
+                    for label, row in (("初回", first), ("Tab", tab), ("Space", rows[-1])):
+                        if row is None or needle not in row["output"]:
+                            raise AssertionError(f"{label}に{args.expect_variant}がありません")
             finally:
                 if p.poll() is None:
                     p.kill()

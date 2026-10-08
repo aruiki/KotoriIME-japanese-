@@ -20529,10 +20529,18 @@ index 0d2eb3455..1b13074f1 100644
    // For example, "私の" is created from composition "わたしのなまえ".
    bool create_partial_candidates = false;
 diff --git a/src/rewriter/BUILD.bazel b/src/rewriter/BUILD.bazel
-index 4bbcddeca..e8eec4469 100644
+index 4bbcddeca..2c8443cfb 100644
 --- a/src/rewriter/BUILD.bazel
 +++ b/src/rewriter/BUILD.bazel
-@@ -1536,6 +1536,7 @@ mozc_cc_library(
+@@ -675,6 +675,7 @@ mozc_cc_library(
+         "//dictionary:pos_matcher",
+         "//protocol:commands_cc_proto",
+         "//request:conversion_request",
++        "@com_google_absl//absl/container:flat_hash_map",
+         "@com_google_absl//absl/container:flat_hash_set",
+         "@com_google_absl//absl/log:check",
+         "@com_google_absl//absl/strings",
+@@ -1536,6 +1537,7 @@ mozc_cc_library(
          ":fortune_rewriter",
          ":ivs_variants_rewriter",
          ":language_aware_rewriter",
@@ -20540,7 +20548,7 @@ index 4bbcddeca..e8eec4469 100644
          ":merger_rewriter",
          ":number_rewriter",
          ":remove_redundant_candidate_rewriter",
-@@ -1743,3 +1744,59 @@ mozc_cc_test(
+@@ -1743,3 +1745,59 @@ mozc_cc_test(
          "//testing:gunit_main",
      ],
  )
@@ -20601,24 +20609,24 @@ index 4bbcddeca..e8eec4469 100644
 +    ],
 +)
 diff --git a/src/rewriter/english_variants_rewriter.cc b/src/rewriter/english_variants_rewriter.cc
-index b75c03feb..d0619d1f9 100644
+index b75c03feb..7454b3c42 100644
 --- a/src/rewriter/english_variants_rewriter.cc
 +++ b/src/rewriter/english_variants_rewriter.cc
-@@ -35,6 +35,7 @@
+@@ -34,6 +34,7 @@
+ #include <utility>
  #include <vector>
  
- #include "absl/container/flat_hash_set.h"
 +#include "absl/container/flat_hash_map.h"
+ #include "absl/container/flat_hash_set.h"
  #include "absl/log/check.h"
  #include "absl/strings/match.h"
- #include "absl/strings/str_cat.h"
 @@ -49,6 +50,31 @@
  
  namespace mozc {
  
 +namespace {
 +
-+// Mozcの辞書に英字表記がない一般的な外来語だけを、入力中の候補として補う。
++// Kotori: Mozcの辞書に英字表記がない一般的な外来語を補う。
 +// 大きな辞書を再実装せず、表記が明確な語に限定して誤採用を避ける。
 +const char* KatakanaEnglishVariant(absl::string_view value) {
 +  static const absl::flat_hash_map<absl::string_view, const char*> kVariants = {
@@ -20644,10 +20652,20 @@ index b75c03feb..d0619d1f9 100644
  // Add space-prefixed variants to enable Space-joined English words conversion.
  // 'Google Japan' consists of 'ぐーぐる': 'Google', and 'じゃぱん': 'Japan'
  // Therefore, when a user types 'ぐーぐるじゃぱん', it will be 'GoogleJapan'
-@@ -166,6 +192,26 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
-       continue;
-     }
+@@ -141,7 +167,7 @@ bool EnglishVariantsRewriter::IsEnglishCandidate(
+ }
  
+ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+-    bool need_space_prefix, Segment* seg) const {
++    bool need_space_prefix, Segment* seg, bool expand_case) const {
+   CHECK(seg);
+ 
+   bool modified = false;
+@@ -156,13 +182,40 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+     converter::Candidate* original_candidate = seg->mutable_candidate(i);
+     DCHECK(original_candidate);
+ 
++    // Kotori: 予測器の大小文字展開抑止とは独立した、英字表記の補助候補。
 +    const absl::string_view katakana =
 +        original_candidate->content_value.empty()
 +            ? absl::string_view(original_candidate->value)
@@ -20655,35 +20673,80 @@ index b75c03feb..d0619d1f9 100644
 +    const char* english = KatakanaEnglishVariant(katakana);
 +    if (english != nullptr) {
 +      const std::string new_value =
-+          absl::StrCat(english, original_candidate->functional_value());
-+      if (original_candidates.find(new_value) == original_candidates.end()) {
++          absl::StrCat(english, original_candidate->content_value.empty()
++                                   ? absl::string_view()
++                                   : original_candidate->functional_value());
++      if (original_candidates.insert(new_value).second) {
 +        modified = true;
 +        converter::Candidate* new_candidate = seg->insert_candidate(i + 1);
 +        DCHECK(new_candidate);
 +        *new_candidate = *original_candidate;
 +        new_candidate->value = new_value;
 +        new_candidate->content_value = english;
++        new_candidate->inner_segment_boundary.clear();
++        new_candidate->description.clear();
++        new_candidate->kotori_ai_evaluated = false;
++        new_candidate->kotori_confident_prediction = false;
 +        new_candidate->attributes |= converter::Attribute::NO_VARIANTS_EXPANSION;
 +      }
 +      continue;
 +    }
 +
-     if (IsT13NCandidate(original_candidate)) {
-       if (!(original_candidate->attributes &
-             converter::Attribute::NO_VARIANTS_EXPANSION)) {
-@@ -246,6 +292,10 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+     // http://b/issue?id=5137299
+-    // If the entry is coming from user dictionary,
+-    // expand English variants.
+-    if (original_candidate->attributes &
+-            converter::Attribute::NO_VARIANTS_EXPANSION &&
+-        !(original_candidate->attributes &
+-          converter::Attribute::USER_DICTIONARY)) {
++    // If the entry is coming from user dictionary, expand English variants.
++    if (!expand_case ||
++        ((original_candidate->attributes &
++          converter::Attribute::NO_VARIANTS_EXPANSION) &&
++         !(original_candidate->attributes &
++           converter::Attribute::USER_DICTIONARY))) {
+       continue;
+     }
+ 
+@@ -246,10 +299,7 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
  
  int EnglishVariantsRewriter::capability(
      const ConversionRequest& request) const {
-+  if (request.request_type() == ConversionRequest::SUGGESTION ||
-+      request.request_type() == ConversionRequest::PARTIAL_SUGGESTION) {
-+    return RewriterInterface::SUGGESTION;
-+  }
-   if (request.request().mixed_conversion()) {
-     return RewriterInterface::ALL;
-   }
+-  if (request.request().mixed_conversion()) {
+-    return RewriterInterface::ALL;
+-  }
+-  return RewriterInterface::CONVERSION;
++  return RewriterInterface::ALL;
+ }
+ 
+ bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
+@@ -266,7 +316,10 @@ bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
+     // need_space_prefix = true
+     const bool need_space_prefix =
+         enable_space_insersion && is_previous_candidate_english;
+-    modified |= ExpandEnglishVariantsWithSegment(need_space_prefix, &segment);
++    modified |= ExpandEnglishVariantsWithSegment(
++        need_space_prefix, &segment,
++        request.request_type() == ConversionRequest::CONVERSION ||
++            request.request().mixed_conversion());
+     is_previous_candidate_english =
+         segment.candidates_size() > 0 &&
+         Util::IsScriptType(segment.candidate(0).value, Util::ALPHABET);
+diff --git a/src/rewriter/english_variants_rewriter.h b/src/rewriter/english_variants_rewriter.h
+index 07e114229..af9330424 100644
+--- a/src/rewriter/english_variants_rewriter.h
++++ b/src/rewriter/english_variants_rewriter.h
+@@ -63,7 +63,7 @@ class EnglishVariantsRewriter : public RewriterInterface {
+   bool ExpandSpacePrefixedVariants(absl::string_view input,
+                                    std::vector<std::string>* variants) const;
+   bool ExpandEnglishVariantsWithSegment(bool need_space_prefix,
+-                                        Segment* seg) const;
++                                        Segment* seg, bool expand_case) const;
+ 
+   const dictionary::PosMatcher pos_matcher_;
+ };
 diff --git a/src/rewriter/english_variants_rewriter_test.cc b/src/rewriter/english_variants_rewriter_test.cc
-index 9c9f95e8f..462acfbb2 100644
+index 9c9f95e8f..a4dea718f 100644
 --- a/src/rewriter/english_variants_rewriter_test.cc
 +++ b/src/rewriter/english_variants_rewriter_test.cc
 @@ -161,6 +161,27 @@ TEST_F(EnglishVariantsRewriterTest, ExpandSpacePrefixedVariants) {
@@ -20714,6 +20777,73 @@ index 9c9f95e8f..462acfbb2 100644
    // T13N
    {
      Segments segments;
+@@ -343,6 +364,57 @@ TEST_F(EnglishVariantsRewriterTest, RewriteTest) {
+   }
+ }
+ 
++// Kotori: 実際の予測候補の属性と、表記を変えた後の整合性を確かめる。
++TEST_F(EnglishVariantsRewriterTest, KatakanaPredictionVariants) {
++  for (const auto type : {ConversionRequest::SUGGESTION,
++                          ConversionRequest::PREDICTION,
++                          ConversionRequest::PARTIAL_SUGGESTION,
++                          ConversionRequest::PARTIAL_PREDICTION,
++                          ConversionRequest::CONVERSION}) {
++    const auto request = ConversionRequestBuilder().SetRequestType(type).Build();
++    EXPECT_EQ(rewriter_->capability(request), RewriterInterface::ALL);
++    Segments segments;
++    Segment* seg = segments.push_back_segment();
++    for (int i = 0; i < 2; ++i) {
++      auto* candidate = seg->add_candidate();
++      candidate->key = "いんでっくすの";
++      candidate->content_key = "いんでっくす";
++      candidate->value = "インデックスの";
++      candidate->content_value = "インデックス";
++      candidate->attributes = converter::Attribute::NO_VARIANTS_EXPANSION;
++      candidate->inner_segment_boundary.push_back(1);
++      candidate->description = "カタカナ";
++      candidate->kotori_ai_evaluated = true;
++      candidate->kotori_confident_prediction = true;
++    }
++    EXPECT_TRUE(rewriter_->Rewrite(request, &segments));
++    ASSERT_EQ(seg->candidates_size(), 3);
++    EXPECT_EQ(seg->candidate(0).value, "インデックスの");
++    int rank = -1;
++    ASSERT_TRUE(GetRankFromValue(*seg, "indexの", &rank));
++    const auto& english = seg->candidate(rank);
++    EXPECT_EQ(english.key, "いんでっくすの");
++    EXPECT_TRUE(english.inner_segment_boundary.empty());
++    EXPECT_TRUE(english.description.empty());
++    EXPECT_FALSE(english.kotori_ai_evaluated);
++    EXPECT_FALSE(english.kotori_confident_prediction);
++    EXPECT_FALSE(rewriter_->Rewrite(request, &segments));
++    EXPECT_EQ(seg->candidates_size(), 3);
++  }
++}
++
++TEST_F(EnglishVariantsRewriterTest, KatakanaMissingContentValue) {
++  Segments segments;
++  auto* seg = segments.push_back_segment();
++  seg->add_candidate()->value = "インターネット";
++  const auto request = ConversionRequestBuilder()
++                           .SetRequestType(ConversionRequest::SUGGESTION)
++                           .Build();
++  EXPECT_TRUE(rewriter_->Rewrite(request, &segments));
++  ASSERT_EQ(seg->candidates_size(), 2);
++  EXPECT_EQ(seg->candidate(1).value, "internet");
++}
++
+ TEST_F(EnglishVariantsRewriterTest, Regression3242753) {
+   Segments segments;
+   const ConversionRequest request;
+@@ -604,7 +676,7 @@ TEST_F(EnglishVariantsRewriterTest, MobileEnvironmentTest) {
+     request.set_mixed_conversion(false);
+     const ConversionRequest convreq =
+         ConversionRequestBuilder().SetRequest(request).Build();
+-    EXPECT_EQ(rewriter_->capability(convreq), RewriterInterface::CONVERSION);
++    EXPECT_EQ(rewriter_->capability(convreq), RewriterInterface::ALL);
+   }
+ }
+ 
 diff --git a/src/rewriter/llama_runtime.cc b/src/rewriter/llama_runtime.cc
 new file mode 100644
 index 000000000..b7fd9ece6
