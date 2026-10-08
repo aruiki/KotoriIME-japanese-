@@ -485,7 +485,7 @@ index 000000000..3bcfec328
 +}  // namespace mozc
 diff --git a/src/base/kotori_live.h b/src/base/kotori_live.h
 new file mode 100644
-index 000000000..11f4961a8
+index 000000000..f0ba3e164
 --- /dev/null
 +++ b/src/base/kotori_live.h
 @@ -0,0 +1,25 @@
@@ -508,7 +508,7 @@ index 000000000..11f4961a8
 +// 2 回目以降に取り直すまでの時間(ms。裏で作る予測を待つ)。0 なら 1 回だけ。
 +inline std::atomic<int> g_live_next_ms{0};
 +// 1 回の打鍵の後に取り直す回数の上限。
-+inline constexpr int kMaxLiveRefreshes = 3;
++inline constexpr int kMaxLiveRefreshes = 5;
 +
 +}  // namespace kotori
 +}  // namespace mozc
@@ -638,6 +638,35 @@ index 000000000..cbd6e6dc7
 +        "//conditions:default": ":llama_static",
 +    }),
 +)
+diff --git a/src/converter/candidate.cc b/src/converter/candidate.cc
+index 18a83698f..5372cc894 100644
+--- a/src/converter/candidate.cc
++++ b/src/converter/candidate.cc
+@@ -59,6 +59,8 @@ void Candidate::Clear() {
+   content_value.clear();
+   content_key.clear();
+   consumed_key_size = 0;
++  kotori_confident_prediction = false;
++  kotori_ai_evaluated = false;
+   converted_segment_count = 1;
+   prefix.clear();
+   suffix.clear();
+diff --git a/src/converter/candidate.h b/src/converter/candidate.h
+index b75c095d5..7a601e8d9 100644
+--- a/src/converter/candidate.h
++++ b/src/converter/candidate.h
+@@ -84,6 +84,11 @@ class Candidate {
+ 
+   uint32_t consumed_key_size = 0;
+ 
++  // Kotori: 読みの一致と生成候補間の採点差を確認した入力中の予測。
++  // 保存・学習用の属性ではなく、この要求の候補だけに付ける。
++  bool kotori_confident_prediction = false;
++  bool kotori_ai_evaluated = false;
++
+   // Number of whole conversion segments covered/consumed by this candidate,
+   // starting from the current segment.
+   //
 diff --git a/src/converter/immutable_converter.cc b/src/converter/immutable_converter.cc
 index 448b6c25a..d62a1ff22 100644
 --- a/src/converter/immutable_converter.cc
@@ -722,6 +751,19 @@ index dff166325..b6ba3fe95 100644
    // LINT.ThenChange(//converter/segments_matchers.h)
  };
  
+diff --git a/src/converter/segments_matchers.h b/src/converter/segments_matchers.h
+index 2bfeb844c..bb82de57f 100644
+--- a/src/converter/segments_matchers.h
++++ b/src/converter/segments_matchers.h
+@@ -81,6 +81,8 @@ MATCHER_P(EqualsCandidate, candidate, "") {
+   COMPARE_FIELD(style);
+   COMPARE_FIELD(command);
+   COMPARE_FIELD(inner_segment_boundary);
++  COMPARE_FIELD(kotori_confident_prediction);
++  COMPARE_FIELD(kotori_ai_evaluated);
+ #undef COMPARE_FIELD
+   return true;
+ }
 diff --git a/src/data/images/win/BUILD.bazel b/src/data/images/win/BUILD.bazel
 index 7c164ee3c..f570624e2 100644
 --- a/src/data/images/win/BUILD.bazel
@@ -19527,10 +19569,10 @@ zL@613W7Zf1G&4<#nt(BZ;xoE2_j8mrXY(!KeiIne+sK-zQeq6KNh!`3eBt9B?)?Em
 Ce@$lq
 
 diff --git a/src/engine/engine_converter.cc b/src/engine/engine_converter.cc
-index fd03a6c0c..365d80361 100644
+index fd03a6c0c..b136c5191 100644
 --- a/src/engine/engine_converter.cc
 +++ b/src/engine/engine_converter.cc
-@@ -604,6 +604,68 @@ bool EngineConverter::Suggest(const composer::Composer& composer,
+@@ -604,6 +604,77 @@ bool EngineConverter::Suggest(const composer::Composer& composer,
    return true;
  }
  
@@ -19541,6 +19583,12 @@ index fd03a6c0c..365d80361 100644
 +    const composer::Composer& composer, const commands::Context& context) {
 +  if (state_ != SUGGESTION || segments_.conversion_segments_size() != 1) {
 +    return false;
++  }
++  // Kotori: 強い続き予測を、短い通常変換で押し下げない。
++  const Segment& first = segments_.conversion_segment(0);
++  if (first.candidates_size() > 0 &&
++      first.candidate(0).kotori_confident_prediction) {
++    return true;
 +  }
 +  DCHECK(request_);
 +  DCHECK(config_);
@@ -19566,6 +19614,7 @@ index fd03a6c0c..365d80361 100644
 +  std::string key, value;
 +  for (const Segment& seg : converted.conversion_segments()) {
 +    if (seg.candidates_size() == 0) return false;
++    if (!seg.candidate(0).kotori_ai_evaluated) return false;
 +    key += seg.key();
 +    value += seg.candidate(0).value;
 +  }
@@ -19573,7 +19622,7 @@ index fd03a6c0c..365d80361 100644
 +  if (value.empty() || key != suggestion->key()) return false;
 +  for (size_t i = 0; i < suggestion->candidates_size(); ++i) {
 +    if (suggestion->candidate(i).value != value) continue;
-+    if (i == 0) return false;  // もう先頭にある
++    if (i == 0) return true;  // 評価済みで、もう先頭にある
 +    suggestion->erase_candidate(i);
 +    break;
 +  }
@@ -19589,6 +19638,8 @@ index fd03a6c0c..365d80361 100644
 +  candidate.suffix.clear();
 +  candidate.description.clear();
 +  candidate.attributes = 0;
++  candidate.kotori_confident_prediction = false;
++  candidate.kotori_ai_evaluated = true;
 +  *suggestion->insert_candidate(0) = std::move(candidate);
 +  previous_suggestions_ = *suggestion;
 +  UpdateCandidateList();
@@ -19615,15 +19666,16 @@ index 6d061cfca..aab8a601b 100644
    // Brings base class overloads into scope to avoid name hiding.
    using EngineConverterInterface::Predict;
 diff --git a/src/engine/engine_converter_interface.h b/src/engine/engine_converter_interface.h
-index f8e3b43ec..22506677c 100644
+index f8e3b43ec..ab93fbb7e 100644
 --- a/src/engine/engine_converter_interface.h
 +++ b/src/engine/engine_converter_interface.h
-@@ -141,6 +141,13 @@ class EngineConverterInterface {
+@@ -141,6 +141,14 @@ class EngineConverterInterface {
                     conversion_preferences());
    }
  
 +  // Kotori: 今の読みを Space と同じように変換し、その結果を入力中の候補の先頭に置く
-+  // (手が止まった後の取り直し。docs/adr/0039)。Suggest の後に呼ぶ。候補を変えたら true。
++  // (手が止まった後の取り直し。docs/adr/0039)。Suggest の後に呼ぶ。
++  // 評価済みの変換、または採用条件を満たした続き予測を表示できる場合は true。
 +  virtual bool KotoriPreviewConversion(const composer::Composer& composer,
 +                                       const commands::Context& context) {
 +    return false;
@@ -20263,9 +20315,18 @@ index b0c1e6cf6..d26d16a67 100644
    required CommandType type = 1;
  
 diff --git a/src/protocol/config.proto b/src/protocol/config.proto
-index 7d735374e..3988c7598 100644
+index 7d735374e..94dcf7013 100644
 --- a/src/protocol/config.proto
 +++ b/src/protocol/config.proto
+@@ -221,7 +221,7 @@ message Config {
+   optional bool auto_switch_composition_mode = 56 [default = true];
+ 
+   // Toggle to use cascanding window for debugging.
+-  optional bool use_cascading_window = 58 [default = true];
++  optional bool use_cascading_window = 58 [default = false];
+ 
+   // Shift key mode switch
+   enum ShiftKeyModeSwitch {
 @@ -360,6 +360,29 @@ message Config {
    // Use mode indicator feature.
    optional bool use_mode_indicator = 120 [default = true];
@@ -20296,6 +20357,162 @@ index 7d735374e..3988c7598 100644
    //////////////////////////////////////////////////////////////
    //
    // Cloud (300-319)
+diff --git a/src/renderer/win32/BUILD.bazel b/src/renderer/win32/BUILD.bazel
+index 17723c3b7..d9941bee3 100644
+--- a/src/renderer/win32/BUILD.bazel
++++ b/src/renderer/win32/BUILD.bazel
+@@ -45,6 +45,20 @@ package(
+     features = ["gdi"],
+ )
+ 
++mozc_cc_binary(
++    name = "kotori_candidate_snapshot",
++    srcs = ["kotori_candidate_snapshot.cc"],
++    tags = MOZC_TAGS.WIN_ONLY,
++    target_compatible_with = ["@platforms//os:windows"],
++    deps = [
++        ":candidate_window",
++        "//base:coordinates",
++        "//bazel/win32:gdi32",
++        "//bazel/win32:user32",
++        "//protocol:candidate_window_cc_proto",
++    ],
++)
++
+ mozc_win32_cc_prod_binary(
+     name = "win32_renderer_main",
+     srcs = ["win32_renderer_main.cc"],
+diff --git a/src/renderer/win32/kotori_candidate_snapshot.cc b/src/renderer/win32/kotori_candidate_snapshot.cc
+new file mode 100644
+index 000000000..97c6109f1
+--- /dev/null
++++ b/src/renderer/win32/kotori_candidate_snapshot.cc
+@@ -0,0 +1,73 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++// Kotori: 実際の候補描画を、非表示の専用ウィンドウで BMP に出す確認用ツール。
++// 実行中の IME や入力先アプリには接続しない。
++#include <windows.h>
++
++#include <cstdlib>
++#include <fstream>
++#include <vector>
++
++#include "base/coordinates.h"
++#include "protocol/candidate_window.pb.h"
++#include "renderer/win32/candidate_window.h"
++
++int main(int argc, char** argv) {
++  if (argc != 3) return 1;  // 出力 BMP、DPI
++  const int dpi = std::atoi(argv[2]);
++  if (dpi < 96 || dpi > 384) return 1;
++  SetProcessDPIAware();
++  mozc::renderer::win32::CandidateWindow window;
++  if (!window.Create(nullptr)) return 2;
++  window.UpdateDpi(dpi);
++  mozc::commands::CandidateWindow candidates;
++  candidates.set_size(3);
++  candidates.set_page_size(9);
++  candidates.set_focused_index(0);
++  candidates.set_category(mozc::commands::CONVERSION);
++  int index = 0;
++  for (const char* value : {"足を痛めたので", "足を傷めたので", "あしをいためたので"}) {
++    auto* candidate = candidates.add_candidate();
++    candidate->set_index(index);
++    candidate->set_id(index++);
++    candidate->set_value(value);
++    candidate->mutable_annotation()->set_shortcut(std::to_string(index));
++  }
++  candidates.mutable_footer()->set_label("Kotori");
++  window.UpdateLayout(candidates);
++  const mozc::Size size = window.GetLayoutSize();
++  if (size.width <= 0 || size.height <= 0) return 3;
++  window.SetWindowPos(nullptr, 0, 0, size.width, size.height,
++                      SWP_NOACTIVATE | SWP_NOZORDER);
++  HDC screen = GetDC(nullptr);
++  HDC dc = CreateCompatibleDC(screen);
++  BITMAPINFO info = {};
++  info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
++  info.bmiHeader.biWidth = size.width;
++  info.bmiHeader.biHeight = -size.height;
++  info.bmiHeader.biPlanes = 1;
++  info.bmiHeader.biBitCount = 32;
++  info.bmiHeader.biCompression = BI_RGB;
++  void* pixels = nullptr;
++  HBITMAP bitmap = CreateDIBSection(screen, &info, DIB_RGB_COLORS,
++                                   &pixels, nullptr, 0);
++  if (!bitmap || !dc) return 4;
++  HGDIOBJ old = SelectObject(dc, bitmap);
++  window.OnPrintClient(dc, PRF_CLIENT);
++  GdiFlush();
++  const DWORD bytes = size.width * size.height * 4;
++  BITMAPFILEHEADER header = {};
++  header.bfType = 0x4d42;
++  header.bfOffBits = sizeof(header) + sizeof(BITMAPINFOHEADER);
++  header.bfSize = header.bfOffBits + bytes;
++  std::ofstream output(argv[1], std::ios::binary);
++  output.write(reinterpret_cast<const char*>(&header), sizeof(header));
++  output.write(reinterpret_cast<const char*>(&info.bmiHeader), sizeof(BITMAPINFOHEADER));
++  output.write(static_cast<const char*>(pixels), bytes);
++  const bool ok = output.good();
++  SelectObject(dc, old);
++  DeleteObject(bitmap);
++  DeleteDC(dc);
++  ReleaseDC(nullptr, screen);
++  window.DestroyWindow();
++  return ok ? 0 : 5;
++}
+diff --git a/src/renderer/win32/text_renderer.cc b/src/renderer/win32/text_renderer.cc
+index 650832ef0..febbd864c 100644
+--- a/src/renderer/win32/text_renderer.cc
++++ b/src/renderer/win32/text_renderer.cc
+@@ -107,8 +107,8 @@ LOGFONT GetLogFont(TextRenderer::FONT_TYPE type, uint32_t dpi) {
+ 
+   switch (type) {
+     case TextRenderer::FONTSET_SHORTCUT: {
+-      font.lfHeight += (font.lfHeight > 0 ? 3 : -3);
+-      font.lfWeight = FW_BOLD;
++      // Kotori: 番号は補助情報なので、本文より小さい通常の太さにする。
++      font.lfWeight = FW_NORMAL;
+       return font;
+     }
+     case TextRenderer::FONTSET_CANDIDATE: {
+diff --git a/src/renderer/win32/win32_dpi_util.cc b/src/renderer/win32/win32_dpi_util.cc
+index 92000261e..372b9c5ad 100644
+--- a/src/renderer/win32/win32_dpi_util.cc
++++ b/src/renderer/win32/win32_dpi_util.cc
+@@ -71,6 +71,32 @@ void GetScaledRendererStyle(::mozc::renderer::RendererStyle* style,
+ 
+   RendererStyleHandler::GetRendererStyle(style);
+ 
++  // Kotori: Windows の候補欄は余白を持たせ、番号の帯と強い枠線を抑える。
++  // 拡大率を掛ける前の論理ピクセルで指定する。
++  const auto color = [](RendererStyle::RGBAColor* c, int r, int g, int b) {
++    c->set_r(r);
++    c->set_g(g);
++    c->set_b(b);
++  };
++  style->set_row_rect_padding(4);
++  color(style->mutable_border_color(), 200, 200, 200);
++  color(style->mutable_shortcut_style()->mutable_background_color(),
++        255, 255, 255);
++  color(style->mutable_shortcut_style()->mutable_foreground_color(),
++        110, 110, 110);
++  color(style->mutable_candidate_style()->mutable_foreground_color(),
++        32, 32, 32);
++  color(style->mutable_description_style()->mutable_foreground_color(),
++        100, 100, 100);
++  color(style->mutable_focused_background_color(), 232, 240, 250);
++  color(style->mutable_focused_border_color(), 232, 240, 250);
++  color(style->mutable_footer_top_color(), 250, 250, 250);
++  color(style->mutable_footer_bottom_color(), 250, 250, 250);
++  for (auto& border : *style->mutable_footer_border_colors()) {
++    color(&border, 225, 225, 225);
++  }
++  color(style->mutable_scrollbar_indicator_color(), 150, 150, 150);
++
+   // style->window_border is non-scalable.
+   style->set_scrollbar_width(style->scrollbar_width() * scale_factor);
+   style->set_row_rect_padding(style->row_rect_padding() * scale_factor);
 diff --git a/src/request/options.h b/src/request/options.h
 index 0d2eb3455..1b13074f1 100644
 --- a/src/request/options.h
@@ -20723,10 +20940,10 @@ index 000000000..cf2c801ea
 +#endif  // MOZC_REWRITER_LLAMA_RUNTIME_H_
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..9c9f8c334
+index 000000000..eaf737f7d
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
-@@ -0,0 +1,2300 @@
+@@ -0,0 +1,2363 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -21769,7 +21986,7 @@ index 000000000..9c9f8c334
 +void LmRewriter::ClearPredictions() const {
 +  std::lock_guard<std::mutex> lock(job_mu_);
 +  cache_.clear();
-+  if (job_ && !job_->convert) job_.reset();
++  if (job_ && !job_->convert && !job_->preview) job_.reset();
 +}
 +
 +bool LmRewriter::HasGpu() const {
@@ -21792,7 +22009,8 @@ index 000000000..9c9f8c334
 +LmRewriter::CheckResizeSegmentsRequest(const ConversionRequest& request,
 +                                       const Segments& segments) const {
 +  // サジェストのための変換(予測の中のリアルタイム変換。1 打鍵ごとに来る)では動かない。
-+  if (!sentence_ || request.request_type() != ConversionRequest::CONVERSION ||
++  if (!request.config().kotori_lm_enabled() || request.incognito_mode() ||
++      !sentence_ || request.request_type() != ConversionRequest::CONVERSION ||
 +      request.options().skip_slow_rewriters) {
 +    return std::nullopt;
 +  }
@@ -21820,12 +22038,24 @@ index 000000000..9c9f8c334
 +    if (!*memo) return std::nullopt;
 +    return ResizeFor(**memo, segments);
 +  }
++  if (preview) {
++    // Kotori: 入力中の取り直しは計算を待たない。文候補と設定のコピーを
++    // ワーカーへ渡し、次の取り直しで同じ読み・文脈の結果だけを使う。
++    std::lock_guard<std::mutex> jl(job_mu_);
++    if (running_preview_ != memo_key &&
++        !(job_ && job_->preview &&
++          MemoKey(job_->config, job_->reading, job_->context) == memo_key)) {
++      job_ = Job{reading, context, request.config(), false,
++                 std::make_shared<Segments>(segments)};
++      new_job_ = true;
++      job_cv_.notify_one();
++    }
++    return std::nullopt;
++  }
 +  const std::optional<ResizeSegmentsRequest> resize =
 +      SelectSentence(request, segments, reading, context, key);
-+  if (!resize && preview) {
-+    // AI が選ばなかった・選べなかった(取り直しのたびに計算し直さない)。
-+    if (!FindMemo(memo_key)) StoreMemo(memo_key, std::nullopt);
-+  }
++  // Kotori: モデルの準備中・ロック待ち・時間切れは結果ではない。
++  // 失敗を保存すると、同じ読みの取り直しでも永久に再評価できなくなる。
 +  return resize;
 +}
 +
@@ -21851,18 +22081,21 @@ index 000000000..9c9f8c334
 +LmRewriter::SelectSentence(const ConversionRequest& request,
 +                           const Segments& segments, const std::string& reading,
 +                           const std::string& context,
-+                           const std::string& key) const {
++                           const std::string& key, bool background) const {
 +  const std::vector<converter::Candidate>& sentences =
 +      segments.kotori_sentences();
 +  const auto t_request = std::chrono::steady_clock::now();
-+  Urgent urgent(urgent_, last_request_us_);
++  std::unique_ptr<Urgent> urgent;
++  if (!background) urgent = std::make_unique<Urgent>(urgent_, last_request_us_);
 +  // 同じ読みの先回りの変換が裏で計算中なら、捨てずに終わるのを待つ(上限まで)。
-+  int wait_ms = 300;
++  int wait_ms = background ? 0 : 300;
 +  {
 +    std::lock_guard<std::mutex> jl(job_mu_);
 +    urgent_key_ = key;
 +    last_converted_key_ = key;
-+    if (running_convert_ == key) wait_ms = std::max(wait_ms, BudgetMs());
++    if (!background && running_convert_ == key) {
++      wait_ms = std::max(wait_ms, BudgetMs());
++    }
 +  }
 +  if (!TryLockForRequest(wait_ms)) return std::nullopt;
 +  HeldLock lock(mutex_);
@@ -21873,12 +22106,14 @@ index 000000000..9c9f8c334
 +  std::chrono::steady_clock::time_point deadline, gen_deadline;
 +  int budget_ms = 0;
 +  auto over = [&] {
-+    return budget_ms > 0 && std::chrono::steady_clock::now() > deadline;
++    return (background && (stop_.load() || new_job_.load() || urgent_.load() > 0)) ||
++           (budget_ms > 0 && std::chrono::steady_clock::now() > deadline);
 +  };
 +  // 生成は上限の 6 割までにし、残りを採点に残す(採点の 1 回の計算は途中でやめられないため。
 +  // docs/adr/0029)。
 +  auto gen_over = [&] {
-+    return budget_ms > 0 && std::chrono::steady_clock::now() > gen_deadline;
++    return over() ||
++           (budget_ms > 0 && std::chrono::steady_clock::now() > gen_deadline);
 +  };
 +  auto ms = [](auto a, auto b) {
 +    return std::chrono::duration<double, std::milli>(b - a).count();
@@ -22064,7 +22299,7 @@ index 000000000..9c9f8c334
 +      best.values.emplace_back(inner.GetValue());
 +    }
 +  }
-+  if (best.keys.empty()) return std::nullopt;
++  if (best.keys.empty() || (background && over())) return std::nullopt;
 +
 +  // 今の区切りと同じなら、切り直さずに Rewrite で先頭を入れ替える。
 +  best_ = best;
@@ -22095,6 +22330,9 @@ index 000000000..9c9f8c334
 +  i = 0;
 +  for (Segment& seg : segments->conversion_segments()) {
 +    const std::string& value = best.values[i++];
++    if (seg.candidates_size() > 0) {
++      seg.mutable_candidate(0)->kotori_ai_evaluated = true;
++    }
 +    if (seg.candidates_size() == 0 || seg.candidate(0).value == value) {
 +      continue;
 +    }
@@ -22120,6 +22358,7 @@ index 000000000..9c9f8c334
 +      c.inner_segment_boundary.clear();
 +    }
 +    *seg.insert_candidate(0) = std::move(c);
++    seg.mutable_candidate(0)->kotori_ai_evaluated = true;
 +    changed = true;
 +  }
 +  *changed_out = changed;
@@ -22424,6 +22663,11 @@ index 000000000..9c9f8c334
 +      std::iota(order.begin(), order.end(), 0);
 +      std::stable_sort(order.begin(), order.end(),
 +                       [&](size_t x, size_t y) { return avg[x] > avg[y]; });
++      // Kotori: 初回表示では弱い予測を先頭にしない。これは正解確率ではなく、
++      // 自然さの絶対値と次点との差による保守的な採用条件。
++      const size_t best = order.front();
++      preds[best].can_lead = std::isfinite(avg[best]) && avg[best] >= -1.0 &&
++                            avg[best] - avg[order[1]] >= 0.5;
 +      std::vector<Prediction> sorted;
 +      for (size_t i : order) sorted.push_back(preds[i]);
 +      preds = std::move(sorted);
@@ -22488,6 +22732,8 @@ index 000000000..9c9f8c334
 +      }
 +    }
 +    converter::Candidate c = existing.value_or(base);
++    c.kotori_confident_prediction = false;
++    c.kotori_ai_evaluated = false;
 +    if (!existing) {
 +      c.key = reading;
 +      c.content_key = reading;
@@ -22642,6 +22888,10 @@ index 000000000..9c9f8c334
 +  // AI を切ったとき・シークレットモードでは、覚えておいた予測を捨て、新しく作らない(案 04)。
 +  if (!config.kotori_lm_enabled() || request.incognito_mode()) {
 +    ClearPredictions();
++    std::lock_guard<std::mutex> lock(job_mu_);
++    job_.reset();
++    new_job_ = true;
++    memo_.clear();
 +    return false;
 +  }
 +  Segment& seg = *segments->mutable_conversion_segment(0);
@@ -22650,10 +22900,19 @@ index 000000000..9c9f8c334
 +  // 打ちかけのローマ字(「おせわn」)が残っているときは使わない。
 +  if (rchars.size() < 2 || rchars.back().size() == 1) return false;
 +  const std::string context = HistoryContext(request, *segments);
++  bool preview_pending = false;
++  {
++    std::lock_guard<std::mutex> lock(job_mu_);
++    const std::string memo_key = MemoKey(config, reading, context);
++    preview_pending = running_preview_ == memo_key ||
++        (job_ && job_->preview &&
++         MemoKey(job_->config, job_->reading, job_->context) == memo_key);
++  }
 +  // LLM の予測を使わない(GPU がない、など)ときは、今の読みの変換を裏で先に済ませておく
 +  // (先回りの変換。Space で待たせないため。docs/adr/0024)。
 +  if (!(predict_ && config.kotori_lm_predict() && UsesLlm(config))) {
 +    ClearPredictions();
++    if (preview_pending) return false;
 +    if (preconvert_ && rchars.size() <= kMaxGenerateChars &&
 +        (HasGpu() || rchars.size() <= kMaxCpuChars)) {
 +      std::lock_guard<std::mutex> lock(job_mu_);
@@ -22669,10 +22928,13 @@ index 000000000..9c9f8c334
 +  const std::string key = CacheKey(config, context);
 +  std::vector<std::string> texts;
 +  for (const Prediction& p : CachedPredictions(reading, key, suggest_count_)) {
-+    texts.push_back(p.text);
++    if (p.can_lead && !p.yomi.empty() &&
++        absl::StartsWith(p.yomi, reading)) {
++      texts.push_back(p.text);
++    }
 +  }
 +  // 2. 今の読みの予測を裏で計算させる(待たない)。長い読みは計算しない。
-+  if (rchars.size() <= kMaxPredictChars) {
++  if (!preview_pending && rchars.size() <= kMaxPredictChars) {
 +    std::lock_guard<std::mutex> lock(job_mu_);
 +    bool cached = false;
 +    for (const Entry& e : cache_) {
@@ -22694,6 +22956,9 @@ index 000000000..9c9f8c334
 +  }
 +  if (texts.empty()) return false;
 +  InsertPredictions(&seg, reading, texts, std::vector<bool>(texts.size(), true));
++  for (size_t i = 0; i < texts.size(); ++i) {
++    seg.mutable_candidate(i)->kotori_confident_prediction = true;
++  }
 +  return true;
 +}
 +
@@ -22800,8 +23065,22 @@ index 000000000..9c9f8c334
 +      job = std::move(*job_);
 +      job_.reset();
 +      new_job_ = false;
++      if (job.preview) {
++        running_preview_ = MemoKey(job.config, job.reading, job.context);
++      }
 +    }
 +    last_config = job.config;
++    if (job.preview) {
++      ConversionRequest::Options options;
++      options.request_type = ConversionRequest::CONVERSION;
++      const ConversionRequest request = ConversionRequestBuilder()
++          .SetConfigView(job.config).SetOptions(options).Build();
++      SelectSentence(request, *job.preview, job.reading, job.context,
++                     job.reading + "\t" + job.context, true);
++      std::lock_guard<std::mutex> lock(job_mu_);
++      running_preview_.clear();
++      continue;
++    }
 +    if (job.convert) {
 +      RunPreconvert(job);
 +      continue;
@@ -22869,6 +23148,7 @@ index 000000000..9c9f8c334
 +  }
 +  // サジェストのための変換(1 打鍵ごと)では、AI の変換を動かさない(入力が重くなるため)。
 +  if (request.options().skip_slow_rewriters) return false;
++  if (!request.config().kotori_lm_enabled() || request.incognito_mode()) return false;
 +  // Kotori: 文全体で選んだ結果を覚えていれば、ロックを取らずに当てはめる(入力中の候補の取り直しと、
 +  // その後の Space。docs/adr/0039)。取り直しでは文節ごとの見直しもしない(先頭だけ使う)。
 +  if (sentence_ && request.request_type() == ConversionRequest::CONVERSION) {
@@ -23029,10 +23309,10 @@ index 000000000..9c9f8c334
 +}  // namespace mozc
 diff --git a/src/rewriter/lm_rewriter.h b/src/rewriter/lm_rewriter.h
 new file mode 100644
-index 000000000..eaa7436b2
+index 000000000..f735eb0e5
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.h
-@@ -0,0 +1,364 @@
+@@ -0,0 +1,367 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +//
 +// Kotori: AI による変換(docs/adr/0013、0015、0016)。
@@ -23185,7 +23465,7 @@ index 000000000..eaa7436b2
 +  std::optional<ResizeSegmentsRequest> SelectSentence(
 +      const ConversionRequest& request, const Segments& segments,
 +      const std::string& reading, const std::string& context,
-+      const std::string& key) const;
++      const std::string& key, bool background = false) const;
 +  // best の区切りが今の区切りと違えば、切り直す要求を返す。
 +  static std::optional<ResizeSegmentsRequest> ResizeFor(
 +      const Best& best, const Segments& segments);
@@ -23195,6 +23475,7 @@ index 000000000..eaa7436b2
 +    std::string base;
 +    std::string covered;
 +    std::string yomi;  // text 全体の読み(求まったとき)
++    bool can_lead = false;
 +  };
 +  struct Entry {
 +    std::string reading;
@@ -23206,6 +23487,7 @@ index 000000000..eaa7436b2
 +    std::string context;
 +    config::Config config;
 +    bool convert = false;  // 予測ではなく先回りの変換
++    std::shared_ptr<Segments> preview;  // 入力中の評価用。変換器の状態を共有しない。
 +  };
 +  // 先回りの変換で生成した文(読みと前の文ごと)。
 +  struct Generated {
@@ -23344,6 +23626,7 @@ index 000000000..eaa7436b2
 +  mutable std::optional<Generated> gen_cache_ ABSL_GUARDED_BY(mutex_);
 +  // 裏で計算中の先回りの変換と、変換の要求が来ている読み(読み + TAB + 前の文)。job_mu_ で守る。
 +  mutable std::string running_convert_;
++  mutable std::string running_preview_;  // MemoKey、job_mu_ で守る。
 +  // 最後に変換した読み(読み + TAB + 前の文)。先回りの変換でやり直さない。job_mu_ で守る。
 +  mutable std::string last_converted_key_;
 +  // 最後に要求(変換・Tab)が終わった時刻(steady_clock、マイクロ秒)。
@@ -24437,7 +24720,7 @@ index 2da5b8d46..c4c944c55 100644
          "//base/strings:assign",
          "//base/strings:unicode",
 diff --git a/src/session/session.cc b/src/session/session.cc
-index 8186b0a8d..1e42be609 100644
+index 8186b0a8d..b593b3e99 100644
 --- a/src/session/session.cc
 +++ b/src/session/session.cc
 @@ -44,6 +44,7 @@
@@ -24458,7 +24741,7 @@ index 8186b0a8d..1e42be609 100644
      case commands::SessionCommand::REQUEST_NWP: {
        ConversionPreferences conversion_preferences =
            context_->converter().conversion_preferences();
-@@ -538,10 +542,49 @@ bool Session::SendKey(commands::Command* command) {
+@@ -538,10 +542,71 @@ bool Session::SendKey(commands::Command* command) {
        break;
    }
  
@@ -24469,26 +24752,44 @@ index 8186b0a8d..1e42be609 100644
    return result;
  }
  
-+void Session::KotoriScheduleRefresh(commands::Command* command, int count) {
++void Session::KotoriScheduleRefresh(commands::Command* command, int count,
++                                    bool waiting) {
 +  if (context_->state() != ImeContext::COMPOSITION ||
++      context_->GetRequest().mixed_conversion() ||
++      !context_->GetConfig().kotori_lm_enabled() ||
++      context_->GetConfig().incognito_mode() ||
++      context_->GetRequest().is_incognito_mode() ||
++      context_->composer().GetInputFieldType() == commands::Context::PASSWORD ||
 +      !command->output().has_candidate_window() ||
 +      command->output().has_callback() || count >= kotori::kMaxLiveRefreshes) {
 +    return;
 +  }
-+  const int delay =
++  int delay =
 +      count == 0 ? kotori::g_live_first_ms.load() : kotori::g_live_next_ms.load();
++  if (waiting && delay <= 0) delay = kotori::g_live_first_ms.load();
 +  if (delay <= 0) return;
 +  commands::Output::Callback* callback =
 +      command->mutable_output()->mutable_callback();
 +  callback->mutable_session_command()->set_type(
 +      commands::SessionCommand::KOTORI_REFRESH_SUGGESTION);
 +  callback->set_delay_millisec(delay);
++  // Kotori: 未評価の候補を先に表示しない。読みは即座に表示し、候補だけを
++  // 最初の取り直しまで待つ。取り直し後は AI が使えなくても通常候補へ戻す。
++  // 内部の候補は保持するため、待つ間の Space / Tab 操作は妨げない。
++  if (count == 0) {
++    command->mutable_output()->clear_candidate_window();
++    command->mutable_output()->clear_all_candidate_words();
++  }
 +}
 +
 +bool Session::KotoriRefreshSuggestion(commands::Command* command) {
 +  // 打鍵の後に入力中の候補が出ている状態でだけ取り直す(変換中・確定後は何もしない)。
 +  // 「使わなかった」と返し、クライアントは画面を変えない(DoNothing は今の画面を出し直すので使わない)。
-+  if (context_->state() != ImeContext::COMPOSITION) {
++  if (context_->state() != ImeContext::COMPOSITION ||
++      !context_->GetConfig().kotori_lm_enabled() ||
++      context_->GetConfig().incognito_mode() ||
++      context_->GetRequest().is_incognito_mode() ||
++      context_->composer().GetInputFieldType() == commands::Context::PASSWORD) {
 +    command->mutable_output()->set_consumed(false);
 +    return true;
 +  }
@@ -24497,11 +24798,15 @@ index 8186b0a8d..1e42be609 100644
 +    OutputComposition(command);
 +    return true;
 +  }
-+  context_->mutable_converter()->KotoriPreviewConversion(
++  const bool ready = context_->mutable_converter()->KotoriPreviewConversion(
 +      context_->composer(), command->input().context());
 +  Output(command);
 +  ++kotori_refresh_count_;
-+  KotoriScheduleRefresh(command, kotori_refresh_count_);
++  KotoriScheduleRefresh(command, kotori_refresh_count_, !ready);
++  if (!ready && command->output().has_callback()) {
++    command->mutable_output()->clear_candidate_window();
++    command->mutable_output()->clear_all_candidate_words();
++  }
 +  return true;
 +}
 +
@@ -24509,7 +24814,7 @@ index 8186b0a8d..1e42be609 100644
    command->mutable_output()->set_consumed(true);
  
 diff --git a/src/session/session.h b/src/session/session.h
-index a9903ecd3..ab3ce6ae0 100644
+index a9903ecd3..db1e0dae1 100644
 --- a/src/session/session.h
 +++ b/src/session/session.h
 @@ -116,6 +116,10 @@ class Session {
@@ -24523,20 +24828,21 @@ index a9903ecd3..ab3ce6ae0 100644
    // Fills Output::Callback with the Undo SessionCommand to ask the
    // client to send back the SessionCommand to the server.
    // This function is called when the key event representing the
-@@ -275,6 +279,11 @@ class Session {
+@@ -275,6 +279,12 @@ class Session {
   private:
    friend class SessionTestPeer;
  
 +  // Kotori: 入力中の候補が出ていれば、少し後に取り直すようにクライアントに頼む
 +  // (Output.callback)。count は、この打鍵の後に取り直した回数。
-+  void KotoriScheduleRefresh(mozc::commands::Command* command, int count);
++  void KotoriScheduleRefresh(mozc::commands::Command* command, int count,
++                             bool waiting = false);
 +  int kotori_refresh_count_ = 0;
 +
    std::unique_ptr<ImeContext> context_;
  
    // Undo stack. *begin is the oldest, and *back is the newest.
 diff --git a/src/session/session_handler_tool.cc b/src/session/session_handler_tool.cc
-index e22e60a8c..36f138ff1 100644
+index e22e60a8c..12394a671 100644
 --- a/src/session/session_handler_tool.cc
 +++ b/src/session/session_handler_tool.cc
 @@ -211,6 +211,15 @@ bool SessionHandlerTool::UndoOrRewind(commands::Output* output) {
@@ -24555,7 +24861,20 @@ index e22e60a8c..36f138ff1 100644
  bool SessionHandlerTool::DeleteCandidateFromHistory(std::optional<int> id,
                                                      commands::Output* output) {
    commands::Input input;
-@@ -668,6 +677,9 @@ absl::Status SessionHandlerInterpreter::Eval(
+@@ -281,7 +290,11 @@ bool SessionHandlerTool::EvalCommandInternal(commands::Input* input,
+   // If callback is allowed and the callback field exists, evaluate the callback
+   // command.
+   if (result && allow_callback && command.output().has_callback() &&
+-      command.output().callback().has_session_command()) {
++      command.output().callback().has_session_command() &&
++      command.output().callback().session_command().type() !=
++          commands::SessionCommand::KOTORI_REFRESH_SUGGESTION) {
++    // Kotori: 遅延更新を即実行すると、初回表示と取り直しを区別できず、
++    // 打鍵ごとにモデルを呼んでしまう。テスト側で KOTORI_REFRESH を送る。
+     commands::Input input2;
+     input2.set_type(commands::Input::SEND_COMMAND);
+     *input2.mutable_command() = command.output().callback().session_command();
+@@ -668,6 +681,9 @@ absl::Status SessionHandlerInterpreter::Eval(
      MOZC_ASSERT_TRUE(client_->SubmitCandidate(id, last_output_.get()));
    } else if (command == "UNDO_OR_REWIND") {
      MOZC_ASSERT_TRUE(client_->UndoOrRewind(last_output_.get()));
@@ -24579,7 +24898,7 @@ index 4d3669e06..5df1ea7d9 100644
    // The target candidate is specified with the |id|. If |id| is not specified,
    // the current focused candidate will be specified.
 diff --git a/src/session/session_test.cc b/src/session/session_test.cc
-index 012d822a5..a426ce151 100644
+index 012d822a5..f656d09cf 100644
 --- a/src/session/session_test.cc
 +++ b/src/session/session_test.cc
 @@ -43,6 +43,7 @@
@@ -24590,7 +24909,38 @@ index 012d822a5..a426ce151 100644
  #include "base/strings/assign.h"
  #include "base/strings/unicode.h"
  #include "base/vlog.h"
-@@ -10494,5 +10495,80 @@ TEST_F(SessionTest, MultiSegmentSelectionCancel) {
+@@ -2291,6 +2292,9 @@ TEST_F(SessionTest, OutputAllCandidateWords) {
+ 
+   Session session(engine);
+   InitSessionToPrecomposition(&session);
++  config::Config config;
++  config.set_use_cascading_window(true);  // このテストは副候補欄を含む出力を検証。
++  session.SetConfig(config);
+   commands::Command command;
+ 
+   Segments segments;
+@@ -7878,6 +7882,9 @@ TEST_F(SessionTest, CommitCandidateT13N) {
+ 
+   Session session(engine);
+   InitSessionToPrecomposition(&session, *mobile_request_);
++  config::Config config;
++  config.set_use_cascading_window(true);  // 副候補欄からの選択を検証。
++  session.SetConfig(config);
+ 
+   Segments segments;
+   Segment* segment = segments.add_segment();
+@@ -9805,6 +9812,10 @@ TEST_F(SessionTest, ModeChangeOfConvertAtPunctuations) {
+ TEST_F(SessionTest, SuppressSuggestion) {
+   Session session(*mock_data_engine_);
+   InitSessionToPrecomposition(&session);
++  // 通常候補の抑制を検証する。AI の遅延表示は KotoriRefreshSuggestion で検証。
++  config::Config config;
++  config.set_kotori_lm_enabled(false);
++  session.SetConfig(config);
+ 
+   commands::Command command;
+   SendKey("a", &session, &command);
+@@ -10494,5 +10505,147 @@ TEST_F(SessionTest, MultiSegmentSelectionCancel) {
              "わたしのなまえはなかのです");
  }
  
@@ -24616,6 +24966,7 @@ index 012d822a5..a426ce151 100644
 +    Segment* segment = converted.add_segment();
 +    segment->set_key("あいうえお");
 +    AddCandidate("あいうえお", "阿伊宇江於", segment);
++    segment->mutable_candidate(0)->kotori_ai_evaluated = true;
 +  }
 +  EXPECT_CALL(*converter, StartConversion(_, _))
 +      .WillRepeatedly(DoAll(SetArgPointee<1>(converted), Return(true)));
@@ -24628,8 +24979,9 @@ index 012d822a5..a426ce151 100644
 +  EXPECT_EQ(command.output().callback().session_command().type(),
 +            commands::SessionCommand::KOTORI_REFRESH_SUGGESTION);
 +  EXPECT_EQ(command.output().callback().delay_millisec(), 200);
-+  EXPECT_EQ(command.output().candidate_window().candidate(0).value(),
-+            "あいうえお");
++  EXPECT_FALSE(command.output().has_candidate_window());
++  EXPECT_FALSE(command.output().has_all_candidate_words());
++  EXPECT_TRUE(command.output().has_preedit());
 +
 +  auto refresh = [&] {
 +    command.Clear();
@@ -24653,6 +25005,36 @@ index 012d822a5..a426ce151 100644
 +  ASSERT_TRUE(command.output().has_callback());
 +  EXPECT_EQ(command.output().callback().delay_millisec(), 800);
 +
++  // 採用条件を満たした続き予測は、通常変換の取り直しで押し下げない。
++  Segments confident = suggestion;
++  auto* prediction = confident.mutable_conversion_segment(0)->mutable_candidate(0);
++  prediction->value = "あいうえおの続き";
++  prediction->kotori_confident_prediction = true;
++  EXPECT_CALL(*converter, StartPrediction(_, _))
++      .WillOnce(DoAll(SetArgPointee<1>(confident), Return(true)))
++      .RetiresOnSaturation();
++  EXPECT_TRUE(refresh());
++  EXPECT_EQ(command.output().candidate_window().candidate(0).value(),
++            "あいうえおの続き");
++
++  // AI が評価できない間は候補を待ち、上限で通常候補に戻す。
++  Segments unavailable = converted;
++  unavailable.mutable_conversion_segment(0)->mutable_candidate(0)
++      ->kotori_ai_evaluated = false;
++  EXPECT_CALL(*converter, StartConversion(_, _))
++      .Times(kotori::kMaxLiveRefreshes)
++      .WillRepeatedly(DoAll(SetArgPointee<1>(unavailable), Return(true)))
++      .RetiresOnSaturation();
++  InsertCharacterChars("a", &session, &command);
++  EXPECT_FALSE(command.output().has_candidate_window());
++  for (int i = 0; i < kotori::kMaxLiveRefreshes; ++i) {
++    EXPECT_TRUE(refresh());
++    EXPECT_EQ(command.output().has_candidate_window(),
++              i == kotori::kMaxLiveRefreshes - 1);
++    EXPECT_EQ(command.output().has_callback(),
++              i != kotori::kMaxLiveRefreshes - 1);
++  }
++
 +  // 変換を始めた後の取り直しは何もしない。
 +  command.Clear();
 +  EXPECT_TRUE(session.Convert(&command));
@@ -24667,6 +25049,41 @@ index 012d822a5..a426ce151 100644
 +  session.Revert(&command);
 +  InsertCharacterChars("a", &session, &command);
 +  EXPECT_FALSE(command.output().has_callback());
++}
++
++TEST_F(SessionTest, KotoriRefreshDisabledOrPrivate) {
++  // 別セッションの AI が有効でも、このセッションの設定を優先する。
++  kotori::g_live_first_ms = 200;
++  kotori::g_live_next_ms = 800;
++  for (const bool incognito : {false, true}) {
++    MockEngine engine;
++    auto converter = CreateEngineConverterMock(&engine);
++    Session session(engine);
++    InitSessionToPrecomposition(&session);
++    config::Config config;
++    config.set_kotori_lm_enabled(incognito);
++    config.set_incognito_mode(incognito);
++    session.SetConfig(config);
++    Segments suggestion;
++    Segment* segment = suggestion.add_segment();
++    segment->set_key("あいうえお");
++    AddCandidate("あいうえお", "あいうえお", segment);
++    EXPECT_CALL(*converter, StartPrediction(_, _))
++        .WillRepeatedly(DoAll(SetArgPointee<1>(suggestion), Return(true)));
++    EXPECT_CALL(*converter, StartConversion(_, _)).Times(0);
++    commands::Command command;
++    InsertCharacterChars("aiueo", &session, &command);
++    EXPECT_FALSE(command.output().has_callback());
++    EXPECT_TRUE(command.output().has_candidate_window());
++    command.Clear();
++    command.mutable_input()->set_type(commands::Input::SEND_COMMAND);
++    command.mutable_input()->mutable_command()->set_type(
++        commands::SessionCommand::KOTORI_REFRESH_SUGGESTION);
++    EXPECT_TRUE(session.SendCommand(&command));
++    EXPECT_FALSE(command.output().consumed());
++  }
++  kotori::g_live_first_ms = 0;
++  kotori::g_live_next_ms = 0;
 +}
 +
  }  // namespace session
