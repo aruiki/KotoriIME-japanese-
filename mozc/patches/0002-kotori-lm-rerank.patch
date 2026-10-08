@@ -20681,17 +20681,20 @@ index b75c03feb..90317214c 100644
      return RewriterInterface::ALL;
    }
 diff --git a/src/rewriter/english_variants_rewriter_test.cc b/src/rewriter/english_variants_rewriter_test.cc
-index 9c9f95e8f..fd8c3c63e 100644
+index 9c9f95e8f..462acfbb2 100644
 --- a/src/rewriter/english_variants_rewriter_test.cc
 +++ b/src/rewriter/english_variants_rewriter_test.cc
-@@ -161,6 +161,24 @@ TEST_F(EnglishVariantsRewriterTest, ExpandSpacePrefixedVariants) {
+@@ -161,6 +161,27 @@ TEST_F(EnglishVariantsRewriterTest, ExpandSpacePrefixedVariants) {
  }
  
  TEST_F(EnglishVariantsRewriterTest, RewriteTest) {
 +  // Common katakana loanwords expose a clear English spelling candidate.
 +  {
 +    Segments segments;
-+    const ConversionRequest request;
++    const ConversionRequest request =
++        ConversionRequestBuilder()
++            .SetRequestType(ConversionRequest::SUGGESTION)
++            .Build();
 +    Segment* seg = segments.push_back_segment();
 +    converter::Candidate* candidate = seg->add_candidate();
 +    candidate->content_key = "いんでっくす";
