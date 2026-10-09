@@ -1,0 +1,93 @@
+{
+  "scope": "dedicated session on installed server; not native TSF UI; no input commit/config/history reset",
+  "installed_version": "3.34.6332.100",
+  "quality": "Unreal (actual user setting, not changed by audit)",
+  "checked_at": "2026-10-10T03:13:48.602949+09:00",
+  "installed_file_count_checked": 29,
+  "fixture_failure_preserved": "configuration originally ended in unresolved roman n; expected reading guard failed. v2 uses nn to finalize ん. Original logs retained.",
+  "remaining_observation": "typo second Space can select uncorrected alternate ちょ止まってください; first/Tab/Esc immediate Space remain corrected. Native displayed focus still unverified.",
+  "payload_identity": "29 files match the public BUILD6332 MSI",
+  "probe_rows": [
+    {
+      "label": "foot",
+      "first": "足を痛めた",
+      "tab": "足を痛めた",
+      "space1": "足を痛めた",
+      "space2": "脚を痛めた"
+    },
+    {
+      "label": "medical",
+      "first": "足を痛めてしまったため今日は医者に行こう",
+      "tab": "足を痛めてしまったため今日は医者に行こう",
+      "space1": "足を痛めてしまったため今日は医者に行こう",
+      "space2": "脚を痛めてしまったため今日は医者に行こう"
+    },
+    {
+      "label": "cooking",
+      "first": "玉ねぎを炒めた",
+      "tab": "玉ねぎを炒めた",
+      "space1": "玉ねぎを炒めた",
+      "space2": "たまねぎを炒めた"
+    },
+    {
+      "label": "typo-cancel",
+      "first": "ちょっと待ってください",
+      "tab": "ちょっと待ってください",
+      "space1": "ちょっと待ってください",
+      "space2": "ちょ止まってください"
+    },
+    {
+      "label": "english-architecture",
+      "first": "アーキテクチャ",
+      "tab": "アーキテクチャ",
+      "space1": "アーキテクチャ",
+      "space2": "architecture"
+    },
+    {
+      "label": "english-accessibility",
+      "first": "アクセシビリティ",
+      "tab": "アクセシビリティ",
+      "space1": "アクセシビリティ",
+      "space2": "accessibility"
+    },
+    {
+      "label": "english-configuration-v2",
+      "first": "コンフィギュレーション",
+      "tab": "コンフィギュレーション",
+      "space1": "コンフィギュレーション",
+      "space2": "configuration"
+    }
+  ],
+  "server_file_sha256": "952cdc9e6ff4219d47ef69def817ec2b7b4a3ce23c7fc778754060b8b2dab833",
+  "server_pid_at_check": 23680,
+  "tip_modules": "Post-reboot browser/application processes loaded the installed 6332 path; active TSF input not observed",
+  "install": {
+    "started": "2026-10-10T02:52:27.4903201+09:00",
+    "ended": "2026-10-10T02:53:38.8805127+09:00",
+    "transaction_seconds": 71.3901926,
+    "last_boot": "2026-10-10T02:54:11.5000000+09:00",
+    "result": "MSI install completed, Windows rebooted",
+    "reboot_required": true,
+    "per_action_timing": "not available; no verbose install log",
+    "locked_file_process_count": 15
+  },
+  "gui_revision": {
+    "input_manifest_sha256": "224aa0b92f5f732790222979d43517da8b713373c70589fe43da29dee782154a",
+    "changes_from_rc4": [
+      "src/gui/config_dialog/config_dialog.cc",
+      "src/gui/config_dialog/config_dialog.h",
+      "src/gui/config_dialog/kotori_dashboard_test.cc",
+      "src/version.bzl"
+    ],
+    "tests": 4,
+    "scales": [
+      1,
+      1.5,
+      2
+    ],
+    "platform": "Windows Qt hidden test widgets, mocked config service and temporary user profile",
+    "saving_success_failure_retry": "PASS",
+    "production_tool_build": "PASS; update MSI pending",
+    "installed6332_contains_new_save_feedback": false
+  }
+}

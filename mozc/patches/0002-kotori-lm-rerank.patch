@@ -20931,7 +20931,7 @@ index 335639ca8..1295e38c7 100644
 +    ],
 +)
 diff --git a/src/gui/config_dialog/config_dialog.cc b/src/gui/config_dialog/config_dialog.cc
-index abbf55d68..b996554a3 100644
+index abbf55d68..db7f6cb93 100644
 --- a/src/gui/config_dialog/config_dialog.cc
 +++ b/src/gui/config_dialog/config_dialog.cc
 @@ -30,12 +30,51 @@
@@ -21452,7 +21452,7 @@ index abbf55d68..b996554a3 100644
  #endif  // __APPLE__
  
  #if defined(__linux__)
-@@ -152,6 +627,482 @@ ConfigDialog::ConfigDialog()
+@@ -152,6 +627,490 @@ ConfigDialog::ConfigDialog()
    symbolsSettingComboBox->addItem(QString::fromUtf8("「」／"));
    symbolsSettingComboBox->addItem(QString::fromUtf8("[]・"));
  
@@ -21726,7 +21726,7 @@ index abbf55d68..b996554a3 100644
 +    title->setStyleSheet("font-size: 22pt; font-weight: 600;");
 +    header->addWidget(title);
 +    header->addStretch();
-+    auto *badge = new QLabel(page);
++    auto *badge = new QLabel(QString::fromUtf8("確認中"), page);
 +    badge->setObjectName("kotoriDashboardStateBadge");
 +    header->addWidget(badge);
 +    outer->addLayout(header);
@@ -21764,6 +21764,8 @@ index abbf55d68..b996554a3 100644
 +    ai_card->addLayout(ai_columns);
 +    auto *ai = field(ai_left, "kotoriDashboardAi");
 +    auto *models = field(ai_left, "kotoriDashboardModels");
++    ai->setText(QString::fromUtf8("AIの状態を確認しています…"));
++    models->setText(QString::fromUtf8("実行中のモデル: 確認中"));
 +    models->setProperty("kotoriNote", true);
 +    auto *settings = new QPushButton(QString::fromUtf8("AIの設定を開く"), page);
 +    settings->setAutoDefault(false);
@@ -21772,8 +21774,10 @@ index abbf55d68..b996554a3 100644
 +    QObject::connect(settings, &QPushButton::clicked, this,
 +                     [this] { configDialogTabWidget->setCurrentIndex(1); });
 +    auto *inference_value = field(ai_right, "kotoriDashboardInferenceValue");
++    inference_value->setText(QString::fromUtf8("—"));
 +    inference_value->setStyleSheet("font-size: 24pt; font-weight: 600;");
 +    auto *inference = field(ai_right, "kotoriDashboardInference");
++    inference->setText(QString::fromUtf8("AI計算時間: 確認中"));
 +    inference->setProperty("kotoriNote", true);
 +    auto *inference_note = new QLabel(
 +        QString::fromUtf8(
@@ -21796,12 +21800,15 @@ index abbf55d68..b996554a3 100644
 +                            int column, const char *gauge_name) {
 +      auto *layout = card(heading, false);
 +      auto *value = field(layout, (std::string(name) + "Value").c_str());
++      value->setText(QString::fromUtf8("—"));
 +      value->setStyleSheet("font-size: 25pt; font-weight: 600;");
 +      auto *bar = new QProgressBar(page);
 +      bar->setObjectName(gauge_name);
 +      bar->setRange(0, 100);
 +      bar->setTextVisible(false);
 +      bar->setFixedHeight(6);
++      // Kotori: 測定前の空欄や0%を実測値と見せない。
++      bar->setVisible(false);
 +      if (!KotoriHighContrast())
 +        bar->setStyleSheet(
 +            "QProgressBar { background: #E5E5E5; border: none; border-radius: "
@@ -21809,6 +21816,7 @@ index abbf55d68..b996554a3 100644
 +            "3px; }");
 +      layout->addWidget(bar);
 +      auto *detail = field(layout, name);
++      detail->setText(QString::fromUtf8("計測しています…"));
 +      detail->setProperty("kotoriNote", true);
 +      grid->addWidget(layout->parentWidget(), row, column);
 +      return Metric{value, detail, bar};
@@ -21935,29 +21943,106 @@ index abbf55d68..b996554a3 100644
    keymapSettingComboBox->addItem(tr("Custom keymap"));
    keymapSettingComboBox->addItem(tr("ATOK"));
    keymapSettingComboBox->addItem(tr("MS-IME"));
-@@ -250,8 +1201,10 @@ ConfigDialog::ConfigDialog()
+@@ -217,6 +1176,14 @@ ConfigDialog::ConfigDialog()
+       ->setText(tr("Cancel"));
+   configDialogButtonBox->button(QDialogButtonBox::Apply)->setText(tr("Apply"));
+ 
++  // Kotori: 保存結果をタブに依存しない場所へ残す。色だけで状態を伝えない。
++  kotoriSettingsStatusLabel_ = new QLabel(QString::fromUtf8("変更はありません"), this);
++  kotoriSettingsStatusLabel_->setObjectName("kotoriSettingsSaveStatus");
++  kotoriSettingsStatusLabel_->setAccessibleName(QString::fromUtf8("設定の保存状態"));
++  kotoriSettingsStatusLabel_->setWordWrap(true);
++  kotoriSettingsStatusLabel_->setProperty("saveState", "unchanged");
++  centralLayout->insertWidget(centralLayout->count() - 1, kotoriSettingsStatusLabel_);
++
+   // signal/slot
+   QObject::connect(configDialogButtonBox, SIGNAL(clicked(QAbstractButton *)),
+                    this, SLOT(clicked(QAbstractButton *)));
+@@ -250,8 +1217,12 @@ ConfigDialog::ConfigDialog()
                     SIGNAL(clicked()), this, SLOT(LaunchAdministrationDialog()));
  
    // Event handlers to enable 'Apply' button.
 -  Connect(findChildren<QPushButton *>(), SIGNAL(clicked()), this,
 -          SLOT(EnableApplyButton()));
 +  for (auto* button : findChildren<QPushButton*>()) {
-+    if (!button->property("kotoriNavigation").toBool())
++    // 保存/終了ボタン自身のクリックを設定変更として扱わない。
++    if (!button->property("kotoriNavigation").toBool() &&
++        configDialogButtonBox->buttonRole(button) == QDialogButtonBox::InvalidRole)
 +      QObject::connect(button, SIGNAL(clicked()), this, SLOT(EnableApplyButton()));
 +  }
    Connect(findChildren<QCheckBox *>(), SIGNAL(clicked()), this,
            SLOT(EnableApplyButton()));
    Connect(findChildren<QComboBox *>(), SIGNAL(activated(int)), this,
-@@ -324,6 +1277,8 @@ ConfigDialog::ConfigDialog()
+@@ -324,6 +1295,10 @@ ConfigDialog::ConfigDialog()
  #ifdef CHANNEL_DEV
    usageStatsCheckBox->setEnabled(false);
  #endif  // CHANNEL_DEV
 +  // Kotori: 読み込み中の状態通知は利用者による変更ではない。
 +  configDialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
++  kotoriSettingsStatusLabel_->setText(QString::fromUtf8("変更はありません"));
++  kotoriSettingsStatusLabel_->setProperty("saveState", "unchanged");
  }
  
  bool ConfigDialog::SetConfig(const config::Config &config) {
-@@ -524,6 +1479,21 @@ void ConfigDialog::ConvertFromProto(const config::Config &config) {
+@@ -383,6 +1358,22 @@ bool ConfigDialog::Update() {
+     return false;
+   }
+ 
++  // Kotori: サーバーの保存成功を確認するまで、適用済み表示や終了を行わない。
++  auto* apply = configDialogButtonBox->button(QDialogButtonBox::Apply);
++  apply->setEnabled(false);
++  kotoriSettingsStatusLabel_->setText(QString::fromUtf8("設定を適用しています…"));
++  kotoriSettingsStatusLabel_->setProperty("saveState", "saving");
++  kotoriSettingsStatusLabel_->repaint();
++  if (!SetConfig(config)) {
++    kotoriSettingsStatusLabel_->setText(QString::fromUtf8(
++        "設定を保存できませんでした。変更は残っています。"));
++    kotoriSettingsStatusLabel_->setProperty("saveState", "error");
++    apply->setEnabled(true);
++    QMessageBox::critical(this, windowTitle(), tr("Failed to update config"));
++    return false;
++  }
++  base_config_ = config;
++
+ #if defined(_WIN32)
+   if ((initial_preedit_method_ != static_cast<int>(config.preedit_method())) ||
+       (initial_use_keyboard_to_change_preedit_method_ !=
+@@ -405,16 +1396,16 @@ bool ConfigDialog::Update() {
+   }
+ #endif  // _WIN32
+ 
+-  if (!SetConfig(config)) {
+-    QMessageBox::critical(this, windowTitle(), tr("Failed to update config"));
+-  }
+-
+ #ifdef _WIN32
+-  if (!WinUtil::SetIMEHotKeyDisabled(IMEHotKeyDisabledCheckBox->isChecked())) {
+-    // Do not show any dialog here, since this operation will not fail
+-    // in almost all cases.
+-    // TODO(taku): better to show dialog?
++  // 変更していないWindows設定は書き直さない。部分失敗を完全成功と表示しない。
++  if (IMEHotKeyDisabledCheckBox->isChecked() != WinUtil::GetIMEHotKeyDisabled() &&
++      !WinUtil::SetIMEHotKeyDisabled(IMEHotKeyDisabledCheckBox->isChecked())) {
+     LOG(ERROR) << "Failed to update IME HotKey status";
++    kotoriSettingsStatusLabel_->setText(QString::fromUtf8(
++        "IMEのショートカット設定を保存できませんでした。再度適用してください。"));
++    kotoriSettingsStatusLabel_->setProperty("saveState", "error");
++    apply->setEnabled(true);
++    return false;
+   }
+ #endif  // _WIN32
+ 
+@@ -430,6 +1421,9 @@ bool ConfigDialog::Update() {
+   }
+ #endif  // __APPLE__
+ 
++  kotoriSettingsStatusLabel_->setText(QString::fromUtf8("設定を適用しました"));
++  kotoriSettingsStatusLabel_->setProperty("saveState", "saved");
++  apply->setEnabled(false);
+   return true;
+ }
+ 
+@@ -524,6 +1518,21 @@ void ConfigDialog::ConvertFromProto(const config::Config &config) {
    custom_keymap_table_ = config.custom_keymap_table();
    custom_roman_table_ = config.custom_roman_table();
  
@@ -21979,7 +22064,7 @@ index abbf55d68..b996554a3 100644
    // tab2
    SET_COMBOBOX(historyLearningLevelComboBox, HistoryLearningLevel,
                 history_learning_level);
-@@ -612,6 +1582,17 @@ void ConfigDialog::ConvertToProto(config::Config *config) const {
+@@ -612,6 +1621,17 @@ void ConfigDialog::ConvertToProto(config::Config *config) const {
      config->set_custom_roman_table(custom_roman_table_);
    }
  
@@ -21997,11 +22082,23 @@ index abbf55d68..b996554a3 100644
    // tab2
    GET_COMBOBOX(historyLearningLevelComboBox, HistoryLearningLevel,
                 history_learning_level);
+@@ -846,6 +1866,11 @@ void ConfigDialog::LaunchAdministrationDialog() {
+ 
+ void ConfigDialog::EnableApplyButton() {
+   configDialogButtonBox->button(QDialogButtonBox::Apply)->setEnabled(true);
++  if (kotoriSettingsStatusLabel_ != nullptr) {
++    kotoriSettingsStatusLabel_->setText(QString::fromUtf8(
++        "変更はまだ適用されていません"));
++    kotoriSettingsStatusLabel_->setProperty("saveState", "pending");
++  }
+ }
+ 
+ // Catch MouseButtonRelease event to toggle the CheckBoxes
 diff --git a/src/gui/config_dialog/config_dialog.h b/src/gui/config_dialog/config_dialog.h
-index 85e1c0075..abf088094 100644
+index 85e1c0075..b8bb25147 100644
 --- a/src/gui/config_dialog/config_dialog.h
 +++ b/src/gui/config_dialog/config_dialog.h
-@@ -33,6 +33,10 @@
+@@ -33,6 +33,11 @@
  #define MOZC_GUI_CONFIG_DIALOG_CONFIG_DIALOG_H_
  
  #include <QObject>
@@ -22009,10 +22106,11 @@ index 85e1c0075..abf088094 100644
 +class QCheckBox;
 +class QComboBox;
 +class QLineEdit;
++class QLabel;
  #include <QTimer>
  #include <map>
  #include <memory>
-@@ -48,6 +52,14 @@ namespace gui {
+@@ -48,6 +53,15 @@ namespace gui {
  class ConfigDialog : public QDialog, private Ui::ConfigDialog {
    Q_OBJECT;
  
@@ -22023,11 +22121,12 @@ index 85e1c0075..abf088094 100644
 +  QComboBox *kotoriLmModelComboBox_ = nullptr;
 +  QCheckBox *kotoriLmPredictCheckBox_ = nullptr;
 +  QCheckBox *kotoriLmCorrectionCheckBox_ = nullptr;
++  QLabel *kotoriSettingsStatusLabel_ = nullptr;
 +
   public:
    ConfigDialog();
  
-@@ -80,6 +92,7 @@ class ConfigDialog : public QDialog, private Ui::ConfigDialog {
+@@ -80,6 +94,7 @@ class ConfigDialog : public QDialog, private Ui::ConfigDialog {
    bool eventFilter(QObject *obj, QEvent *event) override;
  
   private:
@@ -22037,10 +22136,10 @@ index 85e1c0075..abf088094 100644
    // Set/GetSendStatsChechBox read/write registry or file directly
 diff --git a/src/gui/config_dialog/kotori_dashboard_test.cc b/src/gui/config_dialog/kotori_dashboard_test.cc
 new file mode 100644
-index 000000000..134f2ba53
+index 000000000..5d10f668d
 --- /dev/null
 +++ b/src/gui/config_dialog/kotori_dashboard_test.cc
-@@ -0,0 +1,214 @@
+@@ -0,0 +1,293 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +#include <QApplication>
 +#include <QDir>
@@ -22049,6 +22148,7 @@ index 000000000..134f2ba53
 +#include <QEventLoop>
 +#include <QFontInfo>
 +#include <QLabel>
++#include <QMessageBox>
 +#include <QProgressBar>
 +#include <QPushButton>
 +#include <QScrollArea>
@@ -22091,8 +22191,10 @@ index 000000000..134f2ba53
 +using ::testing::SetArgPointee;
 +class DashboardClientFactory : public client::ClientFactoryInterface {
 + public:
++  client::ClientMock* mock = nullptr;
 +  std::unique_ptr<client::ClientInterface> NewClient() override {
 +    auto mock = std::make_unique<::testing::NiceMock<client::ClientMock>>();
++    this->mock = mock.get();
 +    EXPECT_CALL(*mock, CheckVersionOrRestartServer()).WillOnce(Return(true));
 +    EXPECT_CALL(*mock, GetConfig(_))
 +        .WillOnce(DoAll(SetArgPointee<0>(config::Config()), Return(true)));
@@ -22124,8 +22226,84 @@ index 000000000..134f2ba53
 +  inline static std::unique_ptr<QApplication> app_;
 +  DashboardClientFactory factory_;
 +};
++// Kotori: 実際の設定保存の成功だけを表示し、保存操作を未保存扱いへ戻さない。
++TEST_F(KotoriDashboardTest, ShowsPendingAndSavedFeedback) {
++  ConfigDialog dialog;
++  dialog.setAttribute(Qt::WA_DontShowOnScreen);
++  auto* status = dialog.findChild<QLabel*>("kotoriSettingsSaveStatus");
++  ASSERT_NE(status, nullptr);
++  auto* buttons = dialog.findChild<QDialogButtonBox*>("configDialogButtonBox");
++  auto* correction = dialog.findChild<QCheckBox*>("kotoriLmCorrection");
++  ASSERT_NE(buttons, nullptr);
++  ASSERT_NE(correction, nullptr);
++  auto* apply = buttons->button(QDialogButtonBox::Apply);
++  EXPECT_FALSE(apply->isEnabled());
++  EXPECT_FALSE(status->text().contains(QString::fromUtf8("適用しました")));
++  correction->click();
++  EXPECT_TRUE(apply->isEnabled());
++  EXPECT_TRUE(status->text().contains(QString::fromUtf8("まだ適用")));
++  EXPECT_CALL(*factory_.mock, CheckVersionOrRestartServer())
++      .WillOnce(Return(true));
++  EXPECT_CALL(*factory_.mock, SetConfig(_)).WillOnce(Return(true));
++  apply->click();
++  EXPECT_FALSE(apply->isEnabled());
++  EXPECT_TRUE(status->text().contains(QString::fromUtf8("設定を適用しました")));
++  QCoreApplication::processEvents();
++  EXPECT_FALSE(apply->isEnabled());
++  const QString capture = qEnvironmentVariable("KOTORI_GUI_CAPTURE_DIR");
++  if (!capture.isEmpty()) {
++    dialog.show();
++    QCoreApplication::processEvents();
++    Refresh();
++    QDir().mkpath(capture);
++    EXPECT_TRUE(dialog.grab().save(capture + "/settings-applied.png"));
++  }
++  correction->click();
++  EXPECT_TRUE(apply->isEnabled());
++  EXPECT_FALSE(status->text().contains(QString::fromUtf8("適用しました")));
++}
++// 保存失敗でOKから閉じず、変更を保持したまま適用を再試行できる。
++TEST_F(KotoriDashboardTest, FailedSaveKeepsDialogOpenAndRetrySucceeds) {
++  ConfigDialog dialog;
++  dialog.setAttribute(Qt::WA_DontShowOnScreen);
++  dialog.show();
++  auto* status = dialog.findChild<QLabel*>("kotoriSettingsSaveStatus");
++  auto* buttons = dialog.findChild<QDialogButtonBox*>("configDialogButtonBox");
++  auto* correction = dialog.findChild<QCheckBox*>("kotoriLmCorrection");
++  ASSERT_NE(status, nullptr);
++  ASSERT_NE(buttons, nullptr);
++  ASSERT_NE(correction, nullptr);
++  correction->click();
++  const bool changed_value = correction->isChecked();
++  EXPECT_CALL(*factory_.mock, CheckVersionOrRestartServer())
++      .Times(2).WillRepeatedly(Return(true));
++  EXPECT_CALL(*factory_.mock, SetConfig(_))
++      .WillOnce(Return(false)).WillOnce(Return(true));
++  QTimer::singleShot(0, &dialog, [&dialog]() {
++    auto* error = dialog.findChild<QMessageBox*>();
++    ASSERT_NE(error, nullptr);
++    error->accept();
++  });
++  buttons->button(QDialogButtonBox::Ok)->click();
++  EXPECT_TRUE(dialog.isVisible());
++  EXPECT_EQ(correction->isChecked(), changed_value);
++  EXPECT_TRUE(buttons->button(QDialogButtonBox::Apply)->isEnabled());
++  EXPECT_EQ(status->property("saveState").toString(), "error");
++  EXPECT_FALSE(status->text().contains(QString::fromUtf8("適用しました")));
++  buttons->button(QDialogButtonBox::Apply)->click();
++  EXPECT_FALSE(buttons->button(QDialogButtonBox::Apply)->isEnabled());
++  EXPECT_EQ(status->property("saveState").toString(), "saved");
++  EXPECT_TRUE(status->text().contains(QString::fromUtf8("設定を適用しました")));
++}
 +TEST_F(KotoriDashboardTest, StartsOnDashboardAndUpdatesActualPcCounters) {
 +  ConfigDialog dialog;
++  // 非表示で作成されても、最初の計測まで空欄や見せかけの0%を出さない。
++  EXPECT_EQ(dialog.findChild<QLabel*>("kotoriDashboardPcCpuValue")->text(),
++            QString::fromUtf8("—"));
++  EXPECT_FALSE(dialog.findChild<QLabel*>("kotoriDashboardPcCpu")->text().isEmpty());
++  EXPECT_EQ(dialog.findChild<QLabel*>("kotoriDashboardStateBadge")->text(),
++            QString::fromUtf8("確認中"));
++  EXPECT_TRUE(dialog.findChild<QProgressBar*>("kotoriPcCpuGauge")->isHidden());
 +  dialog.setAttribute(Qt::WA_DontShowOnScreen);
 +  dialog.show();
 +  QCoreApplication::processEvents();
@@ -31004,7 +31182,7 @@ index 012d822a5..21ac2b3ec 100644
  }  // namespace session
  }  // namespace mozc
 diff --git a/src/version.bzl b/src/version.bzl
-index ada11a64a..48dcd6389 100644
+index ada11a64a..209c0c8dc 100644
 --- a/src/version.bzl
 +++ b/src/version.bzl
 @@ -32,10 +32,10 @@ MAJOR = 3
@@ -31016,7 +31194,7 @@ index ada11a64a..48dcd6389 100644
  
  # Number to be increased. This value may be replaced by other tools.
 -BUILD = BUILD_OSS
-+BUILD = 6332
++BUILD = 6333
  
  # Represent the platform and release channel.
  REVISION = 100
