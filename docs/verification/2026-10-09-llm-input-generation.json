@@ -1,0 +1,218 @@
+{
+  "date": "2026-10-09",
+  "scope": "Input generation and guarded free correction in isolated native session_handler_main; not installed-app Windows TSF acceptance",
+  "default_enabled": false,
+  "source_parent_commit": "011abf55d94547ccce3028cba092dd666c7ce541",
+  "source": {
+    "changed_source_blocks": [
+      "src/engine/engine_converter.cc",
+      "src/engine/engine_converter.h",
+      "src/engine/engine_converter_interface.h",
+      "src/engine/engine_converter_test.cc",
+      "src/request/conversion_request.h",
+      "src/request/conversion_request_test.cc",
+      "src/rewriter/BUILD.bazel",
+      "src/rewriter/lm_rewriter.cc",
+      "src/rewriter/lm_rewriter.h",
+      "src/rewriter/lm_rewriter_test.cc",
+      "src/session/session.cc",
+      "src/session/session_test.cc"
+    ],
+    "bundle_patch_unchanged": true,
+    "patch_sha256": "7b25be7de6858a20d83ac10bb9226d4ccf86be8c2c5b8195ea3d40b0024999df",
+    "source_sha256": {
+      "src/engine/engine_converter.cc": "f4bea2525631c73d69179a46a09b9abfee31e1e9e67fc8dc90cc5426ec7a04b3",
+      "src/engine/engine_converter.h": "9a9471bdcfa6682f676890d2f8187acfe5bb75664f218f11a955e986bc8bf477",
+      "src/engine/engine_converter_interface.h": "d981f1cea22f06b4f7038a52d1315aa4844b3d80eefad690513f4e0daefed37f",
+      "src/engine/engine_converter_test.cc": "e8741725d3617ab9ee00fad1648446c6d38cfceee4989ef27563a9007ee7327b",
+      "src/request/conversion_request.h": "854e07d3fd19b4df564a21f68ffae91da0e7c79fcd12675aa0ec50216e0470bc",
+      "src/request/conversion_request_test.cc": "03b60f6472d246c1c621e3543f435556569ea868eac74f598cd1e1e1d6028562",
+      "src/rewriter/BUILD.bazel": "dac45263506bde8a18b9846df2fd6753280071a886af87868ff03c8bf237e4c6",
+      "src/rewriter/lm_rewriter.cc": "b9ec877940f06d19315147642e975b1bbe60af51ce27f3328f83f75d96d18b3a",
+      "src/rewriter/lm_rewriter.h": "e5880600e8ef377352541d66cf9e058ee6b2efb8f805255fcc94b90683aee46e",
+      "src/rewriter/lm_rewriter_test.cc": "0605a3eed5cbd20a390f13dff62e6bcfe94cd49af32077a9294707a201a5762a",
+      "src/session/session.cc": "31f0c602013ab0125ead897fdc19b7323171d176d6284befeeef3f07d5f4dd20",
+      "src/session/session_test.cc": "a6a55e67c6d31fd82ea8d724561425b4a52beefd380c31463e21b4266e32c731"
+    },
+    "ranking_comparison": {
+      "changed_outputs": 0,
+      "correct_to_wrong": 0,
+      "correct": 183,
+      "items": 200
+    }
+  },
+  "session": {
+    "exe_sha256": "603eea4b9f7cc4b2bf6412ff7387fd4242b280f831e4dd26af910def04c96c44",
+    "romaji": "ashiwoitametanodebyouinnniikimasu",
+    "reading": "あしをいためたのでびょういんにいきます",
+    "key_interval_seconds": 0.03,
+    "warm_seconds": 12,
+    "controlled_environment": {
+      "KOTORI_LM_NSENT": "1",
+      "KOTORI_LM_BEAMS": "0",
+      "KOTORI_LM_PREDICT": "0",
+      "KOTORI_LM_TYPO": "0",
+      "KOTORI_LM_CORRECTION": "0 versus 1"
+    },
+    "observations": {
+      "on": {
+        "first_candidate": "足を痛めたので病院に行きます",
+        "first_since_last_key_ms": 848.6276000039652,
+        "space_text": "足を痛めたので病院に行きます",
+        "space_response_ms": 1.941199996508658
+      },
+      "off": {
+        "first_candidate": "足を炒めたので病院に行きます",
+        "first_since_last_key_ms": 1051.880600018194,
+        "space_text": "足を痛めたので病院に行きます",
+        "space_response_ms": 278.3369999960996
+      }
+    },
+    "lifecycle": [
+      {
+        "phase": "test-key-clone",
+        "first_candidate": "足を痛めたので病院に行きます",
+        "consumed": true
+      },
+      {
+        "phase": "after-test-key-clone",
+        "first_candidate": "足を痛めたので病院に行きます",
+        "consumed": true
+      },
+      {
+        "phase": "after-cancel",
+        "first_candidate": null,
+        "consumed": false
+      },
+      {
+        "phase": "after-ai-disabled",
+        "first_candidate": null,
+        "consumed": false
+      },
+      {
+        "phase": "after-password-field",
+        "first_candidate": null,
+        "consumed": false
+      },
+      {
+        "phase": "after-incognito",
+        "first_candidate": null,
+        "consumed": false
+      }
+    ],
+    "reproducer": "mozc/tools/first_candidate_smoke.py --check-lifecycle",
+    "reproducer_sha256": "19a120ae028846827a231ba79dbbc8dbee597fa8763cbac42addd679f9708135"
+  },
+  "unit_checks": {
+    "request": true,
+    "engine": true,
+    "rewriter": true,
+    "session": true,
+    "new_generation_cases": 13,
+    "lm_total_cases": 29,
+    "python_tool_cases": 7
+  },
+  "build_targets": [
+    "//session:session_handler_main",
+    "//converter:converter_main"
+  ],
+  "ranking_regression": {
+    "scope": "Synchronous Standard equivalent ranking with free correction OFF; not asynchronous free-correction ON quality",
+    "accuracy_percent": 91.5,
+    "comparison": {
+      "changed_outputs": 0,
+      "correct_to_wrong": 0,
+      "correct": 183,
+      "items": 200
+    },
+    "manifest": {
+      "data": {
+        "path": "eval/data/ajimee-bench.json",
+        "sha256": "e9eb668fd6aa14b1e26436f429b5550108af0a1dfd443b8cea0bcb3ab3028fca",
+        "items": 200
+      },
+      "context": true,
+      "profile": "C:\\Users\\aruik\\AppData\\Local\\Temp\\kotori-generation-ajimee-j9tpztmf",
+      "tracked_working_changes": true,
+      "acc": 91.5,
+      "converter_main": {
+        "path": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\converter\\converter_main.exe",
+        "sha256": "848f2ee84238bca34b15e78f2bda3d4a4ed870828b91108b24db8b8ced7a04b9"
+      },
+      "models": {
+        "C:/Program Files (x86)/Kotori/tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+        "C:\\Program Files (x86)\\Kotori\\tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+        "C:\\Program Files (x86)\\Kotori\\zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+        "C:\\Program Files (x86)\\Kotori\\zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+      },
+      "env": {
+        "KOTORI_LLM_MODEL": "C:/Program Files (x86)/Kotori/tinyswallow-1.5b-q5_k_m.gguf",
+        "KOTORI_LM_BEAMS": "4",
+        "KOTORI_LM_CONTEXT_MAP": "C:\\Users\\aruik\\AppData\\Local\\Temp\\tmprbj7s_ut.tsv",
+        "KOTORI_LM_CORRECTION": "0",
+        "KOTORI_LM_LLM_TOP": "4",
+        "KOTORI_LM_PRELOAD": "0",
+        "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
+        "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori"
+      },
+      "commit": "011abf55d94547ccce3028cba092dd666c7ce541",
+      "gpu": "NVIDIA GeForce RTX 3060, 617.14",
+      "time": "2026-10-09T10:13:35+0900"
+    }
+  },
+  "patches_apply_to_fresh_clone": true,
+  "actual_applied_source_whitespace_check": true,
+  "english_pr": {
+    "number": 140,
+    "url": "https://github.com/aruiki/KotoriIME-japanese-/pull/140",
+    "head": "236ddbfbc0ac8ea8deddef8fc9ccbb4247f0cae6",
+    "merge_commit": "40b7bcc7446a75a962f6586c606e4bc663adc15a",
+    "merged_at": "2026-10-09T01:05:00Z",
+    "checks_passed": 8,
+    "msi_run": 37861976522,
+    "ci_checkout_commit": "4d95002a14357f9e9a878a0d8f84d67131f058a6",
+    "ci_msi_sha256": "a2061483f62fbcbc7431acbb30c9e97526a519b68637851613e3ddcb4d91d620",
+    "disposable_runner_install_exit": 0,
+    "disposable_runner_input": true,
+    "disposable_runner_uninstall_exit": 3010,
+    "reboot_required": true,
+    "msi_input_texts": [
+      "日本語",
+      "東京"
+    ],
+    "dedicated_english_tsf_acceptance": false,
+    "supported_forms": 24,
+    "local_cases": [
+      "インデックス/index",
+      "エフェクト/effect",
+      "インターネット/internet"
+    ],
+    "phases": [
+      "initial suggestion",
+      "Tab",
+      "Space"
+    ],
+    "index_rechecked_after_generation_changes": true
+  },
+  "limitations": [
+    "Free correction disabled by default",
+    "Model load epoch is checked but actual model SHA256 association is unfinished",
+    "Semantic polarity/tense/subject preservation incomplete",
+    "Normal 100 sentences tested through shared guard earlier, not full native first-display session path",
+    "CPU/no-GPU and installed real-app TSF not tested",
+    "High-confidence continuation Tab quality and settings UI work remain",
+    "Updated PR145 CI/MSI pending; rc.3 unchanged"
+  ],
+  "raw_receipts": {
+    "input-generation-final-first-20261009.json": "ba87ddb2964dac028657c3eaaa5d5c303d1d3955e1777f132d2bdcdac884cb7f",
+    "input-generation-final-first-20261009.stderr.txt": "549304d281a98d0929c8051e57fb0772030d3746a8e59cb1979d16b5b9fc36cc",
+    "input-generation-final-off-20261009.json": "f05e401deb8e6666d20d4b616dea0ad4dc9d094d4bdaba3bf08257ec2b38b66b",
+    "input-generation-english-20261009.json": "a896cbc14e24375c9ef9c30bf0a19e52548fd412e4f16ef68bf2d926d9b960fd",
+    "input-generation-ajimee-20261009.json": "c1b10a4c0b39ee59920f9ff249879aebc3bc3a7264b9a38966ae0f1fd0c8505b",
+    "input-generation-final-build-20261009.log": "8781d04d946d6adf5df669a9dbe85622c115d1ab664d30e4df9c0ff1888af197",
+    "input-generation-field-tests-20261009.log": "28e47d26d11d7b98375cad221d3f56191203030879df92ce6add4e9a4a9d172b",
+    "input-generation-patches-20261009.log": "d66c8cc6e4e79cd9a2a709580cb1b416560b85cd62398e4e452c3fbb7f7e5250",
+    "english-pr140-merged-20261009.json": "4ab5d30ee79cb50cc7ff990e138661c9ca6197870c105bf9b3d1a33bdf787385",
+    "english-pr140-ci-final-20261009.log": "5637df6f974dc3a142a6c68cbf450673cfdb0478a823df6c563edbac2f05b353"
+  }
+}

@@ -25,6 +25,14 @@ AGENTS.md、DEVELOPMENT.md、ADR0040、EnglishVariantsRewriter、Candidate。
 
 ## 完了条件
 
-- [ ] 指定3語が実セッションでSpace前にも選べる
-- [ ] 単体テストとMSIを含むCIが通る
-- [ ] 対応語が限定されることを記録する
+- [x] 指定3語が実セッションでSpace前にも選べる
+- [x] 単体テストとMSIを含むCIが通る
+- [x] 対応語が限定されることを記録する
+
+## 2026-10-09の完了記録
+
+PR140は最新mainとの競合を解消し、全8チェックとMSI導入・実入力・削除の成功後にmerge commitでmainへ統合。
+index/effect/internetの初回/Tab/Space候補と日本語の先頭候補の保持を実セッションで確認した。
+対応は明示的な24表記に限る。CIのTSF入力は一般日本語の導入確認であり、英語候補専用のTSF受け入れではない。
+ソース・CI・MSIの識別子は `docs/verification/2026-10-09-llm-input-generation.json` のenglish_pr。
+公開済みrc.3にはまだ含まれない。

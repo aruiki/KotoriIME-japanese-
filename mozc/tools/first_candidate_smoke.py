@@ -26,8 +26,12 @@ def main():
     ap.add_argument("--expect-variant", help="初回表示・Tab・Spaceに必要な候補")
     ap.add_argument("--expect-reading", help="最終打鍵時の読み。ローマ字の送り間違いも拒否する")
     ap.add_argument("--expect-first", help="最初に表示する候補とSpace後の文全体に必要な表記")
+    ap.add_argument("--check-lifecycle", action="store_true",
+                    help="取消・AI無効・保護欄・シークレット切替後の補正を拒否する")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
+    if args.check_lifecycle and not args.expect_first:
+        ap.error("--check-lifecycleには--expect-firstが必要です")
     exe = args.exe.resolve()
     exe_sha256 = hashlib.sha256(exe.read_bytes()).hexdigest()
     session_started = time.monotonic()
@@ -35,6 +39,7 @@ def main():
     env = dict(os.environ, KOTORI_MODEL_DIR=args.install,
                KOTORI_RUNTIME_DIR=args.install)
     with tempfile.TemporaryDirectory(prefix="kotori-first-") as profile:
+        assert Path(profile).resolve().is_relative_to(Path(tempfile.gettempdir()).resolve())
         with args.out.with_suffix(".stderr.txt").open("wb") as err:
             p = subprocess.Popen(
                 [str(exe), "--dictionary=oss", "--profile=" + str(Path(profile) / "session")],
@@ -92,7 +97,54 @@ def main():
                 if args.expect_variant:
                     rows.append(send("SEND_KEY\tTab"))
                     rows.append(send("SEND_KEY\tESC"))
+                lifecycle = []
+                if args.check_lifecycle:
+                    # TEST_SEND_KEY uses an independent clone/Undo context.
+                    lifecycle.append({"phase": "test-key-clone",
+                                      **send("TEST_SEND_KEY\tSpace")})
+                    clone_refresh = send("KOTORI_REFRESH")
+                    lifecycle.append({"phase": "after-test-key-clone", **clone_refresh})
+                    if clone_refresh["first_candidate"] != args.expect_first:
+                        raise AssertionError("TestSendKeyのコピーが元の補正を失効しました")
                 rows.append(send("SEND_KEY\tSpace"))
+                if args.check_lifecycle:
+                    def clear():
+                        send("SEND_KEY\tESC")
+                        send("SEND_KEY\tESC")
+
+                    def pending():
+                        send("SEND_KEYS\t" + args.romaji)
+                        send("KOTORI_REFRESH")
+
+                    def reject(phase):
+                        # Let an already queued worker finish after the boundary.
+                        time.sleep(1)
+                        event = send("KOTORI_REFRESH")
+                        lifecycle.append({"phase": phase, **event})
+                        if 'consumed: true' in event["output"] or event["first_candidate"]:
+                            raise AssertionError(phase + "の後に古い補正が表示されました")
+
+                    clear()
+                    pending()
+                    clear()
+                    reject("after-cancel")
+                    pending()
+                    send("SET_CONFIG\tkotori_lm_enabled\tfalse")
+                    reject("after-ai-disabled")
+                    clear()
+                    send("SET_CONFIG\tkotori_lm_enabled\ttrue")
+                    pending()
+                    send("SEND_KEY_WITH_OPTION\tESC\ttype=SEND_COMMAND"
+                         "\tcommand.type=SWITCH_INPUT_FIELD_TYPE"
+                         "\tcontext.input_field_type=PASSWORD")
+                    reject("after-password-field")
+                    send("SEND_KEY_WITH_OPTION\tESC\ttype=SEND_COMMAND"
+                         "\tcommand.type=SWITCH_INPUT_FIELD_TYPE"
+                         "\tcontext.input_field_type=NORMAL")
+                    clear()
+                    pending()
+                    send("SET_REQUEST\tis_incognito_mode\ttrue")
+                    reject("after-incognito")
                 p.stdin.close()
                 p.wait(timeout=60)
                 if p.returncode:
@@ -105,9 +157,12 @@ def main():
                 args.out.write_text(json.dumps({"exe": str(exe),
                     "exe_sha256": exe_sha256,
                     "romaji": args.romaji, "warm_seconds": args.warm,
-                    "events": rows}, ensure_ascii=False, indent=2), encoding="utf-8")
+                    "events": rows, "lifecycle": lifecycle},
+                    ensure_ascii=False, indent=2), encoding="utf-8")
                 for row in rows:
                     print(f'{row["response_ms"]:.1f} ms: {row["first_candidate"]}')
+                for event in lifecycle:
+                    print(f'{event["phase"]}: {event["first_candidate"]}')
                 def preedit_fields(row, field):
                     text = row["output"]
                     if "preedit {" not in text:
