@@ -85,6 +85,8 @@ class Session:
                 break
             tail |= line.startswith("removed_candidate_words_for_debug {")
         text = "\n".join(output)
+        if re.search(r"^ERROR:", text, re.M):
+            raise RuntimeError("セッションがコマンドを拒否: " + text)
         match = re.search(r'candidate_window \{.*?value: "([^"\n]*)"', text, re.S)
         return {"command": command, "response_ms": (time.monotonic() - start) * 1000,
                 "first_candidate": match.group(1) if match else None,

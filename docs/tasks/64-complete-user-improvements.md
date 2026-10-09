@@ -22,3 +22,9 @@ CLI・Qt描画・Windows TSFの実測を区別する。未検証を完成とし�
 
 最終ローカル記録: [all-user-improvements-local-20261009](../verification/all-user-improvements-local-20261009.md)。
 誤入力全件の修正、最初の本文と後続予測の完全一致、実機の導入/入力/削除は完了扱いにしない。
+
+## 2026-10-10の実入力失敗への対応
+
+6330の利用者観測FAILを確認。無関係な同音語の昇格と初回/Spaceの文脈差、Windowsのフォーカス検査を修正。
+[修正のローカル原票](../verification/rc4-medical-fix-local-20261010.md)を追加した。
+BUILD6331のローカルMSIと同じ文の実入力確認は残っている。初回改善の全要望達成/公開完了とは扱わない。

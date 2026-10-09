@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-09",
+  "candidate_source": "25cd371b1b916cdb81577c87beff37e0def12bc9",
+  "build": 6330,
+  "msi_sha256": "86dc529a3d1ce6e10f0a51dfd7e033b3620eea9b3c8373daf9004e0b8c4094ec",
+  "native_acceptance": "FAIL_USER_OBSERVED",
+  "user_outputs": [
+    "脚を炒めてしまったため今日は医者に行こう",
+    "脚を炒めてしまったので今日は慰謝に行こう"
+  ],
+  "input_variants_or_space_cycle": "clarification_pending",
+  "installed_binaries_match_msi": true,
+  "github_release_id": 407889438,
+  "github_release_state": "draft",
+  "local_reproductions": {
+    "warm_space_1": "痛めて/医者",
+    "space_2": "慰謝に",
+    "cold_immediate_space": "炒めて"
+  },
+  "new_context_regression_before": "FAIL",
+  "publication": "withheld_after_real_conversion_failure"
+}

@@ -23247,10 +23247,10 @@ index 000000000..13b1ec304
 +}  // namespace mozc
 diff --git a/src/rewriter/kotori_nuance_rewriter.cc b/src/rewriter/kotori_nuance_rewriter.cc
 new file mode 100644
-index 000000000..f72c75655
+index 000000000..315af4f83
 --- /dev/null
 +++ b/src/rewriter/kotori_nuance_rewriter.cc
-@@ -0,0 +1,171 @@
+@@ -0,0 +1,112 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +#include "rewriter/kotori_nuance_rewriter.h"
 +
@@ -23353,68 +23353,9 @@ index 000000000..f72c75655
 +    }
 +    if (alternatives.size() >= kMaxAlternatives) break;
 +  }
-+  // Kotori: 有限の語組以外にもMozcの内容語候補を文全体へ広げる。先頭の一字や
-+  // かな/カタカナの表記違いは優先しない。複数文節を覆う候補はそのまとまりを保つ。
-+  size_t offset = 0;
-+  for (size_t i = 0; i < count && alternatives.size() < kMaxAlternatives; ++i) {
-+    const auto& segment = segments->conversion_segment(i);
-+    const auto& top = segment.candidate(0);
-+    if (top.effective_converted_segment_count() != 1) break;
-+    auto content = [](absl::string_view text) {
-+      std::string kanji;
-+      for (ConstChar32Iterator it(text); !it.Done(); it.Next()) {
-+        if (Util::GetScriptType(it.Get()) == Util::KANJI) kanji += Util::CodepointToUtf8(it.Get());
-+      }
-+      return kanji;
-+    };
-+    const std::string original_content = content(top.value);
-+    if (Util::CharsLen(original_content) >= 2) {
-+      for (size_t j = 1; j < segment.candidates_size() && j < 16 && alternatives.size() < kMaxAlternatives; ++j) {
-+        const auto& candidate = segment.candidate(j);
-+        if (candidate.kotori_nuance_alternative || candidate.attributes &
-+            (converter::Attribute::USER_DICTIONARY | converter::Attribute::NO_MODIFICATION | converter::Attribute::COMMAND_CANDIDATE)) continue;
-+        const size_t span = candidate.effective_converted_segment_count();
-+        if (span > count-i) continue;
-+        std::string covered_key, covered_value;
-+        for (size_t k = 0; k < span; ++k) {
-+          covered_key += segments->conversion_segment(i+k).key();
-+          covered_value += segments->conversion_segment(i+k).candidate(0).value;
-+        }
-+        if (candidate.key != covered_key || candidate.value == covered_value ||
-+            Util::CharsLen(content(candidate.value)) < 2 || content(candidate.value) == content(covered_value)) continue;
-+        // 数量は意味の選択肢に含めない。語尾/助詞も元のまとまりを保つ。
-+        auto contains_number = [](absl::string_view text) {
-+          for (ConstChar32Iterator it(text); !it.Done(); it.Next()) {
-+            const char32_t c = it.Get();
-+            if ((c >= U'0' && c <= U'9') || (c >= U'０' && c <= U'９') ||
-+                std::u32string_view(U"一二三四五六七八九十百千万億兆〇零").find(c) != std::u32string_view::npos) return true;
-+          }
-+          return false;
-+        };
-+        if (contains_number(covered_value) || contains_number(candidate.value)) continue;
-+        const std::string suffix = covered_value.substr(std::min(covered_value.size(), top.content_value.size()));
-+        if (!suffix.empty() && (candidate.value.size() < suffix.size() || candidate.value.substr(candidate.value.size()-suffix.size()) != suffix)) continue;
-+        std::string text = original;
-+        text.replace(offset, covered_value.size(), candidate.value);
-+        if (std::any_of(alternatives.begin(), alternatives.end(), [&](const auto& x) { return x.value == text; }) ||
-+            std::any_of(head->candidates().begin(), head->candidates().end(), [&](const auto* x) { return x->key == reading && x->value == text; })) continue;
-+        converter::Candidate whole = candidate;
-+        whole.key = whole.content_key = reading;
-+        whole.value = whole.content_value = text;
-+        whole.converted_segment_count = count;
-+        whole.inner_segment_boundary.clear();
-+        whole.prefix.clear(); whole.suffix.clear(); whole.display_value.clear();
-+        whole.usage_id = 0; whole.usage_title.clear(); whole.usage_description.clear();
-+        whole.description = covered_value + " → " + candidate.value;
-+        whole.a11y_description = whole.description;
-+        whole.attributes = converter::Attribute::NO_LEARNING | converter::Attribute::NO_VARIANTS_EXPANSION;
-+        whole.kotori_ai_evaluated = whole.kotori_confident_prediction = false;
-+        whole.kotori_nuance_alternative = true;
-+        alternatives.push_back(std::move(whole));
-+      }
-+    }
-+    offset += top.value.size();
-+  }
++  // Kotori: 読みが同じ、漢字が複数というだけでは意味の近い選択肢ではない。
++  // 「医者に」を「慰謝に」へ優先すると、正しい変換を次のSpaceで壊してしまう。
++  // 説明できる語組だけを優先し、その他の辞書候補は元の文節内に保持する。
 +  // 最初の候補と既存の順序を保ち、その間に文全体の意味の選択肢を挿入する。
 +  for (size_t i = 0; i < alternatives.size(); ++i) {
 +    *head->insert_candidate(i + 1) = std::move(alternatives[i]);
@@ -23443,10 +23384,10 @@ index 000000000..7be2ddeaa
 +#endif  // MOZC_REWRITER_KOTORI_NUANCE_REWRITER_H_
 diff --git a/src/rewriter/kotori_nuance_rewriter_test.cc b/src/rewriter/kotori_nuance_rewriter_test.cc
 new file mode 100644
-index 000000000..609481971
+index 000000000..dc7e7466c
 --- /dev/null
 +++ b/src/rewriter/kotori_nuance_rewriter_test.cc
-@@ -0,0 +1,162 @@
+@@ -0,0 +1,187 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +#include "rewriter/kotori_nuance_rewriter.h"
 +#include "converter/attribute.h"
@@ -23553,35 +23494,60 @@ index 000000000..609481971
 +    EXPECT_EQ(segment.segment_type(), Segment::FIXED_BOUNDARY);
 +  }
 +}
-+TEST(KotoriNuanceRewriterTest, PromotesLexicalDifferenceInsideWholeSentence) {
++TEST(KotoriNuanceRewriterTest, DoesNotPromoteUnrelatedHomophones) {
++  // 同音・複数の漢字でも、文脈上の言い換えとは限らない。
++  // 候補は消さず、優先する全文候補へ昇格させない。
++  for (auto replacement : {"慰謝に", "異車に", "慰藉に"}) {
++    for (auto type : {Segment::FREE, Segment::FIXED_BOUNDARY}) {
++      Segments segments;
++      Add(segments, "あしを", "足を");
++      Add(segments, "いためてしまったため", "痛めてしまったため");
++      Add(segments, "きょうは", "今日は");
++      Add(segments, "いしゃに", "医者に");
++      Add(segments, "いこう", "行こう");
++      auto* doctor = segments.mutable_conversion_segment(3);
++      doctor->set_segment_type(type);
++      auto* candidate = doctor->add_candidate();
++      candidate->key = "いしゃに";
++      candidate->value = replacement;
++      KotoriNuanceRewriter rewriter;
++      EXPECT_FALSE(rewriter.Rewrite(Conversion(), &segments));
++      EXPECT_EQ(segments.conversion_segment(0).candidates_size(), 1);
++      EXPECT_EQ(doctor->candidate(0).value, "医者に");
++      EXPECT_EQ(doctor->candidate(1).value, replacement);
++      EXPECT_FALSE(doctor->candidate(1).kotori_nuance_alternative);
++    }
++  }
 +  Segments segments;
 +  Add(segments, "わたしは", "私は");
 +  Add(segments, "こうしょうを", "交渉を");
 +  Add(segments, "つづける", "続ける");
-+  auto* c = segments.mutable_conversion_segment(1)->add_candidate();
-+  c->key = c->content_key = "こうしょうを";
-+  c->value = "考証を"; c->content_value = "考証";
-+  segments.mutable_conversion_segment(1)->mutable_candidate(0)->content_value = "交渉";
-+  auto* kana = segments.mutable_conversion_segment(0)->add_candidate();
-+  kana->key = "わたしは"; kana->value = "わたしは";
++  auto* candidate = segments.mutable_conversion_segment(1)->add_candidate();
++  candidate->key = "こうしょうを";
++  candidate->value = "考証を";
 +  KotoriNuanceRewriter rewriter;
-+  ASSERT_TRUE(rewriter.Rewrite(Conversion(), &segments));
-+  EXPECT_EQ(segments.conversion_segment(0).candidate(1).value, "私は考証を続ける");
-+  EXPECT_TRUE(segments.conversion_segment(0).candidate(1).kotori_nuance_alternative);
 +  EXPECT_FALSE(rewriter.Rewrite(Conversion(), &segments));
++  EXPECT_EQ(segments.conversion_segment(0).candidates_size(), 1);
++  EXPECT_EQ(segments.conversion_segment(1).candidate(1).value, "考証を");
 +}
-+TEST(KotoriNuanceRewriterTest, KeepsAlternativeCoveringAdjacentSegmentsTogether) {
++TEST(KotoriNuanceRewriterTest, KeepsKnownAlternativeCoveringAdjacentSegments) {
 +  Segments segments;
-+  Add(segments, "こうしょう", "交渉");
++  Add(segments, "ほしょう", "保証");
 +  Add(segments, "を", "を");
-+  Add(segments, "つづける", "続ける");
-+  auto* c = segments.mutable_conversion_segment(0)->add_candidate();
-+  c->key = "こうしょうを"; c->value = "考証を"; c->content_value = "考証";
-+  c->converted_segment_count = 2;
++  Add(segments, "おこなう", "行う");
++  auto* candidate = segments.mutable_conversion_segment(0)->add_candidate();
++  candidate->key = "ほしょうを";
++  candidate->value = "保障を";
++  candidate->content_value = "保障";
++  candidate->converted_segment_count = 2;
 +  KotoriNuanceRewriter rewriter;
 +  ASSERT_TRUE(rewriter.Rewrite(Conversion(), &segments));
-+  EXPECT_EQ(segments.conversion_segment(0).candidate(1).value, "考証を続ける");
-+  EXPECT_EQ(segments.conversion_segment(0).candidate(1).converted_segment_count, 3);
++  const auto& head = segments.conversion_segment(0);
++  EXPECT_EQ(head.candidate(1).value, "保障を行う");
++  EXPECT_EQ(head.candidate(1).converted_segment_count, 3);
++  EXPECT_TRUE(head.candidate(1).kotori_nuance_alternative);
++  EXPECT_EQ(head.candidate(3).value, "保障を");
++  EXPECT_EQ(head.candidate(3).converted_segment_count, 2);
 +}
 +TEST(KotoriNuanceRewriterTest, DoesNotPromoteNumbersOrChangedParticles) {
 +  for (auto replacement : {"重視", "十字", "十時に"}) {
@@ -29807,7 +29773,7 @@ index 2da5b8d46..c4c944c55 100644
          "//base/strings:assign",
          "//base/strings:unicode",
 diff --git a/src/session/session.cc b/src/session/session.cc
-index 8186b0a8d..313172112 100644
+index 8186b0a8d..b865d49c7 100644
 --- a/src/session/session.cc
 +++ b/src/session/session.cc
 @@ -44,6 +44,7 @@
@@ -29828,7 +29794,7 @@ index 8186b0a8d..313172112 100644
      case commands::SessionCommand::REQUEST_NWP: {
        ConversionPreferences conversion_preferences =
            context_->converter().conversion_preferences();
-@@ -538,10 +542,71 @@ bool Session::SendKey(commands::Command* command) {
+@@ -538,10 +542,75 @@ bool Session::SendKey(commands::Command* command) {
        break;
    }
  
@@ -29881,12 +29847,16 @@ index 8186b0a8d..313172112 100644
 +    return true;
 +  }
 +  command->mutable_output()->set_consumed(true);
-+  if (!Suggest(command->input())) {
++  // Kotori: TSFのタイマーには周囲の文が含まれない。Spaceと同じ入力開始時の
++  // 文脈を使い、別のキャッシュキーや採点で初回表示と変換が食い違うのを防ぐ。
++  commands::Input input = command->input();
++  *input.mutable_context() = context_->client_context();
++  if (!Suggest(input)) {
 +    OutputComposition(command);
 +    return true;
 +  }
 +  const bool ready = context_->mutable_converter()->KotoriPreviewConversion(
-+      context_->composer(), command->input().context());
++      context_->composer(), input.context());
 +  Output(command);
 +  ++kotori_refresh_count_;
 +  KotoriScheduleRefresh(command, kotori_refresh_count_, !ready);
@@ -29900,7 +29870,7 @@ index 8186b0a8d..313172112 100644
  bool Session::UpdateCompositionInternal(commands::Command* command) {
    command->mutable_output()->set_consumed(true);
  
-@@ -2867,6 +2932,10 @@ void Session::TransformInput(commands::Input* input) {
+@@ -2867,6 +2936,10 @@ void Session::TransformInput(commands::Input* input) {
  
  bool Session::SwitchInputFieldType(commands::Command* command) {
    command->mutable_output()->set_consumed(true);
@@ -29996,7 +29966,7 @@ index 4d3669e06..5df1ea7d9 100644
    // The target candidate is specified with the |id|. If |id| is not specified,
    // the current focused candidate will be specified.
 diff --git a/src/session/session_test.cc b/src/session/session_test.cc
-index 012d822a5..72bb6b61d 100644
+index 012d822a5..21ac2b3ec 100644
 --- a/src/session/session_test.cc
 +++ b/src/session/session_test.cc
 @@ -43,6 +43,7 @@
@@ -30112,7 +30082,7 @@ index 012d822a5..72bb6b61d 100644
  
    commands::Command command;
    SendKey("a", &session, &command);
-@@ -10494,5 +10544,147 @@ TEST_F(SessionTest, MultiSegmentSelectionCancel) {
+@@ -10494,5 +10544,194 @@ TEST_F(SessionTest, MultiSegmentSelectionCancel) {
              "わたしのなまえはなかのです");
  }
  
@@ -30223,6 +30193,53 @@ index 012d822a5..72bb6b61d 100644
 +  EXPECT_FALSE(command.output().has_callback());
 +}
 +
++// Kotori: TSFの取り直しは文脈を再送しないが、Spaceは入力開始時の文脈を使う。
++// この2経路で採点の文脈をそろえ、取り直し後のSpaceで別の文を選ばない。
++TEST_F(SessionTest, KotoriRefreshPreservesSpaceContext) {
++  MockEngine engine;
++  auto converter = CreateEngineConverterMock(&engine);
++  Session session(engine);
++  InitSessionToPrecomposition(&session);
++  const std::string preceding = "前の文です。";
++  const std::string following = "次の文です。";
++  Segments suggestion;
++  AddCandidate("あいうえお", "あいうえお", suggestion.add_segment());
++  suggestion.mutable_segment(0)->set_key("あいうえお");
++  EXPECT_CALL(*converter, StartPrediction(_, _))
++      .WillRepeatedly(DoAll(SetArgPointee<1>(suggestion), Return(true)));
++  Segments converted = suggestion;
++  converted.mutable_segment(0)->mutable_candidate(0)->value = "阿伊宇江於";
++  converted.mutable_segment(0)->mutable_candidate(0)->kotori_ai_evaluated = true;
++  EXPECT_CALL(*converter, StartConversion(_, _))
++      .Times(2)
++      .WillRepeatedly([&](const ConversionRequest& request, Segments* segments) {
++        EXPECT_EQ(request.context().preceding_text(), preceding);
++        EXPECT_EQ(request.context().following_text(), following);
++        *segments = converted;
++        return true;
++      });
++  kotori::g_live_first_ms = 200;
++  kotori::g_live_next_ms = 0;
++  commands::Command command;
++  command.mutable_input()->set_type(commands::Input::SEND_KEY);
++  command.mutable_input()->mutable_key()->set_key_code('a');
++  command.mutable_input()->mutable_context()->set_preceding_text(preceding);
++  command.mutable_input()->mutable_context()->set_following_text(following);
++  ASSERT_TRUE(session.SendKey(&command));
++  InsertCharacterChars("iueo", &session, &command);
++  command.Clear();
++  command.mutable_input()->set_type(commands::Input::SEND_COMMAND);
++  command.mutable_input()->mutable_command()->set_type(
++      commands::SessionCommand::KOTORI_REFRESH_SUGGESTION);
++  ASSERT_TRUE(session.SendCommand(&command));
++  EXPECT_EQ(command.output().candidate_window().candidate(0).value(), "阿伊宇江於");
++  command.Clear();
++  ASSERT_TRUE(session.Convert(&command));
++  EXPECT_EQ(command.output().preedit().segment(0).value(), "阿伊宇江於");
++  kotori::g_live_first_ms = 0;
++  kotori::g_live_next_ms = 0;
++}
++
 +TEST_F(SessionTest, KotoriRefreshDisabledOrPrivate) {
 +  // 別セッションの AI が有効でも、このセッションの設定を優先する。
 +  kotori::g_live_first_ms = 200;
@@ -30261,7 +30278,7 @@ index 012d822a5..72bb6b61d 100644
  }  // namespace session
  }  // namespace mozc
 diff --git a/src/version.bzl b/src/version.bzl
-index ada11a64a..8e938d544 100644
+index ada11a64a..59be6b17f 100644
 --- a/src/version.bzl
 +++ b/src/version.bzl
 @@ -32,10 +32,10 @@ MAJOR = 3
@@ -30269,11 +30286,11 @@ index ada11a64a..8e938d544 100644
  
  # BUILD number used for the OSS version.
 -BUILD_OSS = 6239
-+BUILD_OSS = 6330
++BUILD_OSS = 6331
  
  # Number to be increased. This value may be replaced by other tools.
 -BUILD = BUILD_OSS
-+BUILD = 6330
++BUILD = 6331
  
  # Represent the platform and release channel.
  REVISION = 100
@@ -30288,10 +30305,10 @@ index 34ddf93fd..ef789ba71 100644
 -#define IDS_TEXTSERVICE_DISPLAYNAME_SYNONYM 201
 +#define IDS_TEXTSERVICE_DISPLAYNAME_SYNONYM 202
 diff --git a/src/win32/tip/tip_edit_session.cc b/src/win32/tip/tip_edit_session.cc
-index 35ffb0911..2643b7ef0 100644
+index 35ffb0911..d166396f4 100644
 --- a/src/win32/tip/tip_edit_session.cc
 +++ b/src/win32/tip/tip_edit_session.cc
-@@ -298,6 +298,55 @@ class AsyncSessionCommandEditSessionImpl final
+@@ -298,6 +298,65 @@ class AsyncSessionCommandEditSessionImpl final
    SessionCommand session_command_;
  };
  
@@ -30320,6 +30337,16 @@ index 35ffb0911..2643b7ef0 100644
 +      : text_service_(std::move(text_service)), context_(std::move(context)) {}
 +
 +  STDMETHODIMP DoEditSession(TfEditCookie write_cookie) override {
++    // Kotori: 非同期ロックを待つ間にもフォーカスが変わる。タイマー時の
++    // 検査だけでなく、実行時も現在の入力欄を照合して古い欄を更新しない。
++    wil::com_ptr_nothrow<ITfDocumentMgr> document;
++    wil::com_ptr_nothrow<ITfContext> focused;
++    ITfThreadMgr* manager = text_service_->GetThreadManager();
++    if (manager == nullptr || FAILED(manager->GetFocus(&document)) ||
++        !document || FAILED(document->GetTop(&focused)) ||
++        focused.get() != context_.get()) {
++      return S_OK;
++    }
 +    TipPrivateContext* private_context =
 +        text_service_->GetPrivateContext(context_.get());
 +    if (private_context == nullptr) {
@@ -30347,7 +30374,7 @@ index 35ffb0911..2643b7ef0 100644
  bool OnSessionCommandAsync(TipTextService* text_service, ITfContext* context,
                             const SessionCommand& session_command) {
    auto edit_session = MakeComPtr<AsyncSessionCommandEditSessionImpl>(
-@@ -488,6 +537,9 @@ enum EditSessionMode {
+@@ -488,6 +547,9 @@ enum EditSessionMode {
  
  bool OnOutputReceivedImpl(TipTextService* text_service, ITfContext* context,
                            Output new_output, EditSessionMode mode) {
@@ -30357,7 +30384,7 @@ index 35ffb0911..2643b7ef0 100644
    if (new_output.has_callback() &&
        new_output.callback().has_session_command() &&
        new_output.callback().session_command().has_type()) {
-@@ -743,6 +795,20 @@ bool TipEditSession::OnRendererCallbackAsync(TipTextService* text_service,
+@@ -743,6 +805,20 @@ bool TipEditSession::OnRendererCallbackAsync(TipTextService* text_service,
    }
  }
  
@@ -30445,7 +30472,7 @@ index f6f2c38dc..4af9e749e 100644
      IDS_INPUTMODE           "Input Mode"
      IDS_WIN8_TRAY_ITEM      "Right click to show IME options"
 diff --git a/src/win32/tip/tip_text_service.cc b/src/win32/tip/tip_text_service.cc
-index beaef1a55..d6084c809 100644
+index beaef1a55..7b351a8f0 100644
 --- a/src/win32/tip/tip_text_service.cc
 +++ b/src/win32/tip/tip_text_service.cc
 @@ -111,6 +111,8 @@ volatile bool g_module_unloaded = false;
@@ -30457,7 +30484,7 @@ index beaef1a55..d6084c809 100644
  
  #ifdef GOOGLE_JAPANESE_INPUT_BUILD
  
-@@ -973,6 +975,42 @@ class TipTextServiceImpl
+@@ -973,6 +975,44 @@ class TipTextServiceImpl
      PostMessageW(task_window_handle_, kUpdateUIMessage, 0, 0);
    }
  
@@ -30490,7 +30517,9 @@ index beaef1a55..d6084c809 100644
 +      return;
 +    }
 +    wil::com_ptr_nothrow<ITfContext> focused;
-+    if (FAILED(document_manager->GetBase(&focused)) ||
++    // Kotori: 入力先はスタック先頭のコンテキスト。土台のGetBaseでは、
++    // 一時入力欄が重なったアプリの正しい更新まで取り消してしまう。
++    if (FAILED(document_manager->GetTop(&focused)) ||
 +        focused.get() != target.get()) {
 +      return;
 +    }
@@ -30500,7 +30529,7 @@ index beaef1a55..d6084c809 100644
    void UpdateLangbar(bool enabled, uint32_t mozc_mode) override {
      langbar_.UpdateMenu(enabled, mozc_mode);
    }
-@@ -1332,6 +1370,7 @@ class TipTextServiceImpl
+@@ -1332,6 +1372,7 @@ class TipTextServiceImpl
      if (!::IsWindow(task_window_handle_)) {
        return S_FALSE;
      }
@@ -30508,7 +30537,7 @@ index beaef1a55..d6084c809 100644
      ::DestroyWindow(task_window_handle_);
      task_window_handle_ = nullptr;
      return S_OK;
-@@ -1349,6 +1388,10 @@ class TipTextServiceImpl
+@@ -1349,6 +1390,10 @@ class TipTextServiceImpl
          self->OnUpdateUI();
          return 0;
        }
@@ -30519,7 +30548,7 @@ index beaef1a55..d6084c809 100644
      }
      return ::DefWindowProcW(window_handle, message, wparam, lparam);
    }
-@@ -1481,6 +1524,8 @@ class TipTextServiceImpl
+@@ -1481,6 +1526,8 @@ class TipTextServiceImpl
    PreservedKeyMap preserved_key_map_;
    std::unique_ptr<TipThreadContext> thread_context_;
    HWND task_window_handle_;
