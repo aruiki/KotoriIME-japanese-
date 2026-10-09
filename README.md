@@ -2,7 +2,7 @@
 <p align="center">Windowsで使える、オープンソースの日本語入力ソフトです。</p>
 
 <p align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest"><img alt="最新版" src="https://img.shields.io/github/v/release/aruiki/KotoriIME-japanese-?label=%E6%9C%80%E6%96%B0%E7%89%88&color=242C5C"></a>
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest"><img alt="正式版" src="https://img.shields.io/github/v/release/aruiki/KotoriIME-japanese-?label=%E6%AD%A3%E5%BC%8F%E7%89%88&color=242C5C"></a>
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases"><img alt="ダウンロード数" src="https://img.shields.io/github/downloads/aruiki/KotoriIME-japanese-/total?label=%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89&color=242C5C"></a>
   <img alt="Windows 10 / 11" src="https://img.shields.io/badge/Windows-10%20%2F%2011-242C5C?logo=windows">
   <img alt="オフラインで動作" src="https://img.shields.io/badge/%E3%82%AA%E3%83%95%E3%83%A9%E3%82%A4%E3%83%B3-%E9%80%9A%E4%BF%A1%E3%81%97%E3%81%AA%E3%81%84-F25C2E">
@@ -11,12 +11,18 @@
 </p>
 
 <h3 align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest">⬇ ダウンロード(Windows 用 MSI)</a>
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0-rc.3/Kotori64.msi">⬇ 最新の試用版 v1.1.0-rc.3 をダウンロード</a>
 </h3>
 
 <p align="center">
-  入力中の候補表示の改善と新しい小鳥のアイコンを試せる
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.3">v1.1.0-rc.3（リリース候補・未署名）</a>もあります。
+  入力中の候補表示の改善と新しい小鳥のアイコンを試せます。<br>
+  リリース候補・未署名です。
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.3">変更内容を見る</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest">正式版のダウンロード</a> ・
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases">すべてのリリース</a>
 </p>
 
 <p align="center">

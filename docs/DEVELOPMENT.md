@@ -73,6 +73,10 @@ bash mozc/tools/make_patches.sh ~/mz <google/mozc の clone(~/mz でよい)>
    | `rc` | `v<VERSION>-rc.N` | プレリリース(Latest にしない) |
    | `stable` | `v<VERSION>` | Latest。リリースノートに「ベータ版」が残っていたら失敗する |
 
+   表示名は `mozc/tools/release_name.py` が版・段階・日本時間の公開日の順に作る。
+   例: `v1.1.0-rc.3 — リリース候補3（2026-10-09）`。タグと公開区分は変えない。
+   GitHubのLatestはプレリリースを対象にしないため、試用版への案内はREADMEにも置く。
+
    版は `mozc/tools/release_tag.py` が `mozc/VERSION` と既にあるタグから決める(ビルドの前に決めるので、失敗は早い)。
    `v<VERSION>` の正式版を出した後は、`mozc/VERSION` を上げるまでどの段階も出せない。MSI の版(`version.bzl` の BUILD)は
    段階に関係なく実行番号で上がる。`mozc/release-notes.md` を本文にする。約 45 分。
