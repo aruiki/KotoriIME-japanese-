@@ -22673,10 +22673,10 @@ index 000000000..cf2c801ea
 +#endif  // MOZC_REWRITER_LLAMA_RUNTIME_H_
 diff --git a/src/rewriter/llm_correction_eval_main.cc b/src/rewriter/llm_correction_eval_main.cc
 new file mode 100644
-index 000000000..3ae3de15e
+index 000000000..453310d2d
 --- /dev/null
 +++ b/src/rewriter/llm_correction_eval_main.cc
-@@ -0,0 +1,134 @@
+@@ -0,0 +1,138 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +// 開発用。非同期ワーカーと同じ補正ガードを実辞書・実モデルで評価する。
 +// TSFや初回表示への反映は、別の実セッション試験で確認する。
@@ -22725,6 +22725,9 @@ index 000000000..3ae3de15e
 +      else dictionary.LookupPrefix(suffix, &collector);
 +      for (const auto& token : collector.tokens) {
 +        if (matcher.IsUniqueNoun(token.lid) || matcher.IsUniqueNoun(token.rid) ||
++            (matcher.IsFunctional(token.lid) && matcher.IsSuffixWord(token.lid)) ||
++            (matcher.IsFunctional(token.rid) && matcher.IsSuffixWord(token.rid)) ||
++            matcher.IsPronoun(token.lid) || matcher.IsPronoun(token.rid) ||
 +            (token.attributes & mozc::dictionary::Token::USER_DICTIONARY)) {
 +          if ((reverse && suffix.starts_with(token.key)) ||
 +              (!reverse && original.find(token.value) != std::string::npos)) {
@@ -22784,6 +22787,7 @@ index 000000000..3ae3de15e
 +          original, score_values.back());
 +      std::cerr << "control_guard\t" << guard << '\n';
 +      Diagnose((*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading, original);
++      Diagnose((*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading, score_values.back());
 +    }
 +    const auto start = std::chrono::steady_clock::now();
 +    const auto deadline = start + std::chrono::milliseconds(budget);
@@ -22969,10 +22973,10 @@ index 000000000..c31037864
 +}
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..5ed65b7fb
+index 000000000..e616bd986
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
-@@ -0,0 +1,2822 @@
+@@ -0,0 +1,2831 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -23607,9 +23611,18 @@ index 000000000..5ed65b7fb
 +  for (size_t j = 0; j < r.size(); ++j) r_off[j + 1] = r_off[j] + r[j].size();
 +  for (size_t i = 0; i < t.size(); ++i) t_off[i + 1] = t_off[i] + t[i].size();
 +  auto protected_token = [pos_matcher](const dictionary::Token& token) {
++    // Kotori: 文法語はFunctionalとSuffixWordの共通部分。
++    // Functionalだけでは名詞の接尾語「痛」が動詞「痛めた」に重なり、
++    // 必要な同音語補正を止める。文法語と代名詞は左右の品詞で守る。
++    auto grammar = [pos_matcher](uint16_t id) {
++      return pos_matcher.IsFunctional(id) && pos_matcher.IsSuffixWord(id);
++    };
 +    return (token.attributes & dictionary::Token::USER_DICTIONARY) != 0 ||
 +           pos_matcher.IsUniqueNoun(token.lid) ||
-+           pos_matcher.IsUniqueNoun(token.rid);
++           pos_matcher.IsUniqueNoun(token.rid) ||
++           grammar(token.lid) || grammar(token.rid) ||
++           pos_matcher.IsPronoun(token.lid) ||
++           pos_matcher.IsPronoun(token.rid);
 +  };
 +  std::vector<CorrectionTokenCollector> lookups(r.size());
 +  for (size_t j = 0; j < r.size(); ++j) {
@@ -26238,10 +26251,10 @@ index 000000000..2a6df2369
 +#endif  // MOZC_REWRITER_LM_REWRITER_H_
 diff --git a/src/rewriter/lm_rewriter_test.cc b/src/rewriter/lm_rewriter_test.cc
 new file mode 100644
-index 000000000..650e9c551
+index 000000000..bf2aadaa2
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter_test.cc
-@@ -0,0 +1,546 @@
+@@ -0,0 +1,639 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -26505,6 +26518,99 @@ index 000000000..650e9c551
 +  name.lid = pos_matcher_.GetUniqueNounId();
 +  dictionary.Add(std::move(name));
 +  EXPECT_FALSE(IsSafe(dictionary, "はなをみた", "花を見た", "花華を見た"));
++}
++
++// Kotori: 自動補正の文法・主体の保護。品詞の別解がある表記は
++// 保守的に拒否するが、変更範囲外の機能語・代名詞は保持する。
++TEST_F(LmRewriterDictionaryCorrectionTest,
++       DoesNotTreatNominalSuffixAsGrammar) {
++  ASSERT_TRUE(pos_matcher_.IsFunctional(pos_matcher_.GetCounterSuffixWordId()));
++  ASSERT_FALSE(pos_matcher_.IsSuffixWord(pos_matcher_.GetCounterSuffixWordId()));
++  ASSERT_TRUE(pos_matcher_.IsSuffixWord(pos_matcher_.GetFunctionalId()));
++  CorrectionDictionary dictionary = CommonDictionary();
++  // 実辞書の名詞接尾語「痛」の別解と同じ境界。読みが別でも逆引きに現れる。
++  auto token = CommonToken("つう", "痛");
++  token.lid = pos_matcher_.GetCounterSuffixWordId();
++  dictionary.Add(std::move(token));
++  EXPECT_TRUE(IsSafe(dictionary, "あしをいためたので", "足を炒めたので",
++                     "足を痛めたので"));
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest, RejectsChangedFunctionalAliases) {
++  for (const char* surface : {"ない", "無い"}) {
++    for (const bool left : {true, false}) {
++      SCOPED_TRACE(surface);
++      SCOPED_TRACE(left);
++      CorrectionDictionary dictionary;
++      dictionary.Add(CommonToken("ない", "無い"));
++      ASSERT_TRUE(IsSafe(dictionary, "ない", "ない", "無い"));
++      auto token = CommonToken("ない", surface);
++      (left ? token.lid : token.rid) = pos_matcher_.GetFunctionalId();
++      dictionary.Add(std::move(token));
++      EXPECT_FALSE(IsSafe(dictionary, "ない", "ない", "無い"));
++    }
++  }
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest, RejectsChangedPronounAliases) {
++  for (const char* surface : {"それ", "其れ"}) {
++    for (const bool left : {true, false}) {
++      SCOPED_TRACE(surface);
++      SCOPED_TRACE(left);
++      CorrectionDictionary dictionary;
++      dictionary.Add(CommonToken("それ", "其れ"));
++      ASSERT_TRUE(IsSafe(dictionary, "それ", "それ", "其れ"));
++      auto token = CommonToken("それ", surface);
++      (left ? token.lid : token.rid) = pos_matcher_.GetPronounId();
++      dictionary.Add(std::move(token));
++      EXPECT_FALSE(IsSafe(dictionary, "それ", "それ", "其れ"));
++    }
++  }
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest, PreservesUnchangedFunctionalTokens) {
++  CorrectionDictionary dictionary = CommonDictionary();
++  for (const char* surface : {"を", "た", "ので", "ない", "ます"}) {
++    auto token = CommonToken(surface, surface);
++    token.lid = pos_matcher_.GetFunctionalId();
++    dictionary.Add(std::move(token));
++  }
++  EXPECT_TRUE(IsSafe(dictionary, "あしをいためたので", "足を炒めたので",
++                     "足を痛めたので"));
++  EXPECT_TRUE(IsSafe(dictionary, "あしをいためたのでない", "足を炒めたのでない",
++                     "足を痛めたのでない"));
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest, PreservesUnchangedPronoun) {
++  CorrectionDictionary dictionary = CommonDictionary();
++  auto token = CommonToken("それ", "其れ");
++  token.rid = pos_matcher_.GetPronounId();
++  dictionary.Add(std::move(token));
++  EXPECT_TRUE(IsSafe(dictionary, "それのあしをいためた", "其れの足を炒めた",
++                     "其れの足を痛めた"));
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest,
++       RejectsChangedFunctionalTokenWithAlternateReading) {
++  CorrectionDictionary dictionary;
++  dictionary.Add(CommonToken("ない", "無い"));
++  ASSERT_TRUE(IsSafe(dictionary, "ない", "ない", "無い"));
++  // 入力の読みでは見つからない別解も、表記からの逆引きで保護する。
++  auto token = CommonToken("む", "無");
++  token.rid = pos_matcher_.GetFunctionalId();
++  dictionary.Add(std::move(token));
++  EXPECT_FALSE(IsSafe(dictionary, "ない", "ない", "無い"));
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest,
++       RejectsMultipleEditsAcrossFunctionalToken) {
++  CorrectionDictionary dictionary = CommonDictionary();
++  dictionary.Add(CommonToken("あし", "脚"));
++  ASSERT_TRUE(IsSafe(dictionary, "あしをいためた", "足を炒めた", "脚を痛めた"));
++  auto token = CommonToken("を", "を");
++  token.lid = pos_matcher_.GetFunctionalId();
++  dictionary.Add(std::move(token));
++  EXPECT_FALSE(IsSafe(dictionary, "あしをいためた", "足を炒めた", "脚を痛めた"));
 +}
 +
 +TEST(LmRewriterCorrectionTest, AllowsLocalJapaneseEdits) {

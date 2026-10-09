@@ -1,0 +1,315 @@
+{
+  "scope": "CLI session with real dictionary/models; not installed Windows TSF",
+  "exe": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
+  "exe_sha256": "6a73829b5eb4f47b84633f058d8ea386454f9b1081b51f788bfef2a2dba044e3",
+  "data_sha256": "a5fd3bcd0d45f34ea2788f4f864645386e5676e85f44e26f3f78b2679835ea38",
+  "romanji_table_sha256": "fcb900e311d32ced05499c86e236d1084fb0c0937398deb6311fc6c7287a7821",
+  "available_model_sha256": {
+    "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+    "zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+    "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+  },
+  "model_status": {
+    "off": {
+      "initial": "state=llm\ndevice=NVIDIA GeForce RTX 3060\nzenz=zenz-v2.5-small-q8_0.gguf\nllm=tinyswallow-1.5b-q5_k_m.gguf\n",
+      "final": "state=llm\ndevice=NVIDIA GeForce RTX 3060\nzenz=zenz-v2.5-small-q8_0.gguf\nllm=tinyswallow-1.5b-q5_k_m.gguf\n",
+      "environment": {
+        "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
+        "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori",
+        "KOTORI_LM_CORRECTION": "0",
+        "KOTORI_LM_DEBUG": "1"
+      }
+    },
+    "on": {
+      "initial": "state=llm\ndevice=NVIDIA GeForce RTX 3060\nzenz=zenz-v2.5-small-q8_0.gguf\nllm=tinyswallow-1.5b-q5_k_m.gguf\n",
+      "final": "state=llm\ndevice=NVIDIA GeForce RTX 3060\nzenz=zenz-v2.5-small-q8_0.gguf\nllm=tinyswallow-1.5b-q5_k_m.gguf\n",
+      "environment": {
+        "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
+        "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori",
+        "KOTORI_LM_CORRECTION": "1",
+        "KOTORI_LM_DEBUG": "1"
+      }
+    }
+  },
+  "adoption_logs": {
+    "off": 0,
+    "on": 0
+  },
+  "items": 100,
+  "categories": {
+    "daily": 40,
+    "kanjinum": 20,
+    "names": 20,
+    "homophone": 20
+  },
+  "cpu_forced": false,
+  "warm_seconds": 12,
+  "settle_seconds": 2.4,
+  "key_interval_seconds": 0.01,
+  "elapsed_seconds": 606.7004257999997,
+  "changed_items": 3,
+  "changes": [
+    {
+      "index": 21,
+      "category": "daily",
+      "reading": "かいしゃにもどります",
+      "expected": [
+        "会社に戻ります"
+      ],
+      "fields": [
+        "tab"
+      ],
+      "off": {
+        "tab": "会社に戻ります"
+      },
+      "on": {
+        "tab": "会社に戻りマスターに復帰する"
+      },
+      "space_off": "会社に戻ります",
+      "space_on": "会社に戻ります"
+    },
+    {
+      "index": 39,
+      "category": "daily",
+      "reading": "けっこんしきのしょうたいじょうがとどいた",
+      "expected": [
+        "結婚式の招待状が届いた"
+      ],
+      "fields": [
+        "tab"
+      ],
+      "off": {
+        "tab": "結婚式の招待状が届いたとき"
+      },
+      "on": {
+        "tab": "結婚式の招待状が届いたときの返信方法は"
+      },
+      "space_off": "結婚式の招待状が届いた",
+      "space_on": "結婚式の招待状が届いた"
+    },
+    {
+      "index": 45,
+      "category": "kanjinum",
+      "reading": "よじじゅくごをおぼえる",
+      "expected": [
+        "四字熟語を覚える"
+      ],
+      "fields": [
+        "tab"
+      ],
+      "off": {
+        "tab": "四字熟語を覚えるには"
+      },
+      "on": {
+        "tab": "四字熟語を覚えるるのに役立つサイトです"
+      },
+      "space_off": "四字熟語を覚える",
+      "space_on": "四字熟語を覚える"
+    }
+  ],
+  "modes": {
+    "off": {
+      "key_max_ms": 5.417600001237588,
+      "space_max_ms": 4.892300001301919,
+      "space_expected": 100,
+      "full_first_expected": 100,
+      "first_visible_expected": 100,
+      "first_visible_space_equal": 100
+    },
+    "on": {
+      "key_max_ms": 5.340299998351838,
+      "space_max_ms": 3.698600001371233,
+      "space_expected": 100,
+      "full_first_expected": 100,
+      "first_visible_expected": 100,
+      "first_visible_space_equal": 100
+    }
+  },
+  "source_hashes": {
+    "lm_rewriter.cc": "46d6654fffcd45ea7873ca79e7fc249ce48118b9e042eb6c95da947c798601f3",
+    "lm_rewriter.h": "baddddb7f277c539e6b0a05a06da6cc7be81fe02e360502cf089f7f94bdc02ea",
+    "lm_rewriter_test.cc": "557e63f375902690e6904107abeb6a47543f64fb222cb7922a066dfac7a57622",
+    "llm_correction_eval_main.cc": "d9c70a4925767aa00d446a7ff24cba3358c3b54975275200e0a28e76dc0bba9f"
+  },
+  "parent_source_commit": "456118f8ee32e4a86e79085afdb0bc975625c650",
+  "compare_tool_sha256": "c31057be09817758672e0283e753789ab3a153b3c2d0a8e787f8f7d415273a84",
+  "helper": {
+    "scope": "Actual shared GenerateSafeCorrection with production Mozc dictionary and both scoring models; not TSF/first display",
+    "normal_counts": {
+      "unchanged": 100,
+      "accepted_spelling": 0,
+      "changed_wrong": 0
+    },
+    "normal_items": 100,
+    "normal_budget_exceeded": 0,
+    "foot": {
+      "reading": "あしをいためたのでびょういんにいきます",
+      "original": "足を炒めたので病院に行きます",
+      "expected": [
+        "足を痛めたので病院に行きます"
+      ],
+      "category": "requested_correction",
+      "result": "足を痛めたので病院に行きます",
+      "elapsed_ms": 270.335,
+      "adopted": true,
+      "status": "accepted_spelling",
+      "budget_exceeded": false
+    },
+    "warmups": [
+      {
+        "reading": "あしをいためたので",
+        "original": "足を炒めたので",
+        "expected": [
+          "足を痛めたので"
+        ],
+        "category": "warmup",
+        "result": "足を痛めたので",
+        "elapsed_ms": 289.834,
+        "adopted": true,
+        "status": "accepted_spelling",
+        "budget_exceeded": false
+      },
+      {
+        "reading": "あしをいためたので",
+        "original": "足を炒めたので",
+        "expected": [
+          "足を痛めたので"
+        ],
+        "category": "warmup",
+        "result": "足を痛めたので",
+        "elapsed_ms": 239.838,
+        "adopted": true,
+        "status": "accepted_spelling",
+        "budget_exceeded": false
+      }
+    ],
+    "elapsed_seconds": 19.535022000000026,
+    "budget_ms": 2000,
+    "beams": 2,
+    "weights": {
+      "zenz": 1.0,
+      "llm": 0.7
+    },
+    "margin": 5.0,
+    "cpu_forced": false,
+    "normal_data_sha256": "a5fd3bcd0d45f34ea2788f4f864645386e5676e85f44e26f3f78b2679835ea38",
+    "exe_sha256": "399196899e2f6ccbf49d8ea76c84f760f1fd5e312fc6043b95b47a9b46ad4cc8",
+    "data_sha256": "720d0cb42651fe35692578ea5f3c752940b8357fc24efc46230c904d2f5d5d70",
+    "models": {
+      "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c",
+      "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8"
+    },
+    "runtime": "C:\\Program Files (x86)\\Kotori",
+    "source_hashes": {
+      "lm_rewriter.cc": "46d6654fffcd45ea7873ca79e7fc249ce48118b9e042eb6c95da947c798601f3",
+      "lm_rewriter.h": "baddddb7f277c539e6b0a05a06da6cc7be81fe02e360502cf089f7f94bdc02ea",
+      "zenz_scorer.cc": "ecc581fd0351380057e3c3871891cd8f857ea9d660d7b501aaee924007e18272",
+      "zenz_scorer.h": "574df94ed75885f80bce9a827bcc8b1fe13fde487c35c6eb4798f221c52eeb43",
+      "llm_correction_eval_main.cc": "d9c70a4925767aa00d446a7ff24cba3358c3b54975275200e0a28e76dc0bba9f"
+    }
+  },
+  "dictionary_controls": [
+    {
+      "reading": "それをみた",
+      "original": "それを見た",
+      "control": "其れを見た",
+      "guard": false,
+      "purpose": "changed pronoun",
+      "actual_guard": false
+    },
+    {
+      "reading": "あしをいためたので",
+      "original": "足を炒めたので",
+      "control": "足を痛めたので",
+      "guard": true,
+      "purpose": "homophone with unchanged grammar",
+      "actual_guard": true
+    },
+    {
+      "reading": "わたしはあしをいためた",
+      "original": "私は足を炒めた",
+      "control": "私は足を痛めた",
+      "guard": true,
+      "purpose": "unchanged pronoun",
+      "actual_guard": true
+    },
+    {
+      "reading": "かれはあしをいためた",
+      "original": "彼は足を炒めた",
+      "control": "彼は足を痛めた",
+      "guard": true,
+      "purpose": "unchanged pronoun and particle",
+      "actual_guard": true
+    },
+    {
+      "reading": "あしをいためたがいかない",
+      "original": "足を炒めたが行かない",
+      "control": "足を痛めたが行かない",
+      "guard": true,
+      "purpose": "unchanged negation",
+      "actual_guard": true
+    },
+    {
+      "reading": "おかねがない",
+      "original": "お金がない",
+      "control": "お金が無い",
+      "guard": false,
+      "purpose": "changed negation spelling",
+      "actual_guard": false
+    }
+  ],
+  "tests": {
+    "lm_rewriter_test": {
+      "cases": 38,
+      "failures": 0
+    },
+    "engine_converter_test": {
+      "cases": 84,
+      "failures": 0,
+      "scope": "initial broader guard source"
+    },
+    "session_test": {
+      "result": "pass",
+      "scope": "initial broader guard source"
+    },
+    "kotori_model_identity_test": {
+      "cases": 6,
+      "result": "cached pass"
+    }
+  },
+  "logs": {
+    "grammar-final-test.log": "224c4a09af7eb64f5f1b8087cbb3086ee73488930a1689e205467d06ad1cbb05",
+    "grammar-final-build.log": "23d6150c1493518e5d2943818dc055259917ee7b49f91e67c653f4e52e193773",
+    "semantic-guard-build-20261009.log": "08e41dbb8ffe6d21e1a0f3a31aa832d615c0ff8645895f8e192eb2b09251e86e",
+    "grammar-session-normal-100.off.json": "981cae7e33a4d21a4e75cf621c2ee8ec3beeed0c77c1594d35b7c3a1a6f0be56",
+    "grammar-session-normal-100.on.json": "df7844eb7ba7efd4a202620ed6045881e9d58c91af2186f312d981291558ae1c",
+    "grammar-session-normal-100.off.stderr.txt": "f792417210a67d4808fd3e0869bfe8ce67e9382bf9209e1abb577be1b431c01d",
+    "grammar-session-normal-100.on.stderr.txt": "d719c259dd6ccb8ef02f35c33b90d5e4edc2516ed77d480ceb19d18f3f862bda",
+    "grammar-control.stdout.txt": "9280973c202831a382b981daab9c97e8c8ec5f1c5faa8e09c3d2f15498a8b86b",
+    "grammar-control.stderr.txt": "4a174d05c7042698b9b23a05545ce90ebafda5d745faae4bc38a83334ac9dd0f"
+  },
+  "patch_sha256": {
+    "0001-kotori-branding.patch": "7fc85afbdcd397a00d0fa52738415142b8ac483a00e6d457d1107173e852969b",
+    "0002-kotori-lm-rerank.patch": "b74598504998c80f2f9ee22503b49b8be6c1fadb694590e1a73ea2db20b44d3c",
+    "0003-kotori-bundle-model.patch": "5ca328c03068d048ffebbe73e50431e75a9950736e4a6a00fb0427d5de4484a7"
+  },
+  "fresh_clone_all_patches_apply": true,
+  "first_display_control": {
+    "off": {
+      "exe_sha256": "6a73829b5eb4f47b84633f058d8ea386454f9b1081b51f788bfef2a2dba044e3",
+      "first": "足を炒めたので病院に行きます",
+      "first_after_last_key_ms": 1038.175699999556,
+      "space": "足を痛めたので病院に行きます",
+      "space_ms": 295.2114999989135,
+      "scope": "NSENT=1 BEAMS=0 PREDICT=0 TYPO=0; post-segment ranking kept"
+    },
+    "on": {
+      "exe_sha256": "6a73829b5eb4f47b84633f058d8ea386454f9b1081b51f788bfef2a2dba044e3",
+      "first": "足を痛めたので病院に行きます",
+      "first_after_last_key_ms": 1039.0857999991567,
+      "space": "足を痛めたので病院に行きます",
+      "space_ms": 2.103299999362207,
+      "scope": "NSENT=1 BEAMS=0 PREDICT=0 TYPO=0; post-segment ranking kept"
+    }
+  }
+}
