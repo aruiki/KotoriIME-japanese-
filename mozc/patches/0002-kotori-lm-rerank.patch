@@ -22973,7 +22973,7 @@ index 000000000..c31037864
 +}
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..e8e4f8c52
+index 000000000..b9135c8c5
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
 @@ -0,0 +1,2892 @@
@@ -25320,34 +25320,34 @@ index 000000000..e8e4f8c52
 +      ranked_ai.push_back(from_ai[i]);
 +    }
 +  }
-+if (evaluated) {
-+  // Kotori: 本文を保持し、初回表示と同じ採用条件を満たす続きだけを先頭へ。
-+  // 弱い予測や別表記は、明示的に選べる候補として一覧に残す。
-+  std::string leading = *evaluated;
-+  for (const std::string& value : ranked) {
-+    const auto strong =
-+        std::find_if(preds.begin(), preds.end(), [&](const Prediction& p) {
-+          return p.text == value && p.can_lead && !p.yomi.empty() &&
-+                 absl::StartsWith(p.yomi, reading) &&
-+                 absl::StartsWith(p.text, *evaluated);
-+        });
-+    if (strong != preds.end()) {
-+      leading = value;
-+      break;
++  if (evaluated) {
++    // Kotori: 本文を保持し、初回表示と同じ採用条件を満たす続きだけを先頭へ。
++    // 弱い予測や別表記は、明示的に選べる候補として一覧に残す。
++    std::string leading = *evaluated;
++    for (const std::string& value : ranked) {
++      const auto strong =
++          std::find_if(preds.begin(), preds.end(), [&](const Prediction& p) {
++            return p.text == value && p.can_lead && !p.yomi.empty() &&
++                   absl::StartsWith(p.yomi, reading) &&
++                   absl::StartsWith(p.text, *evaluated);
++          });
++      if (strong != preds.end()) {
++        leading = value;
++        break;
++      }
 +    }
++    const auto old = std::find(ranked.begin(), ranked.end(), leading);
++    if (old != ranked.end()) {
++      const auto index = old - ranked.begin();
++      ranked.erase(old);
++      ranked_ai.erase(ranked_ai.begin() + index);
++    }
++    ranked.insert(ranked.begin(), leading);
++    ranked_ai.insert(ranked_ai.begin(), true);
++    // 採点中の取消・設定切替等で失効した補正文を追加しない。
++    if (EvaluatedPredictionBase(request, reading, context) != evaluated)
++      return false;
 +  }
-+  const auto old = std::find(ranked.begin(), ranked.end(), leading);
-+  if (old != ranked.end()) {
-+    const auto index = old - ranked.begin();
-+    ranked.erase(old);
-+    ranked_ai.erase(ranked_ai.begin() + index);
-+  }
-+  ranked.insert(ranked.begin(), leading);
-+  ranked_ai.insert(ranked_ai.begin(), true);
-+  // 採点中の取消・設定切替等で失効した補正文を追加しない。
-+  if (EvaluatedPredictionBase(request, reading, context) != evaluated)
-+    return false;
-+}
 +  const size_t shown = std::min<size_t>(
 +      ranked.size(), tab_show_ > 0 ? tab_show_ : predict_beams_ + 1);
 +  ranked.resize(shown);

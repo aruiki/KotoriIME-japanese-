@@ -1,7 +1,7 @@
 {
   "scope": "CLI session with real dictionary/models; not installed Windows TSF",
   "exe": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
-  "exe_sha256": "5654a1937e16a99d805f68f184341c5c4073ab52d1731e948210f5e649bdb8a6",
+  "exe_sha256": "517ea9c3426370004b359aaec655d49d9253c3df678c16865ebc2413edfad151",
   "data_sha256": "1ede3ab859471ac9a7eddf5975d3052087eeb3edf9c79ee1936eb70c6f0a713b",
   "romanji_table_sha256": "fcb900e311d32ced05499c86e236d1084fb0c0937398deb6311fc6c7287a7821",
   "available_model_sha256": {
@@ -45,26 +45,639 @@
   "warm_seconds": 12,
   "settle_seconds": 2.4,
   "key_interval_seconds": 0.01,
-  "elapsed_seconds": 87.88570439999967,
+  "elapsed_seconds": 87.09997959999964,
   "changed_items": 0,
   "changes": [],
   "modes": {
     "off": {
-      "key_max_ms": 4.241700000420678,
-      "space_max_ms": 2.9821999996784143,
+      "key_max_ms": 4.546899999695597,
+      "space_max_ms": 2.4338999992323807,
       "space_expected": 10,
       "full_first_expected": 10,
-      "tab_expected": 10,
-      "first_tab_space_equal": 10
+      "first_tab_space_equal": 10,
+      "tab_expected": 10
     },
     "on": {
-      "key_max_ms": 3.8277000003290595,
-      "space_max_ms": 2.8965999990759883,
+      "key_max_ms": 4.03089999963413,
+      "space_max_ms": 3.0549000002793036,
       "space_expected": 10,
       "full_first_expected": 10,
-      "tab_expected": 10,
-      "first_tab_space_equal": 10
+      "first_tab_space_equal": 10,
+      "tab_expected": 10
     }
+  },
+  "prior_before_format": {
+    "exe_sha256": "5654a1937e16a99d805f68f184341c5c4073ab52d1731e948210f5e649bdb8a6",
+    "source_hashes": {
+      "lm_rewriter.cc": "2caaf3cc90804846f6638a01c6c977171f3c1f9c42e01019e64f208ec190dce9",
+      "lm_rewriter.h": "5aae83da8ea38aabb3dd9f277a41b4a93da276c2a49da2ba5be3418a1dfd157c",
+      "lm_rewriter_test.cc": "f0d09ea70d067a9658bc2be6874af094350b4874b98f016fc3156ecdee40d904"
+    },
+    "full_source_manifest": [
+      {
+        "path": "src/MODULE.bazel",
+        "sha256": "384438caedb281396976f2d8619643ee749e6c10c3ce8f933d5b730fb83472d9"
+      },
+      {
+        "path": "src/base/BUILD.bazel",
+        "sha256": "69cd5047e3f2347fd42f86573715ac5c0696816e574fda99b7ccec11e61155be"
+      },
+      {
+        "path": "src/base/const.h",
+        "sha256": "5333213e5c51915fa18c4586aed3a85e1eca0dd4ccd163c170f5bf0d32a82bda"
+      },
+      {
+        "path": "src/base/kotori_diagnostics.cc",
+        "sha256": "fbd0c3eb3674b32fd195bc4d77dce0b1ab2c0d493ca9d70d55b8d0f80f444a81"
+      },
+      {
+        "path": "src/base/kotori_diagnostics.h",
+        "sha256": "5f24b9451c09936051a5135edbba49ae8346e06a9293f8eb2947ccf42e4ea142"
+      },
+      {
+        "path": "src/base/kotori_diagnostics_test.cc",
+        "sha256": "66bc7a69bd7e2b97b99c66c9cf31aa438408ecd379d4e5efd5e4316524c12238"
+      },
+      {
+        "path": "src/base/kotori_live.h",
+        "sha256": "fbd3e8ef6162e8ecf553b4072569f228867980fdf894ab57c768f0bbde364cec"
+      },
+      {
+        "path": "src/bazel/BUILD.llama_cpp.bazel",
+        "sha256": "2a01d8fe7caa12a5b1719f0bc583f7b4b4bd48a62c803f607ff481f80b2ebe96"
+      },
+      {
+        "path": "src/build_tools/mozc_win32_resource_template.rc",
+        "sha256": "16da1cd4fe676823e88b2afb73ec485a182e462fcc163c3ac4d5788eef6795b0"
+      },
+      {
+        "path": "src/converter/candidate.cc",
+        "sha256": "8e060f8c453dac986a9d149c4772d610871d166fb0fe27161f4bd0c33f02ae24"
+      },
+      {
+        "path": "src/converter/candidate.h",
+        "sha256": "de668debdca2b84c93bca25f302781d8c7da713d1d07e808a81ce38911b2939f"
+      },
+      {
+        "path": "src/converter/immutable_converter.cc",
+        "sha256": "a73c9a7133be0c4c3d3beef3e8e0c1947e111129c2599ebacf8fe758580c5085"
+      },
+      {
+        "path": "src/converter/segments.cc",
+        "sha256": "bda5b7c73107bc7c71e9404b3e5c823c94908f5dc9e3b6e51a14e2df4e03bd85"
+      },
+      {
+        "path": "src/converter/segments.h",
+        "sha256": "60d37dfb1972c3fb2d09807d85acb0ff601f803e7fcc2970204a783aa22711f7"
+      },
+      {
+        "path": "src/converter/segments_matchers.h",
+        "sha256": "3feca2a7208dac12e041114d634b06a9c3e13d76dde5f9ae7cbde28ff43e0f75"
+      },
+      {
+        "path": "src/data/images/win/BUILD.bazel",
+        "sha256": "1b77353966dbc2766c7f985b51693b6cb070fd583bb5fb966ea3443b758f5524"
+      },
+      {
+        "path": "src/data/images/win/ms_alpha.ico",
+        "sha256": "39d6ab726c43d89fbf3e3229aca03c1dc375732a8e06cd7f5140b099ac29297f"
+      },
+      {
+        "path": "src/data/images/win/ms_alpha_a.ico",
+        "sha256": "39d6ab726c43d89fbf3e3229aca03c1dc375732a8e06cd7f5140b099ac29297f"
+      },
+      {
+        "path": "src/data/images/win/ms_alpha_half.ico",
+        "sha256": "6d44a5285b180a9bc7dcd89f8febe348880bcef0a63f8ec795c5d12188f88e9e"
+      },
+      {
+        "path": "src/data/images/win/ms_alpha_half_a.ico",
+        "sha256": "6d44a5285b180a9bc7dcd89f8febe348880bcef0a63f8ec795c5d12188f88e9e"
+      },
+      {
+        "path": "src/data/images/win/ms_direct_input.ico",
+        "sha256": "af800286b5d594b886d243e23348d8dc15579a99e2cd379cf3cf91c739c0351f"
+      },
+      {
+        "path": "src/data/images/win/ms_direct_input_a.ico",
+        "sha256": "af800286b5d594b886d243e23348d8dc15579a99e2cd379cf3cf91c739c0351f"
+      },
+      {
+        "path": "src/data/images/win/ms_disabled.ico",
+        "sha256": "c8b013259e390634f769d496c5fe9ea319246c1442e71931173976ac441abfbd"
+      },
+      {
+        "path": "src/data/images/win/ms_disabled_a.ico",
+        "sha256": "c8b013259e390634f769d496c5fe9ea319246c1442e71931173976ac441abfbd"
+      },
+      {
+        "path": "src/data/images/win/ms_hiragana.ico",
+        "sha256": "2dd1feee2485e58bc02d238fa2eb5393afcca8c4562dcd97ed31271ffc3d4c26"
+      },
+      {
+        "path": "src/data/images/win/ms_hiragana_a.ico",
+        "sha256": "2dd1feee2485e58bc02d238fa2eb5393afcca8c4562dcd97ed31271ffc3d4c26"
+      },
+      {
+        "path": "src/data/images/win/ms_katakana.ico",
+        "sha256": "0b0d390af8547389e71c3288349fc3cf4771f85f7494effc791eb5e48732d570"
+      },
+      {
+        "path": "src/data/images/win/ms_katakana_a.ico",
+        "sha256": "0b0d390af8547389e71c3288349fc3cf4771f85f7494effc791eb5e48732d570"
+      },
+      {
+        "path": "src/data/images/win/ms_katakana_half.ico",
+        "sha256": "fc3cd210e3efd4edfb6207cfabccd532ce24d3d6e0797a3fbcb86f7197d0f600"
+      },
+      {
+        "path": "src/data/images/win/ms_katakana_half_a.ico",
+        "sha256": "fc3cd210e3efd4edfb6207cfabccd532ce24d3d6e0797a3fbcb86f7197d0f600"
+      },
+      {
+        "path": "src/data/images/win/product_icon.ico",
+        "sha256": "b2f5f6b5325d81b348e41260597d648f28afd1aca407b4ef0e4ad57c5cb5469e"
+      },
+      {
+        "path": "src/data/images/win/product_icon_langbar.ico",
+        "sha256": "b2f5f6b5325d81b348e41260597d648f28afd1aca407b4ef0e4ad57c5cb5469e"
+      },
+      {
+        "path": "src/data/images/win/tools_dictionary.ico",
+        "sha256": "49975af6f14a4ee0ae86db2636fce285f661b54d3a83829f1d7f93b8551b9331"
+      },
+      {
+        "path": "src/data/images/win/tools_dictionary_a.ico",
+        "sha256": "49975af6f14a4ee0ae86db2636fce285f661b54d3a83829f1d7f93b8551b9331"
+      },
+      {
+        "path": "src/data/images/win/tools_icon.ico",
+        "sha256": "b2f5f6b5325d81b348e41260597d648f28afd1aca407b4ef0e4ad57c5cb5469e"
+      },
+      {
+        "path": "src/data/images/win/tools_icon_a.ico",
+        "sha256": "b2f5f6b5325d81b348e41260597d648f28afd1aca407b4ef0e4ad57c5cb5469e"
+      },
+      {
+        "path": "src/data/images/win/tools_properties.ico",
+        "sha256": "e9c0354a7a78d3788bc5d5c04824742295590b3bad86228273bdc9e3cbfc1043"
+      },
+      {
+        "path": "src/data/images/win/tools_properties_a.ico",
+        "sha256": "e9c0354a7a78d3788bc5d5c04824742295590b3bad86228273bdc9e3cbfc1043"
+      },
+      {
+        "path": "src/data/kotori/BUILD.bazel",
+        "sha256": "bbc485db89fecbce0733f474db768a3fa561f5d51a4a9e76b21c080c975380a6"
+      },
+      {
+        "path": "src/data/kotori/LICENSE-GPL-3.0.txt",
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+      },
+      {
+        "path": "src/data/kotori/LICENSE-llvm-openmp.txt",
+        "sha256": "fdad1758a9e1f9d5a81e18879b3406772115edc92c24bfa36b70c654f325e8e4"
+      },
+      {
+        "path": "src/data/kotori/NOTICE-third-party.txt",
+        "sha256": "a6785ac9a29ac661b733edf97364a4f5bcf5c6a0439d85bde6646df91178a9e8"
+      },
+      {
+        "path": "src/data/kotori/NOTICE-tinyswallow.txt",
+        "sha256": "f44e2579a09ebc059b8a9a59d80350950d3147dd0f564c76c305fbee0a40cc70"
+      },
+      {
+        "path": "src/data/kotori/NOTICE-zenz.txt",
+        "sha256": "eae7850eefbff66d0cd61594c09f96b6254b103980d20248ec534dafae137739"
+      },
+      {
+        "path": "src/data/kotori/banner.bmp",
+        "sha256": "83362ff80e88be3607a8105f5338600754b4b6f9ad50039777e8c671321f39cb"
+      },
+      {
+        "path": "src/data/kotori/dialog.bmp",
+        "sha256": "99f406c9640f1c823c4d5a2ee2c66cd4a6fe3fd91aa181068e9d5f3b50ce3e98"
+      },
+      {
+        "path": "src/data/kotori/license.rtf",
+        "sha256": "2addd262a57cbbc241726ba99c2215952470389250dc3c6d4a3652f38f1f55ec"
+      },
+      {
+        "path": "src/engine/engine_converter.cc",
+        "sha256": "457bb654ec419bfec78022088870eef4460bf1f1ab516635b6e92b27e374b9da"
+      },
+      {
+        "path": "src/engine/engine_converter.h",
+        "sha256": "c621f8992486c8ccfa2ae0b368ddc6cae72dde15f3413c8522f8157e4fbaed56"
+      },
+      {
+        "path": "src/engine/engine_converter_interface.h",
+        "sha256": "d981f1cea22f06b4f7038a52d1315aa4844b3d80eefad690513f4e0daefed37f"
+      },
+      {
+        "path": "src/engine/engine_converter_test.cc",
+        "sha256": "7192c9dc06861aabc5925cf3a788e782531d3eb3d16fb0d29fa5a514b92f5619"
+      },
+      {
+        "path": "src/gui/base/util.cc",
+        "sha256": "d2db7c8f420d5d24a690d421b4fb3a60f00cb55963c3b83bca6128f37f3b3645"
+      },
+      {
+        "path": "src/gui/config_dialog/BUILD.bazel",
+        "sha256": "1c05c72535e7b2eaa9f05f50d7e46a0aace4b74132a868a2a244d1f89cb0c21c"
+      },
+      {
+        "path": "src/gui/config_dialog/config_dialog.cc",
+        "sha256": "ae01238134027a024dc5906da4a0e36426d1ef8a9df420b06ac4b7e1b7c7d2a1"
+      },
+      {
+        "path": "src/gui/config_dialog/config_dialog.h",
+        "sha256": "80395e3171193cab74d31214a10758781ff61781ab406c34d286dad251ce1208"
+      },
+      {
+        "path": "src/gui/tool/BUILD.bazel",
+        "sha256": "6e2ef9378b8b6f962c419ec449bf76f316b1eb266231db83093f9ab3e5ca510c"
+      },
+      {
+        "path": "src/protocol/commands.proto",
+        "sha256": "6d42cf192c7078d27bcd2492b0b299d0d8a22047f0de7bb9041a2d778a354abf"
+      },
+      {
+        "path": "src/protocol/config.proto",
+        "sha256": "e4cd6fb198f84783f8a83fade732a2370b5928daa1d883de42eb5c4a80888061"
+      },
+      {
+        "path": "src/renderer/win32/BUILD.bazel",
+        "sha256": "775957e0a39603c51c9c9065e158ca2d2df75303e496cf25afd871db0521bd4c"
+      },
+      {
+        "path": "src/renderer/win32/kotori_candidate_snapshot.cc",
+        "sha256": "da53dbb2187f734af365323bb7d08b846c024d068b484ce365a001aeed94358e"
+      },
+      {
+        "path": "src/renderer/win32/text_renderer.cc",
+        "sha256": "c9278cf5f35e594ffd2cda98a50fb969ae4a50c6c41b996bd153ddc448293c4c"
+      },
+      {
+        "path": "src/renderer/win32/win32_dpi_util.cc",
+        "sha256": "65a76193538b3d93f772398eaacea7c78013be482ac94f40d1e38788e8b72f96"
+      },
+      {
+        "path": "src/request/conversion_request.h",
+        "sha256": "854e07d3fd19b4df564a21f68ffae91da0e7c79fcd12675aa0ec50216e0470bc"
+      },
+      {
+        "path": "src/request/conversion_request_test.cc",
+        "sha256": "03b60f6472d246c1c621e3543f435556569ea868eac74f598cd1e1e1d6028562"
+      },
+      {
+        "path": "src/request/options.h",
+        "sha256": "33a535020ccdb403752f9e9560071e30536353c42ae2ae46e44eb584c651cc6c"
+      },
+      {
+        "path": "src/rewriter/BUILD.bazel",
+        "sha256": "86cbad234980e86ba4c9c13e58d9fd5aceb8d5014598acf1cfe61769705d3f8e"
+      },
+      {
+        "path": "src/rewriter/english_variants_rewriter.cc",
+        "sha256": "bb9a7108a2d83ad6929e7c848e28aea236362c5765899fbc86e4fc62ea25bf9f"
+      },
+      {
+        "path": "src/rewriter/english_variants_rewriter.h",
+        "sha256": "47996bf0ab2c6adb37fa4a030860206ffbe67b597a352515f777c5f372067c85"
+      },
+      {
+        "path": "src/rewriter/english_variants_rewriter_test.cc",
+        "sha256": "6a45caceb16e128aea539743b1ea2fd057883d4053086fe0e820149b7cb2523c"
+      },
+      {
+        "path": "src/rewriter/kotori_model_identity.cc",
+        "sha256": "7f9bf4de66fb5ab7112c8bcb79fbcec610af4de6df63a3db2d875722ad0257c4"
+      },
+      {
+        "path": "src/rewriter/kotori_model_identity.h",
+        "sha256": "b603c03628f0d6d6fd9ca9f74bbf274f481a6917c5bf9bfeedb93e234ad77375"
+      },
+      {
+        "path": "src/rewriter/kotori_model_identity_test.cc",
+        "sha256": "319b0f044719a8cd976f69b36d06045c247d0017bd888097994a8da867061707"
+      },
+      {
+        "path": "src/rewriter/kotori_nuance_rewriter.cc",
+        "sha256": "f13467f011653c0d0d605f63b234e952a359b9751ed2490be095b14a9b1b260c"
+      },
+      {
+        "path": "src/rewriter/kotori_nuance_rewriter.h",
+        "sha256": "704c55d82471beb1d060b9dcdf186372df6102bbf3c6674d3eab1ee628cea306"
+      },
+      {
+        "path": "src/rewriter/kotori_nuance_rewriter_test.cc",
+        "sha256": "4e049551daa94e9d201aeebc1577ef3d16de8ffcd5bb331e71b8fb7b0165da0b"
+      },
+      {
+        "path": "src/rewriter/llama_runtime.cc",
+        "sha256": "bae51d4ee0d57ffb50465687927d9f7a23d6e6c5ca103ca13079f5653b315518"
+      },
+      {
+        "path": "src/rewriter/llama_runtime.h",
+        "sha256": "309b3d2e507a5a21843eaa66a6cc8b121c5927837e36e45edc2f652bea374dd9"
+      },
+      {
+        "path": "src/rewriter/llm_correction_eval_main.cc",
+        "sha256": "d9c70a4925767aa00d446a7ff24cba3358c3b54975275200e0a28e76dc0bba9f"
+      },
+      {
+        "path": "src/rewriter/llm_correction_main.cc",
+        "sha256": "2ecd08cfcb76d080e5ba9cda5f9d22dafc97a13b61f89400f5d883172766f14f"
+      },
+      {
+        "path": "src/rewriter/lm_rewriter.cc",
+        "sha256": "2caaf3cc90804846f6638a01c6c977171f3c1f9c42e01019e64f208ec190dce9"
+      },
+      {
+        "path": "src/rewriter/lm_rewriter.h",
+        "sha256": "5aae83da8ea38aabb3dd9f277a41b4a93da276c2a49da2ba5be3418a1dfd157c"
+      },
+      {
+        "path": "src/rewriter/lm_rewriter_test.cc",
+        "sha256": "f0d09ea70d067a9658bc2be6874af094350b4874b98f016fc3156ecdee40d904"
+      },
+      {
+        "path": "src/rewriter/rewriter.cc",
+        "sha256": "5818d15c9251695c5832b5a25a63d530f46ed8ccaa39e727e5f40db749bbc3ba"
+      },
+      {
+        "path": "src/rewriter/zenz_scorer.cc",
+        "sha256": "ecc581fd0351380057e3c3871891cd8f857ea9d660d7b501aaee924007e18272"
+      },
+      {
+        "path": "src/rewriter/zenz_scorer.h",
+        "sha256": "574df94ed75885f80bce9a827bcc8b1fe13fde487c35c6eb4798f221c52eeb43"
+      },
+      {
+        "path": "src/server/BUILD.bazel",
+        "sha256": "3774356e6425c841c01dab6d5da25ff622edda92705fa85ba06cc229dfa1248a"
+      },
+      {
+        "path": "src/server/mozc_server.cc",
+        "sha256": "f1c6682436b6f717f63ed12b42eaf6e3821e46819561e6d7ce45780381ea59e7"
+      },
+      {
+        "path": "src/session/BUILD.bazel",
+        "sha256": "a184ecf30babc6bc8d6f575a5f2742d940a929752919f9e1e68d4e078799c244"
+      },
+      {
+        "path": "src/session/session.cc",
+        "sha256": "31f0c602013ab0125ead897fdc19b7323171d176d6284befeeef3f07d5f4dd20"
+      },
+      {
+        "path": "src/session/session.h",
+        "sha256": "09aa8cc2a8390b228befaadeb93eb98a0331e29de5b801ebd8affa12122b3295"
+      },
+      {
+        "path": "src/session/session_handler_tool.cc",
+        "sha256": "ee523273c2a59b357b7426dd015879eadd2b397ed7c1764ac23794ab9cc9df27"
+      },
+      {
+        "path": "src/session/session_handler_tool.h",
+        "sha256": "6b95e4edb02025e1e026b9050f08f0a14f675a3eda35fd2dfa13a1358f13dff4"
+      },
+      {
+        "path": "src/session/session_test.cc",
+        "sha256": "a6a55e67c6d31fd82ea8d724561425b4a52beefd380c31463e21b4266e32c731"
+      },
+      {
+        "path": "src/win32/base/display_name_resource.h",
+        "sha256": "b2955c86dc9703b961dbb316427246ec4eee5237135bd1515b7c9a6ef1046a04"
+      },
+      {
+        "path": "src/win32/base/tsf_profile.cc",
+        "sha256": "9937f4776dd339d445f2e8eea2e07a1feed8f78d79e9fbb03b90845b17e2d2c8"
+      },
+      {
+        "path": "src/win32/installer/BUILD.bazel",
+        "sha256": "b28d6130a6472508e1942aaf21d7dbc68190a41fc81d748dec7d21950b1e456c"
+      },
+      {
+        "path": "src/win32/installer/build_installer.py",
+        "sha256": "9014cae8a62ad2c4cfa9ae2dbd0ff339fe694584c3a7a0118754ff7bf4b5777e"
+      },
+      {
+        "path": "src/win32/installer/installer_oss_64bit.wxs",
+        "sha256": "beaae253a61c8e282050873db47847fbd654168655b0e098577fd1510a922e36"
+      },
+      {
+        "path": "src/win32/tip/tip_edit_session.cc",
+        "sha256": "e651c22009f2bd56e61e2c37530653787a56ced11823c14a3027e477564ebbdc"
+      },
+      {
+        "path": "src/win32/tip/tip_edit_session.h",
+        "sha256": "ecdbc78ad52d615bdad34e84c9c7870b4eb0b1c58214c314f6182f292101d643"
+      },
+      {
+        "path": "src/win32/tip/tip_linguistic_alternates.cc",
+        "sha256": "a0ebb68057ae3b5b85ded832c0ed069f284ab173a55fcb4f6d53fa9d666cf4e9"
+      },
+      {
+        "path": "src/win32/tip/tip_preferred_touch_keyboard.cc",
+        "sha256": "caa931fa3daeed76267828223ca1cc01b3a1a86007274a89d36751b94c70eaf3"
+      },
+      {
+        "path": "src/win32/tip/tip_reconvert_function.cc",
+        "sha256": "d5e40666d7192d0366e9f9060a0714337f7afc604abc74dcd06e58d4581f6a6c"
+      },
+      {
+        "path": "src/win32/tip/tip_resource.rc",
+        "sha256": "3ab5849300440011d74f3d70b1bd9d149829b20610e889acf091717cdbd7dc11"
+      },
+      {
+        "path": "src/win32/tip/tip_search_candidate_provider.cc",
+        "sha256": "7132bab14aa01a5e5fd8c7a389b305f09a93b3b59d7514f3aec931ff3474457e"
+      },
+      {
+        "path": "src/win32/tip/tip_text_service.cc",
+        "sha256": "25493356ced7c727973a4935b76690b0d3e379fb55fe9af28215a3886abbc3fb"
+      },
+      {
+        "path": "src/win32/tip/tip_text_service.h",
+        "sha256": "7cfc86d025b69e203bac76c66f956eb375ff544b35f22d2efc7344f5f6e0b540"
+      }
+    ],
+    "modes": {
+      "off": {
+        "key_max_ms": 4.241700000420678,
+        "space_max_ms": 2.9821999996784143,
+        "space_expected": 10,
+        "full_first_expected": 10,
+        "tab_expected": 10,
+        "first_tab_space_equal": 10
+      },
+      "on": {
+        "key_max_ms": 3.8277000003290595,
+        "space_max_ms": 2.8965999990759883,
+        "space_expected": 10,
+        "full_first_expected": 10,
+        "tab_expected": 10,
+        "first_tab_space_equal": 10
+      }
+    },
+    "elapsed_seconds": 87.88570439999967
+  },
+  "local_tests": {
+    "lm_rewriter_test": 44,
+    "session_test": 189,
+    "engine_converter_test": 84,
+    "kotori_model_identity_test": 6,
+    "failures": 0,
+    "engine_and_identity_cache": true,
+    "lm_rewriter_test_final_format": 44
+  },
+  "cpu_fallback": {
+    "scope": "CLI session with real dictionary/models; not installed Windows TSF",
+    "exe": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
+    "exe_sha256": "5654a1937e16a99d805f68f184341c5c4073ab52d1731e948210f5e649bdb8a6",
+    "data_sha256": "1ede3ab859471ac9a7eddf5975d3052087eeb3edf9c79ee1936eb70c6f0a713b",
+    "romanji_table_sha256": "fcb900e311d32ced05499c86e236d1084fb0c0937398deb6311fc6c7287a7821",
+    "available_model_sha256": {
+      "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+      "zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+      "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+    },
+    "model_status": {
+      "off": {
+        "initial": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
+        "final": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
+        "environment": {
+          "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
+          "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori",
+          "KOTORI_LM_CORRECTION": "0",
+          "KOTORI_LM_DEBUG": "1",
+          "KOTORI_LM_DEVICE": "cpu"
+        }
+      },
+      "on": {
+        "initial": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
+        "final": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
+        "environment": {
+          "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
+          "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori",
+          "KOTORI_LM_CORRECTION": "1",
+          "KOTORI_LM_DEBUG": "1",
+          "KOTORI_LM_DEVICE": "cpu"
+        }
+      }
+    },
+    "adoption_logs": {
+      "off": 0,
+      "on": 0
+    },
+    "items": 2,
+    "categories": {
+      "daily": 2
+    },
+    "cpu_forced": true,
+    "warm_seconds": 12,
+    "settle_seconds": 2.4,
+    "key_interval_seconds": 0.01,
+    "elapsed_seconds": 30.400910600001225,
+    "changed_items": 0,
+    "changes": [],
+    "modes": {
+      "off": {
+        "key_max_ms": 2.518599998438731,
+        "space_max_ms": 2.278199999636854,
+        "space_expected": 2,
+        "full_first_expected": 2
+      },
+      "on": {
+        "key_max_ms": 2.5944000008166768,
+        "space_max_ms": 1.8553000008978415,
+        "space_expected": 2,
+        "full_first_expected": 2
+      }
+    }
+  },
+  "cpu_scope": "CPU forced on RTX3060 desktop, only two inputs; zenz-medium used without LLM, not low-end hardware acceptance",
+  "morning_smoke": {
+    "exe": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
+    "exe_sha256": "5654a1937e16a99d805f68f184341c5c4073ab52d1731e948210f5e649bdb8a6",
+    "romaji": "ohayou",
+    "warm_seconds": 12,
+    "events": [
+      {
+        "command": "SEND_KEYS\tu",
+        "response_ms": 0.958699998591328,
+        "observed_at_ms": 12255.451000000903,
+        "first_candidate": null,
+        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 200\n}\nremoved_candidate_words_for_debug {\n}",
+        "since_last_key_ms": 0.958699998591328
+      },
+      {
+        "command": "KOTORI_REFRESH",
+        "response_ms": 1.3042999999015592,
+        "observed_at_ms": 12467.278300000544,
+        "first_candidate": null,
+        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
+        "since_last_key_ms": 212.785999998232
+      },
+      {
+        "command": "KOTORI_REFRESH",
+        "response_ms": 2.091800000926014,
+        "observed_at_ms": 13269.5920999995,
+        "first_candidate": "おはよう",
+        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
+        "since_last_key_ms": 1015.0997999971878
+      },
+      {
+        "command": "KOTORI_REFRESH",
+        "response_ms": 1.8166000008932315,
+        "observed_at_ms": 14071.487200000774,
+        "first_candidate": "おはよう",
+        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
+        "since_last_key_ms": 1816.9948999984626
+      },
+      {
+        "command": "KOTORI_REFRESH",
+        "response_ms": 1.8645999989530537,
+        "observed_at_ms": 14873.606999999538,
+        "first_candidate": "おはよう",
+        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
+        "since_last_key_ms": 2619.114699997226
+      },
+      {
+        "command": "KOTORI_REFRESH",
+        "response_ms": 1.8245999999635387,
+        "observed_at_ms": 15675.674300000537,
+        "first_candidate": "おはよう",
+        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\nremoved_candidate_words_for_debug {\n}",
+        "since_last_key_ms": 3421.1819999982254
+      },
+      {
+        "command": "SEND_KEY\tSpace",
+        "response_ms": 0.7894999998825369,
+        "observed_at_ms": 15676.469500000167,
+        "first_candidate": null,
+        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: HIGHLIGHT\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  highlighted_position: 0\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  focused_index: 0\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    value: \"お早よう\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 5\n    index: 3\n    value: \"オハヨウ\"\n    annotation {\n      description: \"カタカナ\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -3\n    index: 4\n    value: \"ohayou\"\n    annotation {\n      description: \"アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -4\n    index: 5\n    value: \"OHAYOU\"\n    annotation {\n      description: \"アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -6\n    index: 6\n    value: \"Ohayou\"\n    annotation {\n      description: \"アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -7\n    index: 7\n    value: \"ｏｈａｙｏｕ\"\n    annotation {\n      description: \"[全] アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -8\n    index: 8\n    value: \"ＯＨＡＹＯＵ\"\n    annotation {\n      description: \"[全] アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -10\n    index: 9\n    value: \"Ｏｈａｙｏｕ\"\n    annotation {\n      description: \"[全] アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -11\n    index: 10\n    value: \"ｵﾊﾖｳ\"\n    annotation {\n      description: \"[半] カタカナ\"\n    }\n    num_segments_in_candidate: 1\n  }\n  category: CONVERSION\n}\nremoved_candidate_words_for_debug {\n}",
+        "since_last_key_ms": 3421.9771999978548
+      }
+    ],
+    "lifecycle": []
+  },
+  "morning_scope": "おはよう stays stable before Space and after; not proof of a strong continuation displayed first",
+  "before_source_commit": "e91784a",
+  "logs": {
+    "tab-final-tests.log": "748441ddaa8d111d986813944be8454899f2381310e81491afba3477221e91e8",
+    "tab-final-build.log": "1921ba30fdafe99ed68f692f1c0719e3237c88cc85d3b3549394d638a0da7b82",
+    "tab-consistency-focused.off.json": "352069e92c327151a7ef97ee4a75722cea3aecdeeb72aa52ca6c6775403361e8",
+    "tab-consistency-focused.on.json": "8ecd50953f001b13338dcdd9c9451f3f1b4633352e79dcf94998dc7cf5cc7876",
+    "tab-cpu-fallback-two.json": "0214536d5f94fc789288c2aa614a114dc1e07921918a361db0f9e68c1021fb10",
+    "tab-final-generated-first.json": "712026a48a7b504a2807fefa5766e6f0fd9b5a1d1e55780e001349d510b092c4",
+    "tab-final-generated-first.stderr.txt": "ca001cf8652546fd939a7985b534a8db7663037f9e4560eacd4e00f969cfc650",
+    "tab-format-test.log": "c3b769484e7088cee67652f0ac57468ee11b8658a08326e2d185cc900dfbaefa",
+    "tab-format-build.log": "6f6db242fd8944abb1b862b32c27f298fb78ef4b951982d8ffe4cb14b68096d4",
+    "tab-consistency-formatted.off.json": "e3a8be789ccbdce2f7fc618d60084baed2af0686243cb743c288ee25e8ba0c7b",
+    "tab-consistency-formatted.on.json": "329df90e64eedabd950a15ba6d3ea04397b5c78b682b3b2c5e0fde3e97f1ca11",
+    "tab-formatted-generated-first.json": "06733ea20869a1319e56a081989f2b63cf2b2f15cbb25b07293356060cc53abb"
   },
   "before_after": [
     {
@@ -248,175 +861,14 @@
       "after_space": "資料を送りますのでご確認ください"
     }
   ],
-  "before_source_commit": "e91784a",
-  "source_hashes": {
-    "lm_rewriter.cc": "2caaf3cc90804846f6638a01c6c977171f3c1f9c42e01019e64f208ec190dce9",
-    "lm_rewriter.h": "5aae83da8ea38aabb3dd9f277a41b4a93da276c2a49da2ba5be3418a1dfd157c",
-    "lm_rewriter_test.cc": "f0d09ea70d067a9658bc2be6874af094350b4874b98f016fc3156ecdee40d904"
-  },
-  "local_tests": {
-    "lm_rewriter_test": 44,
-    "session_test": 189,
-    "engine_converter_test": 84,
-    "kotori_model_identity_test": 6,
-    "failures": 0,
-    "engine_and_identity_cache": true
-  },
-  "logs": {
-    "tab-final-tests.log": "748441ddaa8d111d986813944be8454899f2381310e81491afba3477221e91e8",
-    "tab-final-build.log": "1921ba30fdafe99ed68f692f1c0719e3237c88cc85d3b3549394d638a0da7b82",
-    "tab-consistency-focused.off.json": "352069e92c327151a7ef97ee4a75722cea3aecdeeb72aa52ca6c6775403361e8",
-    "tab-consistency-focused.on.json": "8ecd50953f001b13338dcdd9c9451f3f1b4633352e79dcf94998dc7cf5cc7876",
-    "tab-cpu-fallback-two.json": "0214536d5f94fc789288c2aa614a114dc1e07921918a361db0f9e68c1021fb10",
-    "tab-final-generated-first.json": "712026a48a7b504a2807fefa5766e6f0fd9b5a1d1e55780e001349d510b092c4",
-    "tab-final-generated-first.stderr.txt": "ca001cf8652546fd939a7985b534a8db7663037f9e4560eacd4e00f969cfc650"
-  },
-  "morning_smoke": {
-    "exe": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
-    "exe_sha256": "5654a1937e16a99d805f68f184341c5c4073ab52d1731e948210f5e649bdb8a6",
-    "romaji": "ohayou",
-    "warm_seconds": 12,
-    "events": [
-      {
-        "command": "SEND_KEYS\tu",
-        "response_ms": 0.958699998591328,
-        "observed_at_ms": 12255.451000000903,
-        "first_candidate": null,
-        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 200\n}\nremoved_candidate_words_for_debug {\n}",
-        "since_last_key_ms": 0.958699998591328
-      },
-      {
-        "command": "KOTORI_REFRESH",
-        "response_ms": 1.3042999999015592,
-        "observed_at_ms": 12467.278300000544,
-        "first_candidate": null,
-        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
-        "since_last_key_ms": 212.785999998232
-      },
-      {
-        "command": "KOTORI_REFRESH",
-        "response_ms": 2.091800000926014,
-        "observed_at_ms": 13269.5920999995,
-        "first_candidate": "おはよう",
-        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
-        "since_last_key_ms": 1015.0997999971878
-      },
-      {
-        "command": "KOTORI_REFRESH",
-        "response_ms": 1.8166000008932315,
-        "observed_at_ms": 14071.487200000774,
-        "first_candidate": "おはよう",
-        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
-        "since_last_key_ms": 1816.9948999984626
-      },
-      {
-        "command": "KOTORI_REFRESH",
-        "response_ms": 1.8645999989530537,
-        "observed_at_ms": 14873.606999999538,
-        "first_candidate": "おはよう",
-        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\ncallback {\n  session_command {\n    type: KOTORI_REFRESH_SUGGESTION\n  }\n  delay_millisec: 800\n}\nremoved_candidate_words_for_debug {\n}",
-        "since_last_key_ms": 2619.114699997226
-      },
-      {
-        "command": "KOTORI_REFRESH",
-        "response_ms": 1.8245999999635387,
-        "observed_at_ms": 15675.674300000537,
-        "first_candidate": "おはよう",
-        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: UNDERLINE\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  is_toggleable: false\n}\ncandidate_window {\n  size: 3\n  Candidate {\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    id: 0\n  }\n  Candidate {\n    index: 1\n    value: \"お早う\"\n    id: 1\n  }\n  Candidate {\n    index: 2\n    value: \"おはようクジラ\"\n    id: 2\n  }\n  position: 0\n  category: SUGGESTION\n  display_type: MAIN\n  footer {\n    label: \"Tabキーで選択\"\n  }\n  page_size: 9\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    key: \"おはようくじら\"\n    value: \"おはようクジラ\"\n    num_segments_in_candidate: 1\n  }\n  category: SUGGESTION\n}\nremoved_candidate_words_for_debug {\n}",
-        "since_last_key_ms": 3421.1819999982254
-      },
-      {
-        "command": "SEND_KEY\tSpace",
-        "response_ms": 0.7894999998825369,
-        "observed_at_ms": 15676.469500000167,
-        "first_candidate": null,
-        "output": "\ngoo.gle/debugstr\nid: 4997866375369263526\nmode: HIRAGANA\nconsumed: true\npreedit {\n  cursor: 4\n  Segment {\n    annotation: HIGHLIGHT\n    value: \"おはよう\"\n    value_length: 4\n    key: \"おはよう\"\n  }\n  highlighted_position: 0\n}\nstatus {\n  activated: true\n  mode: HIRAGANA\n  comeback_mode: HIRAGANA\n}\nall_candidate_words {\n  focused_index: 0\n  candidates {\n    id: 0\n    index: 0\n    value: \"おはよう\"\n    annotation {\n      description: \"ひらがな\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 1\n    index: 1\n    value: \"お早う\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 2\n    index: 2\n    value: \"お早よう\"\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: 5\n    index: 3\n    value: \"オハヨウ\"\n    annotation {\n      description: \"カタカナ\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -3\n    index: 4\n    value: \"ohayou\"\n    annotation {\n      description: \"アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -4\n    index: 5\n    value: \"OHAYOU\"\n    annotation {\n      description: \"アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -6\n    index: 6\n    value: \"Ohayou\"\n    annotation {\n      description: \"アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -7\n    index: 7\n    value: \"ｏｈａｙｏｕ\"\n    annotation {\n      description: \"[全] アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -8\n    index: 8\n    value: \"ＯＨＡＹＯＵ\"\n    annotation {\n      description: \"[全] アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -10\n    index: 9\n    value: \"Ｏｈａｙｏｕ\"\n    annotation {\n      description: \"[全] アルファベット\"\n    }\n    num_segments_in_candidate: 1\n  }\n  candidates {\n    id: -11\n    index: 10\n    value: \"ｵﾊﾖｳ\"\n    annotation {\n      description: \"[半] カタカナ\"\n    }\n    num_segments_in_candidate: 1\n  }\n  category: CONVERSION\n}\nremoved_candidate_words_for_debug {\n}",
-        "since_last_key_ms": 3421.9771999978548
-      }
-    ],
-    "lifecycle": []
-  },
-  "morning_scope": "おはよう stays stable before Space and after; not proof of a strong continuation displayed first",
-  "cpu_fallback": {
-    "scope": "CLI session with real dictionary/models; not installed Windows TSF",
-    "exe": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
-    "exe_sha256": "5654a1937e16a99d805f68f184341c5c4073ab52d1731e948210f5e649bdb8a6",
-    "data_sha256": "1ede3ab859471ac9a7eddf5975d3052087eeb3edf9c79ee1936eb70c6f0a713b",
-    "romanji_table_sha256": "fcb900e311d32ced05499c86e236d1084fb0c0937398deb6311fc6c7287a7821",
-    "available_model_sha256": {
-      "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
-      "zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
-      "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
-    },
-    "model_status": {
-      "off": {
-        "initial": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
-        "final": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
-        "environment": {
-          "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
-          "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori",
-          "KOTORI_LM_CORRECTION": "0",
-          "KOTORI_LM_DEBUG": "1",
-          "KOTORI_LM_DEVICE": "cpu"
-        }
-      },
-      "on": {
-        "initial": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
-        "final": "state=zenz\ndevice=CPU\nzenz=zenz-v2.5-medium-q8_0.gguf\n",
-        "environment": {
-          "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
-          "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori",
-          "KOTORI_LM_CORRECTION": "1",
-          "KOTORI_LM_DEBUG": "1",
-          "KOTORI_LM_DEVICE": "cpu"
-        }
-      }
-    },
-    "adoption_logs": {
-      "off": 0,
-      "on": 0
-    },
-    "items": 2,
-    "categories": {
-      "daily": 2
-    },
-    "cpu_forced": true,
-    "warm_seconds": 12,
-    "settle_seconds": 2.4,
-    "key_interval_seconds": 0.01,
-    "elapsed_seconds": 30.400910600001225,
-    "changed_items": 0,
-    "changes": [],
-    "modes": {
-      "off": {
-        "key_max_ms": 2.518599998438731,
-        "space_max_ms": 2.278199999636854,
-        "space_expected": 2,
-        "full_first_expected": 2
-      },
-      "on": {
-        "key_max_ms": 2.5944000008166768,
-        "space_max_ms": 1.8553000008978415,
-        "space_expected": 2,
-        "full_first_expected": 2
-      }
-    }
-  },
-  "cpu_scope": "CPU forced on RTX3060 desktop, only two inputs; zenz-medium used without LLM, not low-end hardware acceptance",
   "final_generated_first": {
-    "exe_sha256": "5654a1937e16a99d805f68f184341c5c4073ab52d1731e948210f5e649bdb8a6",
+    "exe_sha256": "517ea9c3426370004b359aaec655d49d9253c3df678c16865ebc2413edfad151",
     "first": "足を痛めたので病院に行きます",
-    "first_after_last_key_ms": 828.9678000001004,
+    "first_after_last_key_ms": 832.3361999991903,
     "space": "足を痛めたので病院に行きます",
-    "space_ms": 2.144399999451707,
+    "space_ms": 2.692699999897741,
     "scope": "controlled NSENT=1 BEAMS=0 PREDICT=0 TYPO=0, generated correction ON; not default setting"
   },
-  "patch_sha256": {
-    "0001-kotori-branding.patch": "7fc85afbdcd397a00d0fa52738415142b8ac483a00e6d457d1107173e852969b",
-    "0002-kotori-lm-rerank.patch": "5397b58384d8f39e2aff241d7de7e6fac1db741dfbd41d5b5c6b9415207ad5b4",
-    "0003-kotori-bundle-model.patch": "5ca328c03068d048ffebbe73e50431e75a9950736e4a6a00fb0427d5de4484a7"
-  },
-  "all_patches_fresh_clone_apply": true,
   "full_source_manifest": [
     {
       "path": "src/MODULE.bazel",
@@ -736,7 +1188,7 @@
     },
     {
       "path": "src/rewriter/lm_rewriter.cc",
-      "sha256": "2caaf3cc90804846f6638a01c6c977171f3c1f9c42e01019e64f208ec190dce9"
+      "sha256": "00f4532691270a0231485d7b7a8c0bd846f62c0cce6197091e2a542f1f44fab7"
     },
     {
       "path": "src/rewriter/lm_rewriter.h",
@@ -847,5 +1299,21 @@
       "sha256": "7cfc86d025b69e203bac76c66f956eb375ff544b35f22d2efc7344f5f6e0b540"
     }
   ],
-  "build_source_matches_regeneration_source": true
+  "source_hashes": {
+    "lm_rewriter.cc": "00f4532691270a0231485d7b7a8c0bd846f62c0cce6197091e2a542f1f44fab7",
+    "lm_rewriter.h": "5aae83da8ea38aabb3dd9f277a41b4a93da276c2a49da2ba5be3418a1dfd157c",
+    "lm_rewriter_test.cc": "f0d09ea70d067a9658bc2be6874af094350b4874b98f016fc3156ecdee40d904"
+  },
+  "build_source_matches_regeneration_source": true,
+  "all_patches_fresh_clone_apply": true,
+  "patch_sha256": {
+    "0001-kotori-branding.patch": "7fc85afbdcd397a00d0fa52738415142b8ac483a00e6d457d1107173e852969b",
+    "0002-kotori-lm-rerank.patch": "6e4d3072033a8ba2c4e34d770aa5b6e301da07eb5fb690f7268140445893442f",
+    "0003-kotori-bundle-model.patch": "5ca328c03068d048ffebbe73e50431e75a9950736e4a6a00fb0427d5de4484a7"
+  },
+  "format_only_code_section_sha256": {
+    ".text": "007ca4c44478c8048e207d295286d774b27e6ab205cde23815db65191f500ce1",
+    ".pdata": "db6a2af585da325d2fdeb7aa0516d91f8a43c21a3f6222f3c8a9ea1c979d5429"
+  },
+  "final_build_seconds": 2.189
 }
