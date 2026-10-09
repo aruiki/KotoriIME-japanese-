@@ -20411,7 +20411,7 @@ index f8e3b43ec..f20b5eaf8 100644
    virtual bool Predict(const composer::Composer& composer,
                         const commands::Context& context,
 diff --git a/src/engine/engine_converter_test.cc b/src/engine/engine_converter_test.cc
-index 808058c64..6466d6e87 100644
+index 808058c64..87b4f2d89 100644
 --- a/src/engine/engine_converter_test.cc
 +++ b/src/engine/engine_converter_test.cc
 @@ -111,6 +111,7 @@ class EngineConverterTest : public testing::TestWithTempUserProfile {
@@ -20470,11 +20470,12 @@ index 808058c64..6466d6e87 100644
  TEST_F(EngineConverterTest, AppendCandidateListForRequestTypes) {
    auto mock_converter = std::make_shared<MockConverter>();
    EngineConverter converter(mock_converter, request_, config_);
-@@ -3970,6 +4005,87 @@ TEST_F(EngineConverterTest, PredictWithContext) {
+@@ -3970,6 +4005,94 @@ TEST_F(EngineConverterTest, PredictWithContext) {
    EXPECT_TRUE(converter.Predict(*composer_, context));
  }
  
 +TEST_F(EngineConverterTest, NuanceAlternativeFocusesChangedSegment) {
++  for (bool fixed_boundary : {false, true}) {
 +  for (bool whole_top : {true, false}) {
 +  for (bool existing : {true, false}) {
 +    auto mock_converter = std::make_shared<MockConverter>();
@@ -20483,6 +20484,11 @@ index 808058c64..6466d6e87 100644
 +    AddSegmentWithSingleCandidate(&segments, "わたしは", "私は");
 +    AddSegmentWithSingleCandidate(&segments, "そのとくちょうは", "その特徴は");
 +    AddSegmentWithSingleCandidate(&segments, "ちゃいろい", "茶色い");
++    if (fixed_boundary) {
++      for (int i = 0; i < 3; ++i) {
++        segments.mutable_conversion_segment(i)->set_segment_type(Segment::FIXED_BOUNDARY);
++      }
++    }
 +    auto* whole = segments.mutable_conversion_segment(0)->add_candidate();
 +    whole->key = whole->content_key = "わたしはそのとくちょうはちゃいろい";
 +    whole->value = whole->content_value = "私はその特長は茶色い";
@@ -20517,6 +20523,7 @@ index 808058c64..6466d6e87 100644
 +    EXPECT_EQ(output.preedit().segment(1).value(), "その特長は");
 +    EXPECT_EQ(output.preedit().segment(1).annotation(), commands::Preedit::Segment::HIGHLIGHT);
 +    EXPECT_EQ(output.preedit().segment(2).value(), "茶色い");
++  }
 +  }
 +  }
 +}
@@ -20558,7 +20565,7 @@ index 808058c64..6466d6e87 100644
  TEST_F(EngineConverterTest, FullSentenceCandidateInConversion) {
    auto mock_converter = std::make_shared<MockConverter>();
    EngineConverter converter(mock_converter, request_, config_);
-@@ -4822,5 +4938,118 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
+@@ -4822,5 +4945,118 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
    EXPECT_EQ(consumed_key_size, Util::CharsLen("きょうは"));
  }
  
@@ -23240,10 +23247,10 @@ index 000000000..13b1ec304
 +}  // namespace mozc
 diff --git a/src/rewriter/kotori_nuance_rewriter.cc b/src/rewriter/kotori_nuance_rewriter.cc
 new file mode 100644
-index 000000000..ea6145576
+index 000000000..f72c75655
 --- /dev/null
 +++ b/src/rewriter/kotori_nuance_rewriter.cc
-@@ -0,0 +1,169 @@
+@@ -0,0 +1,171 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +#include "rewriter/kotori_nuance_rewriter.h"
 +
@@ -23282,10 +23289,12 @@ index 000000000..ea6145576
 +      request.context().input_field_type() == commands::Context::PASSWORD ||
 +      segments->conversion_segments_size() == 0) return false;
 +  const size_t count = segments->conversion_segments_size();
++  // Kotori: FIXED_BOUNDARYは文節の境界を守る。AIの文節伸縮もこの種別を使うため、
++  // 境界と読みを変えない表記の選択肢は提示する。FIXED_VALUEや保護属性のある
++  // 候補は引き続き変更しない。
 +  std::string reading, original;
 +  for (const Segment& segment : segments->conversion_segments()) {
 +    if (segment.candidates_size() == 0 || segment.segment_type() == Segment::FIXED_VALUE ||
-+        segment.segment_type() == Segment::FIXED_BOUNDARY ||
 +        (segment.candidate(0).attributes &
 +         (converter::Attribute::USER_DICTIONARY | converter::Attribute::NO_MODIFICATION |
 +          converter::Attribute::COMMAND_CANDIDATE))) return false;
@@ -23434,10 +23443,10 @@ index 000000000..7be2ddeaa
 +#endif  // MOZC_REWRITER_KOTORI_NUANCE_REWRITER_H_
 diff --git a/src/rewriter/kotori_nuance_rewriter_test.cc b/src/rewriter/kotori_nuance_rewriter_test.cc
 new file mode 100644
-index 000000000..671ce7822
+index 000000000..609481971
 --- /dev/null
 +++ b/src/rewriter/kotori_nuance_rewriter_test.cc
-@@ -0,0 +1,137 @@
+@@ -0,0 +1,162 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +#include "rewriter/kotori_nuance_rewriter.h"
 +#include "converter/attribute.h"
@@ -23513,10 +23522,35 @@ index 000000000..671ce7822
 +    segments.mutable_conversion_segment(0)->mutable_candidate(0)->attributes |= attribute;
 +    EXPECT_FALSE(rewriter.Rewrite(Conversion(), &segments));
 +  }
-+  for (auto type : {Segment::FIXED_VALUE, Segment::FIXED_BOUNDARY}) {
++  for (auto type : {Segment::FIXED_VALUE}) {
 +    Segments segments; Add(segments, "とくちょう", "特徴");
 +    segments.mutable_conversion_segment(0)->set_segment_type(type);
 +    EXPECT_FALSE(rewriter.Rewrite(Conversion(), &segments));
++  }
++}
++TEST(KotoriNuanceRewriterTest, PreservesAiResizedBoundariesWhileOfferingNuance) {
++  Segments segments;
++  const char* keys[] = {"わたしは", "はやしの", "なかで", "かぶとむしを",
++      "みつけたがなんといってもその", "とくちょうは", "ちゃいろいってことだ"};
++  const char* values[] = {"私は", "林の", "中で", "カブトムシを",
++      "見つけたがなんといってもその", "特徴は", "茶色いってことだ"};
++  for (int i = 0; i < 7; ++i) {
++    Add(segments, keys[i], values[i]);
++    segments.mutable_conversion_segment(i)->set_segment_type(Segment::FIXED_BOUNDARY);
++  }
++  KotoriNuanceRewriter rewriter;
++  ASSERT_TRUE(rewriter.Rewrite(Conversion(), &segments));
++  ASSERT_EQ(segments.conversion_segments_size(), 7);
++  const auto& alternative = segments.conversion_segment(0).candidate(1);
++  EXPECT_EQ(alternative.value,
++      "私は林の中でカブトムシを見つけたがなんといってもその特長は茶色いってことだ");
++  EXPECT_EQ(alternative.converted_segment_count, 7);
++  EXPECT_TRUE(alternative.kotori_nuance_alternative);
++  for (int i = 0; i < 7; ++i) {
++    const auto& segment = segments.conversion_segment(i);
++    EXPECT_EQ(segment.key(), keys[i]);
++    EXPECT_EQ(segment.candidate(0).value, values[i]);
++    EXPECT_EQ(segment.segment_type(), Segment::FIXED_BOUNDARY);
 +  }
 +}
 +TEST(KotoriNuanceRewriterTest, PromotesLexicalDifferenceInsideWholeSentence) {
@@ -23937,10 +23971,10 @@ index 000000000..cf2c801ea
 +#endif  // MOZC_REWRITER_LLAMA_RUNTIME_H_
 diff --git a/src/rewriter/llm_correction_eval_main.cc b/src/rewriter/llm_correction_eval_main.cc
 new file mode 100644
-index 000000000..453310d2d
+index 000000000..d5640c186
 --- /dev/null
 +++ b/src/rewriter/llm_correction_eval_main.cc
-@@ -0,0 +1,138 @@
+@@ -0,0 +1,153 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +// 開発用。非同期ワーカーと同じ補正ガードを実辞書・実モデルで評価する。
 +// TSFや初回表示への反映は、別の実セッション試験で確認する。
@@ -24049,7 +24083,22 @@ index 000000000..453310d2d
 +      const bool guard = mozc::kotori_internal::IsSafeDictionaryCorrection(
 +          (*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading,
 +          original, score_values.back());
-+      std::cerr << "control_guard\t" << guard << '\n';
++      std::string corrected_reading;
++      const bool typo_guard = mozc::kotori_internal::IsSafeDictionaryTypoCorrection(
++          (*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading,
++          original, score_values.back(), &corrected_reading);
++      std::cerr << "control_guard\t" << guard << "\ttypo_guard\t" << typo_guard
++                << "\tcorrected_reading\t" << corrected_reading << '\n';
++      // 開発用の第3列を渡した時だけ、生成候補の拒否理由を調べる。
++      for (const auto& value : llm->Correct(reading, original, options.prompt, beams)) {
++        std::string yomi;
++        const bool same = mozc::kotori_internal::IsSafeDictionaryCorrection(
++            (*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading, original, value);
++        const bool typo = mozc::kotori_internal::IsSafeDictionaryTypoCorrection(
++            (*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading, original, value, &yomi);
++        std::cerr << "generated\t" << value << "\tsame\t" << same
++                  << "\ttypo\t" << typo << "\tyomi\t" << yomi << '\n';
++      }
 +      Diagnose((*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading, original);
 +      Diagnose((*modules)->GetDictionary(), (*modules)->GetPosMatcher(), reading, score_values.back());
 +    }
@@ -24237,10 +24286,10 @@ index 000000000..c31037864
 +}
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..5706dc89f
+index 000000000..f88fcdd46
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
-@@ -0,0 +1,2973 @@
+@@ -0,0 +1,3118 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -24864,7 +24913,8 @@ index 000000000..5706dc89f
 +                              dictionary::PosMatcher pos_matcher,
 +                              absl::string_view reading,
 +                              absl::string_view text,
-+                              std::optional<CorrectionSpan> changed = std::nullopt) {
++                              std::optional<CorrectionSpan> changed = std::nullopt,
++                              bool protect_grammar = true) {
 +  if (!IsValidCorrectionText(reading) || !IsValidCorrectionText(text)) {
 +    return false;
 +  }
@@ -24874,7 +24924,7 @@ index 000000000..5706dc89f
 +  std::vector<size_t> r_off(r.size() + 1), t_off(t.size() + 1);
 +  for (size_t j = 0; j < r.size(); ++j) r_off[j + 1] = r_off[j] + r[j].size();
 +  for (size_t i = 0; i < t.size(); ++i) t_off[i + 1] = t_off[i] + t[i].size();
-+  auto protected_token = [pos_matcher](const dictionary::Token& token) {
++  auto protected_token = [pos_matcher, protect_grammar](const dictionary::Token& token) {
 +    // Kotori: 文法語はFunctionalとSuffixWordの共通部分。
 +    // Functionalだけでは名詞の接尾語「痛」が動詞「痛めた」に重なり、
 +    // 必要な同音語補正を止める。文法語と代名詞は左右の品詞で守る。
@@ -24884,7 +24934,7 @@ index 000000000..5706dc89f
 +    return (token.attributes & dictionary::Token::USER_DICTIONARY) != 0 ||
 +           pos_matcher.IsUniqueNoun(token.lid) ||
 +           pos_matcher.IsUniqueNoun(token.rid) ||
-+           grammar(token.lid) || grammar(token.rid) ||
++           (protect_grammar && (grammar(token.lid) || grammar(token.rid))) ||
 +           pos_matcher.IsPronoun(token.lid) ||
 +           pos_matcher.IsPronoun(token.rid);
 +  };
@@ -25171,6 +25221,139 @@ index 000000000..5706dc89f
 +         HasSafeCorrectionReading(dictionary, pos_matcher, reading, corrected, after);
 +}
 +
++bool IsMechanicalReadingTypo(absl::string_view reading, absl::string_view corrected) {
++  if (!IsValidCorrectionText(reading) || !IsValidCorrectionText(corrected)) return false;
++  const auto a = Chars(reading), b = Chars(corrected);
++  if (a.size() < 4 || a.size() > kMaxTypoChars || b.size() > kMaxTypoChars) return false;
++  size_t first = 0;
++  while (first < a.size() && first < b.size() && a[first] == b[first]) ++first;
++  if (a.size() == b.size()) {
++    if (first == a.size() || !std::equal(a.begin()+first+1,a.end(),b.begin()+first+1)) return false;
++    static constexpr absl::string_view pairs[] = {"かが", "きぎ", "くぐ", "けげ", "こご", "さざ", "しじ", "すず", "せぜ", "そぞ", "ただ", "ちぢ", "つづ", "てで", "とど", "はば", "ひび", "ふぶ", "へべ", "ほぼ", "はぱ", "ひぴ", "ふぷ", "へぺ", "ほぽ"};
++    for (auto pair : pairs) {
++      const auto chars = Chars(pair);
++      if ((a[first] == chars[0] && b[first] == chars[1]) || (a[first] == chars[1] && b[first] == chars[0])) return true;
++    }
++    return false;
++  }
++  if (a.size() == b.size()+1) {
++    // 重複文字か余分な促音だけを削除する。一般の一文字削除は意味を変え得る。
++    for (size_t i = 0; i < a.size(); ++i) {
++      if (a[i] != "っ" && !(i > 0 && a[i] == a[i-1]) && !(i+1 < a.size() && a[i] == a[i+1])) continue;
++      if (Util::GetScriptType(a[i]) != Util::HIRAGANA) continue;
++      auto removed = a; removed.erase(removed.begin()+i);
++      if (removed == b) return true;
++    }
++    return false;
++  }
++  if (b.size() == a.size()+1 && first < b.size() &&
++      (b[first] == "っ" || b[first] == "ー" || b[first] == "う" || b[first] == "い")) {
++    auto removed = b; removed.erase(removed.begin()+first);
++    return removed == a;
++  }
++  return false;
++}
++
++// Kotori: 逆引きの最初の読みだけでは「世話→せいわ」などを選び得る。
++// 入力から一字だけ直した読みを有限に調べ、生成文との辞書対応を確認する。
++std::string MechanicalCorrectionReading(
++    const dictionary::DictionaryInterface& dictionary, absl::string_view reading,
++    absl::string_view corrected) {
++  auto test = [&](const std::vector<std::string>& chars) {
++    const std::string yomi = absl::StrJoin(chars, "");
++    return IsMechanicalReadingTypo(reading, yomi) &&
++           MatchesReading(dictionary, nullptr, corrected, yomi, false) ? yomi : std::string();
++  };
++  const auto input = Chars(reading);
++  if (input.size() < 4 || input.size() > kMaxTypoChars) return {};
++  const auto reverse = ReadingOf(dictionary, nullptr, corrected);
++  if (IsMechanicalReadingTypo(reading, reverse)) return reverse;
++  for (size_t i = 0; i <= input.size(); ++i) {
++    for (const char* insert : {"っ", "ー", "う", "い"}) {
++      auto candidate = input;
++      candidate.insert(candidate.begin() + i, insert);
++      if (const auto yomi = test(candidate); !yomi.empty()) return yomi;
++    }
++    if (i == input.size()) continue;
++    auto removed = input;
++    removed.erase(removed.begin() + i);
++    if (const auto yomi = test(removed); !yomi.empty()) return yomi;
++    for (const auto& ch : Chars("かがきぎくぐけげこごさざしじすずせぜそぞただちぢつづてでとどはばぱひびぴふぶぷへべぺほぼぽ")) {
++      auto candidate = input;
++      candidate[i] = ch;
++      if (const auto yomi = test(candidate); !yomi.empty()) return yomi;
++    }
++  }
++  return {};
++}
++
++bool IsSafeDictionaryTypoCorrection(
++    const dictionary::DictionaryInterface& dictionary,
++    dictionary::PosMatcher pos_matcher, absl::string_view reading,
++    absl::string_view original, absl::string_view corrected, std::string* corrected_reading) {
++  if (corrected_reading == nullptr || !IsLocalCorrection(original, corrected)) return false;
++  const std::string candidate_reading = MechanicalCorrectionReading(dictionary, reading, corrected);
++  if (candidate_reading.empty()) return false;
++  const auto [before, after] = CorrectionSpans(original, corrected);
++  // Kotori: 読みの一字誤りは、表記もかなだけの一字修正に限る。
++  // 漢字・名前・利用者辞書・代名詞を保持し、正しい活用/否定/時制の断片を変えない。
++  auto kana_only = [](absl::string_view text, CorrectionSpan span) {
++    for (const auto& ch : Chars(text.substr(span.first, span.second - span.first))) {
++      if (Util::GetScriptType(ch) != Util::HIRAGANA) return false;
++    }
++    return true;
++  };
++  if (!kana_only(original, before) || !kana_only(corrected, after)) return false;
++  auto count = [](absl::string_view text, absl::string_view fragment) {
++    size_t total = 0, at = 0;
++    while ((at = text.find(fragment, at)) != absl::string_view::npos) {
++      ++total;
++      at += fragment.size();
++    }
++    return total;
++  };
++  for (absl::string_view grammar : {"って", "った", "して", "した", "ない",
++       "なかった", "ません", "ました", "でした", "だった", "れる", "せる"}) {
++    if (count(reading, grammar) != count(candidate_reading, grammar)) return false;
++  }
++  // 単語の途中に現れる一文字の助詞は誤入力の範囲の拒否理由にしない。
++  // 上の活用検査と、前後の辞書対応/保護語検査を併用する。
++  if (!HasSafeCorrectionReading(dictionary, pos_matcher, reading, original, before, false) ||
++      !HasSafeCorrectionReading(dictionary, pos_matcher, candidate_reading, corrected, after, false)) return false;
++  *corrected_reading = candidate_reading;
++  return true;
++}
++
++std::optional<std::string> ProjectMechanicalTypoCorrection(
++    const dictionary::DictionaryInterface& dictionary,
++    dictionary::PosMatcher pos_matcher, absl::string_view reading,
++    absl::string_view original, absl::string_view generated) {
++  // Kotori: LLMの修正した読みだけを元の表記へ反映する。
++  // 正しい漢字を平仮名へ戻したり、周囲の語を言い換えたりしない。
++  if (original == generated) return std::nullopt;
++  const std::string fixed_reading = MechanicalCorrectionReading(dictionary, reading, generated);
++  if (fixed_reading.empty()) return std::nullopt;
++  const auto input = Chars(reading), fixed = Chars(fixed_reading), text = Chars(original);
++  size_t at = 0;
++  while (at < input.size() && at < fixed.size() && input[at] == fixed[at]) ++at;
++  for (size_t i = 0; i <= text.size(); ++i) {
++    auto candidate = text;
++    if (fixed.size() == input.size() + 1) {
++      candidate.insert(candidate.begin() + i, fixed[at]);
++    } else {
++      if (i == text.size() || Util::GetScriptType(text[i]) != Util::HIRAGANA) continue;
++      if (fixed.size() + 1 == input.size()) candidate.erase(candidate.begin() + i);
++      else candidate[i] = fixed[at];
++    }
++    const std::string value = absl::StrJoin(candidate, "");
++    if (!MatchesReading(dictionary, nullptr, value, fixed_reading, false)) continue;
++    std::string checked_reading;
++    if (IsSafeDictionaryTypoCorrection(dictionary, pos_matcher, reading,
++                                      original, value, &checked_reading)) return value;
++  }
++  return std::nullopt;
++}
++
 +void SplitIntoSegments(
 +    const std::vector<std::pair<std::string, std::string>>& units, size_t max,
 +    std::vector<std::string>* keys, std::vector<std::string>* values) {
@@ -25210,17 +25393,22 @@ index 000000000..5706dc89f
 +  }
 +  std::optional<std::string> best;
 +  double best_score = original_score;
-+  for (const auto& value : generated) {
++  for (const auto& generated_value : generated) {
 +    if (cancelled()) return std::nullopt;
-+    if (!IsSafeDictionaryCorrection(dictionary, pos_matcher, reading,
-+                                    original, value)) {
++    const auto projected = ProjectMechanicalTypoCorrection(
++        dictionary, pos_matcher, reading, original, generated_value);
++    if (cancelled()) return std::nullopt;
++    const std::string& value = projected ? *projected : generated_value;
++    std::string candidate_reading(reading);
++    if (!IsSafeDictionaryCorrection(dictionary, pos_matcher, reading, original, value) &&
++        !IsSafeDictionaryTypoCorrection(dictionary, pos_matcher, reading, original, value, &candidate_reading)) {
 +      if (Env("KOTORI_LM_DEBUG") != nullptr) {
 +        std::fprintf(stderr, "[kotori] correction rejected=reading_or_protection\n");
 +      }
 +      continue;
 +    }
 +    if (cancelled()) return std::nullopt;
-+    const auto z = scorer->Score(context, reading, {value});
++    const auto z = scorer->Score(context, candidate_reading, {value});
 +    if (Env("KOTORI_LM_DEBUG") != nullptr) {
 +      std::fprintf(stderr, "[kotori] correction zenz_valid=%d cancelled=%d\n",
 +                   z && z->size() == 1 && std::isfinite((*z)[0]) ? 1 : 0,
@@ -26325,7 +26513,9 @@ index 000000000..5706dc89f
 +  if (conv.empty() || yield()) return preds;
 +  auto add = [&](const std::string& text, const std::string& base,
 +                 const std::string& covered) {
-+    if (text == conv || HasDigit(text)) return;
++    // Kotori: トークン上限で文字の途中に切れた生成を採点・表示へ渡さない。
++    if (!Util::IsValidUtf8(text) || !Util::IsValidUtf8(base) ||
++        !Util::IsValidUtf8(covered) || text == conv || HasDigit(text)) return;
 +    const absl::string_view continuation =
 +        absl::string_view(text).substr(std::min(base.size(), text.size()));
 +    if (filter_junk_ && IsJunkPrediction(text, continuation, reading)) return;
@@ -26519,7 +26709,9 @@ index 000000000..5706dc89f
 +
 +bool LmRewriter::PredictionFits(const Prediction& p,
 +                                const std::string& reading) const {
-+  if (!absl::StartsWith(reading, p.covered) ||
++  if (!Util::IsValidUtf8(p.text) || !Util::IsValidUtf8(p.base) ||
++      !Util::IsValidUtf8(p.covered) || !Util::IsValidUtf8(p.yomi) ||
++      !absl::StartsWith(reading, p.covered) ||
 +      !absl::StartsWith(p.text, p.base)) {
 +    return false;
 +  }
@@ -27088,13 +27280,15 @@ index 000000000..5706dc89f
 +  }
 +  const char* prompt = Env("KOTORI_LM_CORRECTION_PROMPT");
 +  if (prompt != nullptr && std::string(prompt) != "examples" &&
-+      std::string(prompt) != "chat") return false;
++      std::string(prompt) != "typing" && std::string(prompt) != "chat") return false;
 +  kotori_internal::CorrectionOptions options;
 +  options.zenz_weight = lambda_lm_;
 +  options.llm_weight = lambda_llm_;
 +  options.margin = typo_margin_;
 +  if (prompt != nullptr && std::string(prompt) == "chat") {
 +    options.prompt = ZenzScorer::CorrectionPrompt::kChat;
++  } else if (prompt != nullptr && std::string(prompt) == "examples") {
++    options.prompt = ZenzScorer::CorrectionPrompt::kExamples;
 +  }
 +  const auto corrected = kotori_internal::GenerateSafeCorrection(
 +      *dictionary_, pos_matcher_, scorer, llm, context, reading, chosen,
@@ -27216,10 +27410,10 @@ index 000000000..5706dc89f
 +}  // namespace mozc
 diff --git a/src/rewriter/lm_rewriter.h b/src/rewriter/lm_rewriter.h
 new file mode 100644
-index 000000000..95aee38c0
+index 000000000..d725b2461
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.h
-@@ -0,0 +1,442 @@
+@@ -0,0 +1,457 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +//
 +// Kotori: AI による変換(docs/adr/0013、0015、0016)。
@@ -27271,6 +27465,21 @@ index 000000000..95aee38c0
 +// Kotori: 続きが入力済みの断片を繰り返す場合は初回の先頭へ昇格しない。
 +bool HasRepeatedContinuation(absl::string_view base, absl::string_view continuation);
 +
++// Kotori: 一文字の重複削除/促音・長音の脱落/濁点違いだけを認める。
++// 任意の単語・文法の書換えではない。辞書の保護と採点は別に必要。
++bool IsMechanicalReadingTypo(absl::string_view reading, absl::string_view corrected);
++bool IsSafeDictionaryTypoCorrection(
++    const dictionary::DictionaryInterface& dictionary,
++    dictionary::PosMatcher pos_matcher, absl::string_view reading,
++    absl::string_view original, absl::string_view corrected,
++    std::string* corrected_reading);
++
++// 生成した読みの一字の修正を、周囲の表記を保った元の文へ反映する。
++std::optional<std::string> ProjectMechanicalTypoCorrection(
++    const dictionary::DictionaryInterface& dictionary,
++    dictionary::PosMatcher pos_matcher, absl::string_view reading,
++    absl::string_view original, absl::string_view generated);
++
 +// 有限の点数で、正の margin 以上の改善があるときだけ true。
 +bool HasCorrectionScoreGain(double original, double corrected, double margin);
 +
@@ -27280,7 +27489,7 @@ index 000000000..95aee38c0
 +  double llm_weight = 0.7;
 +  double margin = 5.0;
 +  int beams = 2;
-+  ZenzScorer::CorrectionPrompt prompt = ZenzScorer::CorrectionPrompt::kExamples;
++  ZenzScorer::CorrectionPrompt prompt = ZenzScorer::CorrectionPrompt::kTypingExamples;
 +};
 +std::optional<std::string> GenerateSafeCorrection(
 +    const dictionary::DictionaryInterface& dictionary,
@@ -27664,10 +27873,10 @@ index 000000000..95aee38c0
 +#endif  // MOZC_REWRITER_LM_REWRITER_H_
 diff --git a/src/rewriter/lm_rewriter_test.cc b/src/rewriter/lm_rewriter_test.cc
 new file mode 100644
-index 000000000..4e5460e7f
+index 000000000..c2e5a0b44
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter_test.cc
-@@ -0,0 +1,744 @@
+@@ -0,0 +1,817 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -27778,6 +27987,66 @@ index 000000000..4e5460e7f
 +  const CorrectionDictionary dictionary = CommonDictionary();
 +  EXPECT_TRUE(IsSafe(dictionary, "あしをいためたので", "足を炒めたので",
 +                     "足を痛めたので"));
++}
++
++TEST(LmRewriterPredictionGuardTest, AllowsOnlyMechanicalSingleKanaTypo) {
++  EXPECT_TRUE(kotori_internal::IsMechanicalReadingTypo("ちょとまつ", "ちょっとまつ"));
++  EXPECT_TRUE(kotori_internal::IsMechanicalReadingTypo("しりょをおくる", "しりょうをおくる"));
++  EXPECT_TRUE(kotori_internal::IsMechanicalReadingTypo("おりまます", "おります"));
++  EXPECT_TRUE(kotori_internal::IsMechanicalReadingTypo("いたしまっす", "いたします"));
++  EXPECT_TRUE(kotori_internal::IsMechanicalReadingTypo("ありがとうごさいます", "ありがとうございます"));
++  EXPECT_FALSE(kotori_internal::IsMechanicalReadingTypo("いかない", "いきたい"));
++  EXPECT_FALSE(kotori_internal::IsMechanicalReadingTypo("いきます", "いきました"));
++  EXPECT_FALSE(kotori_internal::IsMechanicalReadingTypo("よていおかくにん", "よていをかくにん"));
++  EXPECT_FALSE(kotori_internal::IsMechanicalReadingTypo("１０じから", "１１じから"));
++  EXPECT_FALSE(kotori_internal::IsMechanicalReadingTypo("しりょをおくる", "しりょうをおくります"));
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest, CorrectsSmallKanaWithoutChangingOtherWords) {
++  CorrectionDictionary dictionary;
++  dictionary.Add(CommonToken("まつ", "待つ"));
++  std::string reading;
++  EXPECT_TRUE(kotori_internal::IsSafeDictionaryTypoCorrection(dictionary, pos_matcher_, "ちょとまつ", "ちょと待つ", "ちょっと待つ", &reading));
++  EXPECT_EQ(reading, "ちょっとまつ");
++  auto user_word = CommonToken("ちょと", "ちょと");
++  user_word.attributes = dictionary::Token::USER_DICTIONARY;
++  dictionary.Add(std::move(user_word));
++  EXPECT_FALSE(kotori_internal::IsSafeDictionaryTypoCorrection(dictionary, pos_matcher_, "ちょとまつ", "ちょと待つ", "ちょっと待つ", &reading));
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest, ProjectsOnlyTypoAndKeepsKanji) {
++  CorrectionDictionary dictionary;
++  dictionary.Add(CommonToken("まって", "待って"));
++  auto particle = CommonToken("と", "と");
++  particle.lid = particle.rid = pos_matcher_.GetFunctionalId();
++  dictionary.Add(particle);
++  EXPECT_EQ(kotori_internal::ProjectMechanicalTypoCorrection(
++      dictionary, pos_matcher_, "ちょとまってください", "ちょと待ってください",
++      "ちょっとまってください"), "ちょっと待ってください");
++  std::string reading;
++  EXPECT_TRUE(kotori_internal::IsSafeDictionaryTypoCorrection(dictionary, pos_matcher_,
++      "おせわになっておりまます", "おせわになっておりまます",
++      "おせわになっております", &reading));
++  EXPECT_FALSE(kotori_internal::IsSafeDictionaryTypoCorrection(dictionary, pos_matcher_,
++      "まってください", "待ってください", "待てください", &reading));
++  auto name = CommonToken("ちょと", "ちょと");
++  name.lid = name.rid = pos_matcher_.GetUniqueNounId();
++  dictionary.Add(name);
++  EXPECT_FALSE(kotori_internal::ProjectMechanicalTypoCorrection(dictionary, pos_matcher_,
++      "ちょとまってください", "ちょと待ってください", "ちょっとまってください"));
++}
++
++TEST_F(LmRewriterDictionaryCorrectionTest, ChoosesReadingCloseToTypedInput) {
++  CorrectionDictionary dictionary;
++  dictionary.Add(CommonToken("せいわ", "世話"));
++  dictionary.Add(CommonToken("せわ", "世話"));
++  std::string reading;
++  EXPECT_TRUE(kotori_internal::IsSafeDictionaryTypoCorrection(dictionary, pos_matcher_,
++      "おせわになっておりまます", "お世話になっておりまます",
++      "お世話になっております", &reading));
++  EXPECT_EQ(reading, "おせわになっております");
++  EXPECT_FALSE(kotori_internal::ProjectMechanicalTypoCorrection(dictionary, pos_matcher_,
++      "おせわになっております", "お世話になっております", "お世話になっております"));
 +}
 +
 +TEST_F(LmRewriterDictionaryCorrectionTest, RequiresTheOriginalReading) {
@@ -28221,6 +28490,15 @@ index 000000000..4e5460e7f
 +                                          const std::string& context = "") const {
 +    return rewriter_->EvaluatedPredictionBase(request, reading, context);
 +  }
++  size_t CachedPredictionCountWithMalformedText() const {
++    const std::string reading = "あしをいためた";
++    const std::string key = rewriter_->CacheKey(config_, "");
++    rewriter_->StorePredictions(reading, key, {
++        {"足を痛めたので\xe3\x83", "足を痛めた", reading, "", false},
++        {"足を痛めたので", "足を痛めた", reading, "\xe3\x83", false},
++        {"足を痛めたので", "足を痛めた", reading, reading + "ので", false}});
++    return rewriter_->CachedPredictions(reading, key, 6).size();
++  }
 +  void ReloadModel() { ++rewriter_->model_epoch_; }
 +  void ReplaceModelHashes() {
 +    std::lock_guard<std::mutex> lock(rewriter_->job_mu_);
@@ -28240,6 +28518,10 @@ index 000000000..4e5460e7f
 +  config::Config config_;
 +  std::unique_ptr<LmRewriter> rewriter_;
 +};
++
++TEST_F(LmRewriterGenerationTest, RejectsMalformedPredictionsEvenWithFullCoveredReading) {
++  EXPECT_EQ(CachedPredictionCountWithMalformedText(), 1);
++}
 +
 +TEST_F(LmRewriterGenerationTest, RejectsPastInputAtPublicationAndApplication) {
 +  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
@@ -28447,10 +28729,10 @@ index d92e814fd..6c3ff56e2 100644
  }
 diff --git a/src/rewriter/zenz_scorer.cc b/src/rewriter/zenz_scorer.cc
 new file mode 100644
-index 000000000..62ec97237
+index 000000000..b04585b07
 --- /dev/null
 +++ b/src/rewriter/zenz_scorer.cc
-@@ -0,0 +1,865 @@
+@@ -0,0 +1,871 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/zenz_scorer.h"
@@ -29205,11 +29487,17 @@ index 000000000..62ec97237
 +      text.find_first_of("<\r\n") != absl::string_view::npos ||
 +      reading.find_first_of("<\r\n") != absl::string_view::npos) return {};
 +  const auto* vocab = llama_model_get_vocab(model_);
-+  const bool examples = mode == CorrectionPrompt::kExamples;
++  const bool typing = mode == CorrectionPrompt::kTypingExamples;
++  const bool examples = mode == CorrectionPrompt::kExamples || typing;
 +  std::vector<llama_token> prefix;
 +  if (examples) {
 +    // Kotori: correction-reading-fewshot.txt と同じ読み付きの3例。チャット化しない。
-+    const std::string prompt =
++    const std::string typing_examples =
++        "日本語IMEの誤変換と1文字の打ち間違いを最小限直す。名前、数字、否定、時制は変えない。正しい文は変えない。\n\n"
++        "読み: あめがふっている\n変換候補: 雨が振っている\n修正: 雨が降っている\n\n"
++        "読み: まどをしめました\n変換候補: 窓を閉めました\n修正: 窓を閉めました\n\n"
++        "読み: これはちょとむずかしい\n変換候補: これはちょと難しい\n修正: これはちょっと難しい\n\n";
++    const std::string prompt = (typing ? typing_examples : std::string(
 +        "日本語IMEの変換候補を、読みを変えず、誤変換だけ最小限直す。正しい文は変えない。\n\n"
 +        "読み: あめがふっている\n"
 +        "変換候補: 雨が振っている\n"
@@ -29219,7 +29507,7 @@ index 000000000..62ec97237
 +        "修正: 会議の資料を作成する\n\n"
 +        "読み: きのうはがっこうにいきました\n"
 +        "変換候補: 昨日は学校に行きまいた\n"
-+        "修正: 昨日は学校に行きました\n\n"
++        "修正: 昨日は学校に行きました\n\n")) +
 +        "読み: " + std::string(reading) + "\n変換候補: " + std::string(text) +
 +        "\n修正:";
 +    const llama_token bos = llama_vocab_bos(vocab);
@@ -29318,7 +29606,7 @@ index 000000000..62ec97237
 +}  // namespace mozc
 diff --git a/src/rewriter/zenz_scorer.h b/src/rewriter/zenz_scorer.h
 new file mode 100644
-index 000000000..e7dccc482
+index 000000000..608d25545
 --- /dev/null
 +++ b/src/rewriter/zenz_scorer.h
 @@ -0,0 +1,142 @@
@@ -29397,7 +29685,7 @@ index 000000000..e7dccc482
 +  std::vector<std::vector<std::string>> ContinueMany(
 +      const std::vector<std::pair<std::string, int>>& texts, int max_tokens);
 +
-+  enum class CorrectionPrompt { kChat, kExamples };
++  enum class CorrectionPrompt { kChat, kExamples, kTypingExamples };
 +
 +  // Kotori: 読みと文を渡し、チャット指示または読み付き例示から修正文を生成する。
 +  // 結果の採用判断は呼び出し側で行う。打ち切り・未完了の出力は返さない。

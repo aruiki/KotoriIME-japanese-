@@ -1,0 +1,42 @@
+{
+  "upstream": "a069a88d4cb5c011de0f9aebb6c149a1c808d904",
+  "input_count": 112,
+  "input_manifest_sha256": "6587c1691d86b239737dd97abf883c05cbafef5886c7503372ba65730f1c75b4",
+  "patches": [
+    {
+      "path": "mozc\\patches\\0001-kotori-branding.patch",
+      "sha256": "7fc85afbdcd397a00d0fa52738415142b8ac483a00e6d457d1107173e852969b"
+    },
+    {
+      "path": "mozc\\patches\\0002-kotori-lm-rerank.patch",
+      "sha256": "c5f651433c5f546315eb02d710d692cf14a645e13d1e70b1b62fa0215c363f4a"
+    },
+    {
+      "path": "mozc\\patches\\0003-kotori-bundle-model.patch",
+      "sha256": "d53c2e3d71892d35e5a56a6c7d747c8184dc5da3ba8c37d98ff5849793c351ab"
+    }
+  ],
+  "fresh_patch_apply": "all three patches passed; all 112 input files byte-identical",
+  "scope": "local source/CLI/Qt checks; installed Windows TSF and MSI lifecycle pending",
+  "standard": {
+    "correct": 183,
+    "total": 200,
+    "percent": 91.5,
+    "gate_percent": 90,
+    "artifact": "C:\\Users\\aruik\\kotori-first-check\\all-request-ajimee-final.json"
+  },
+  "heldout": {
+    "correct": 289,
+    "total": 300,
+    "percent": 96.3,
+    "artifact": "C:\\Users\\aruik\\kotori-first-check\\all-request-heldout-final.json"
+  },
+  "predictions": {
+    "total": 29,
+    "continuations": 8,
+    "first_tab_differences": 2,
+    "settled_tab_differences": 0
+  },
+  "native_acceptance": "not performed; computer-use initialization timed out after documented recovery",
+  "msi": "not yet built from final source"
+}

@@ -76,10 +76,13 @@ def main():
     result = dict(scope="CLI session; not installed Windows TSF", exe=str(args.exe), exe_sha256=initial_hash,
                   data_sha256=sha256(args.data), model_status=model_status, items=len(rows),
                   continuations=sum(r["continuation"] for r in rows),
-                  initial_tab_mismatches=sum(r["settled"] is not None and r["settled"] != r["tab"] for r in rows), rows=rows)
+                  initial_tab_mismatches=sum(r["first"] is not None and r["first"] != r["tab"] for r in rows),
+                  settled_tab_mismatches=sum(r["settled"] is not None and r["settled"] != r["tab"] for r in rows), rows=rows)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(json.dumps({k: result[k] for k in ["items", "continuations", "initial_tab_mismatches"]}), flush=True)
-    if result["initial_tab_mismatches"]:
+    print(json.dumps({k: result[k] for k in ["items", "continuations", "initial_tab_mismatches", "settled_tab_mismatches"]}), flush=True)
+    # 続きの計算中は評価済み本文を先に表示できる。初回との差も数値で残す。
+    # 手が止まった後の最終表示とTabが異なる場合は失敗。
+    if result["settled_tab_mismatches"]:
         raise SystemExit(2)
 
 

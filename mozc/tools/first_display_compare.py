@@ -224,7 +224,7 @@ def main():
                "available_model_sha256": {p.name: sha256(p) for p in args.install.glob("*.gguf")},
                "model_status": {mode: json.loads(args.out.with_suffix("." + mode + ".status.json").read_text(encoding="utf-8"))
                                 for mode in ["off", "on"]},
-               "adoption_logs": {mode: args.out.with_suffix("." + mode + ".stderr.txt").read_text(encoding="utf-8").count("correction=adopted")
+               "adoption_logs": {mode: args.out.with_suffix("." + mode + ".stderr.txt").read_bytes().count(b"correction=adopted")
                                   for mode in ["off", "on"]},
                "items": len(items), "categories": dict(collections.Counter(i["category"] for i in items)),
                "cpu_forced": args.cpu, "warm_seconds": args.warm, "settle_seconds": args.settle,

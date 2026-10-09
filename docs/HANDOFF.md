@@ -1,14 +1,41 @@
-# 利用者の全改善案の統合開発（2026-10-09、カード64）
+# 全改善案の統合とローカル配布準備（2026-10-09、カード64）
 
-利用者は全要望を改善するまで開発を続け、最後にリリースするよう指定。
-専用枝codex/complete-user-improvements。全build・評価・MSI作成はローカル。
-初回補正/Tab/ニュアンスの元ソースmzcorrectionへ、ダッシュボードmzappnameの対象ファイルのみ統合。
-統合前の対象ソースをkotori-first-check/all-request-source-before-20261009へ保存。
-通常設定の補正チェック項目、文字種末尾メニューの非表示（F6〜F10保持）、Windows配色を開発中。
-初回の3ターゲットローカルbuild成功67.304秒。関連テストの新規Windows依存ターゲット名の解析失敗を修正中。
-続き予測は全文平均による誤った確信度と1候補の未採点を修正。通常設定の初回挨拶はまだ未採用。
-Windows Computer Useの初期化は2回タイムアウト。CLI/Qt描画と実入力を混同しない。
-まだリリース・push・MSI buildは実施していない。以下の過去記録を維持。
+利用者は全要望の改善後にリリース、全build/評価をローカルと指定。
+実リポジトリは.local/kotori-readme、枝codex/complete-user-improvements。
+正本C:/Users/aruik/mzcorrection、cache C:/Users/aruik/mzicons。112入力が全一致。
+make_patches.shをBazel shutdown後に実行、新規cloneの0001〜0003適用と112ファイルの同一性PASS。
+詳細はdocs/verification/all-user-improvements-local-20261009.mdと同名JSON。
+
+## 今回の結果
+
+- Space前のAI評価・局所生成補正を既定有効。読みは即時、候補は非同期・時間上限あり。
+- 一字の読み修正を元の文へ投影し、漢字/名前/数値/文法/世代を守る。LM50ケースPASS。
+  「ちょと待ってください」→「ちょっと待ってください」が初回約1017ms、直接Space約1.2msで同じ文。
+  誤入力10文の期待一致3→4、全件の補正ではない。
+- 予測29文、続き8、最終表示/Tab差0、初回本文の後に続きへ更新する差は2件。初回/最終を区別。
+- 正常100文の共有補正関数で変更0。100文OFF/ONの生記録もSpace100/100・生成採用0、
+  ただし集計が不正UTF-8ログで失敗した記録を保存。予測UTF-8拒否を修正し単体/実モデルを確認。
+- ユーザーの長文がAIで7文節になる場合にSpace2が文頭へ戻る失敗を修正。
+  FIXED_BOUNDARYの読み/境界は保持し意味候補を提示。Space2で特長はへ。他部分不変。Nuance9/Engine86 PASS。
+- index/effect/internetが初回一覧/Tab/Spaceへ。F6〜F10を保ち文字種の末尾表示だけ除去。
+- Kotoriダッシュボード、Windowsの操作部品、100/150/200%でGUI2ケースPASS、描画確認。
+- 最終Standard AJIMEE183/200=91.5%、heldout289/300=96.3%。heldoutを調整に使わない。
+  最後の境界候補修正前のEXEによる品質原票。後続は先頭選択/モデル/辞書を変えていない。
+- 開発機をCPU強制してcold10文字/cold長文/warm即Spaceの3セッションが正常終了。
+  Space約1.2/5.7/249ms。実際の低性能PCの受け入れ証拠ではない。
+
+## 次の作業と公開境界
+
+最終ソースのコミットを固定し、MSIをローカルbuild。BUILD6330、前のrc.3は6322。
+19:23の旧MSIはその後の生成/予測修正前なので使わない。
+新MSIの版/同梱/ハッシュをcheck_release.py --localで検査し、入力manifestと対象を固定する。
+Windows Computer UseのInitializeは規定の回復を含む3回ともタイムアウトし停止。
+最終MSIの実アプリ入力・上書き更新・削除は未実施。原票/Qt/MSI展開をTSF PASSへ置き換えない。
+成果物ができてから具体的な残りの受け入れを提示する。未確認のまま公開済み/全完了と言わない。
+まだ新たなpush/PR/公開リリースはない。共有workflowは停止せず、PRでcloud buildも起動しない。
+普段使いのIME/登録/設定は変更していない。
+
+以下は以前の対象ソースと実測の履歴。
 
 # 最終ソース・成果物の固定（2026-10-09、ローカル）
 
