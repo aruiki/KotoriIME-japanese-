@@ -20069,7 +20069,7 @@ index 335639ca8..661bb7c5d 100644
          "//base:process",
          "//base:run_level",
 diff --git a/src/gui/config_dialog/config_dialog.cc b/src/gui/config_dialog/config_dialog.cc
-index abbf55d68..aa1592b75 100644
+index abbf55d68..814590787 100644
 --- a/src/gui/config_dialog/config_dialog.cc
 +++ b/src/gui/config_dialog/config_dialog.cc
 @@ -30,9 +30,31 @@
@@ -20255,7 +20255,17 @@ index abbf55d68..aa1592b75 100644
  
  using ::mozc::config::StatsConfigUtil;
  
-@@ -152,6 +311,251 @@ ConfigDialog::ConfigDialog()
+@@ -120,7 +279,8 @@ ConfigDialog::ConfigDialog()
+ #ifdef __APPLE__
+   miscDefaultIMEWidget->setVisible(false);
+   miscAdministrationWidget->setVisible(false);
+-  setWindowTitle(tr("%1 Preferences").arg(GuiUtil::ProductName()));
++  // Kotori: 設定画面も本体と同じアプリ名で表示する。
++  setWindowTitle(QString::fromUtf8("Kotori"));
+ #endif  // __APPLE__
+ 
+ #if defined(__linux__)
+@@ -152,6 +312,251 @@ ConfigDialog::ConfigDialog()
    symbolsSettingComboBox->addItem(QString::fromUtf8("「」／"));
    symbolsSettingComboBox->addItem(QString::fromUtf8("[]・"));
  
@@ -20507,7 +20517,7 @@ index abbf55d68..aa1592b75 100644
    keymapSettingComboBox->addItem(tr("Custom keymap"));
    keymapSettingComboBox->addItem(tr("ATOK"));
    keymapSettingComboBox->addItem(tr("MS-IME"));
-@@ -524,6 +928,20 @@ void ConfigDialog::ConvertFromProto(const config::Config &config) {
+@@ -524,6 +929,20 @@ void ConfigDialog::ConvertFromProto(const config::Config &config) {
    custom_keymap_table_ = config.custom_keymap_table();
    custom_roman_table_ = config.custom_roman_table();
  
@@ -20528,7 +20538,7 @@ index abbf55d68..aa1592b75 100644
    // tab2
    SET_COMBOBOX(historyLearningLevelComboBox, HistoryLearningLevel,
                 history_learning_level);
-@@ -612,6 +1030,16 @@ void ConfigDialog::ConvertToProto(config::Config *config) const {
+@@ -612,6 +1031,16 @@ void ConfigDialog::ConvertToProto(config::Config *config) const {
      config->set_custom_roman_table(custom_roman_table_);
    }
  

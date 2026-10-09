@@ -10,7 +10,7 @@ Kotori日本語入力(以下 Kotori)を使う人のための案内です。開�
 1. [Releases](https://github.com/aruiki/KotoriIME-japanese-/releases/latest) から `Kotori64.msi` をダウンロードして実行します
    (管理者の確認で「はい」)。
 2. 入力方式に **Kotori日本語入力** が加わります。
-3. 設定はデスクトップとスタートメニューの「Kotori日本語入力の設定」から開けます。
+3. 設定はデスクトップとスタートメニューの「Kotori」から開けます。rc.3以前では「Kotori日本語入力の設定」と表示されます。
 
 必要な環境: Windows 10 1809 以降または Windows 11(64 bit)、メモリ 8 GB 以上、ディスク 1.7 GB。
 GPU はなくても動きます(専用 GPU、Vulkan 対応、VRAM 3 GB 以上があれば Standard 以上の品質になります)。

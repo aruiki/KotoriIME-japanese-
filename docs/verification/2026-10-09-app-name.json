@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-09",
+  "title": "Kotori",
+  "desktop_shortcut": "Kotori",
+  "start_menu_folder": "Kotori",
+  "start_menu_shortcut": "Kotori",
+  "target": "[MozcDir]mozc_tool.exe",
+  "arguments": "--mode=config_dialog",
+  "tool_build": "passed 16.175s",
+  "tool_sha256": "b75d7cd1d1b11cd06df917813cf56e533a70d577201da533f27dc10f55ba0293",
+  "config_source_sha256": "92fd13b8ce523a10e65aa6173db0f8fc382420b93a7f434d14f232d2e9d7f619",
+  "wix_source_sha256": "cc4cdb29ea854adee377b1e23563ccf78aeece70aba5ef759a00485c21f5a1a4",
+  "limits": [
+    "interactive window not observed",
+    "new MSI installation/upgrade pending CI",
+    "rc.3 unchanged"
+  ]
+}
