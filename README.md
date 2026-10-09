@@ -11,13 +11,13 @@
 </p>
 
 <h3 align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0-rc.3/Kotori64.msi">⬇ 最新の試用版 v1.1.0-rc.3 をダウンロード</a>
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0-rc.4/Kotori64.msi">⬇ 最新の試用版 v1.1.0-rc.4 をダウンロード</a>
 </h3>
 
 <p align="center">
-  入力中の候補表示の改善と新しい小鳥のアイコンを試せます。<br>
-  リリース候補・未署名です。
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.3">変更内容を見る</a>
+  大規模な英語辞書と、入力中の候補・学習履歴の修正を含みます。<br>
+  リリース候補・未署名です。BUILD6332の実機確認は公開後に進めます。
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.4">変更内容を見る</a>
 </p>
 
 <p align="center">
@@ -149,6 +149,17 @@ Space を押すと、そのまま同じ変換になります。
   次に入力すると裏で読み込み直します。
 - **固まらない**: 変換で AI に使う時間には上限があり、間に合わなければ Mozc の結果をそのまま出します。
   内蔵 GPU には AI を載せません(反応が遅く、入力が止まるため)。
+
+## カタカナ語から英語を選ぶ
+
+v1.1.0-rc.4には、**31,068の読み・36,402組の英語表記**を含む辞書を組み込んでいます。
+アーキテクチャ → architecture、アクセシビリティ → accessibility、コンフィギュレーション → configuration、
+レストラン → restaurantなどを候補から選べます。辞書の手動インポートは不要です。
+日本語の先頭候補を保持し、同じ読みで綴りが分かれる場合も選択肢を残します。
+
+出典は[KEINOSのカタカナ語英字辞典](https://github.com/KEINOS/google-ime-user-dictionary-ja-en)で、
+収録データを検査・加工して使っています。変更済みデータと出典・ライセンス情報をMSIへ同梱しています。
+辞書データはCC BY-SA 3.0です。詳しくは[rc.4のリリースノート](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.4)を参照してください。
 
 ## しくみ
 
