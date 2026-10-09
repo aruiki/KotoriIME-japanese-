@@ -3,7 +3,7 @@
 # Mozc ベースの MSI で、mozc-windows.yml が作る。docs/adr/0012)。手で実行するときに
 # バージョンを省くと、ワークスペースの版(0.x.y-beta)の beta の番号を既にあるタグの次にする。
 # サーバー・x64 と x86 の TIP・辞書・ライセンスを zip にまとめ、最新のリリース(Latest)として
-# 公開する。リリースの名前は日本時間の日時と版(例 2026.929.151234 (v0.1.0-beta.2))にする。
+# 公開する。表示名は版・段階・日本時間の日付の順にする。
 # 配布物に関わるファイルを変える PR では、zip を作って Actions の成果物に置くだけにする(公開しない)。
 name: Release
 
@@ -65,12 +65,12 @@ jobs:
           } else {
             $v = $next
           }
-          $now = [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId([DateTime]::UtcNow, 'Tokyo Standard Time')
-          $stamp = $now.ToString('yyyy.Mdd.HHmmss', [Globalization.CultureInfo]::InvariantCulture)
-          Write-Host "版 v$v、名前 $stamp (v$v)"
+          $releaseName = python -X utf8 mozc/tools/release_name.py --tag "v$v"
+          if ($LASTEXITCODE -ne 0) { throw 'リリース名を決められない' }
+          Write-Host "版 v$v、名前 $releaseName"
           "VERSION=$v" >> $env:GITHUB_ENV
           "TAG=v$v" >> $env:GITHUB_ENV
-          "RELEASE_NAME=$stamp (v$v)" >> $env:GITHUB_ENV
+          [IO.File]::AppendAllText($env:GITHUB_ENV, "RELEASE_NAME=$releaseName`n", [Text.UTF8Encoding]::new($false))
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc,i686-pc-windows-msvc
