@@ -36,3 +36,11 @@ index/effect/internetの初回/Tab/Space候補と日本語の先頭候補の保�
 対応は明示的な24表記に限る。CIのTSF入力は一般日本語の導入確認であり、英語候補専用のTSF受け入れではない。
 ソース・CI・MSIの識別子は `docs/verification/2026-10-09-llm-input-generation.json` のenglish_pr。
 公開済みrc.3にはまだ含まれない。
+
+## 2026-10-10の大規模辞書への拡張
+
+利用者の追加依頼により、手書き24表記を31,068読み・36,402組の公開辞書へ置換。
+Bazelが6ファイルを固定commit/SHA-256で取得・加工し、入力時は静的配列を検索。
+EnglishVariantsRewriter17テスト、実モデル/履歴コピーで12英語例の初回/Tab/Space一覧を確認した。
+辞書TSVと出典・変更内容・CC BY-SA 3.0のNOTICEをMSIに同梱する。
+新MSIとWindows実入力はまだ未検証。実装と境界はADR0051。

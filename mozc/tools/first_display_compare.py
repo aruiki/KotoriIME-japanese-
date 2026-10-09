@@ -3,6 +3,7 @@
 ビルド完了後に単独で実行する。インストール済みIMEには接続しない。
 同一EXEで自由生成補正だけをOFF/ONにする。実アプリのTSF検証ではない。
 入力の読みが一致しない場合・応答欠落・実行ファイル変更は失敗にする。
+本番と同じ文節学習を有効にする。利用者の履歴を読む・変更する道具ではない。
 """
 import argparse
 import collections
@@ -59,7 +60,8 @@ class Session:
         self.lines = queue.Queue()
         self.err = stderr_path.open("wb")
         self.proc = subprocess.Popen(
-            [str(exe), "--dictionary=oss", "--profile=" + str(profile / "session")],
+            [str(exe), "--dictionary=oss", "--profile=" + str(profile / "session"),
+             "--use_history_rewriter=true"],
             cwd=str(exe) + ".runfiles/_main", env=env,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.err)
 
@@ -229,7 +231,7 @@ def main():
                "adoption_logs": {mode: args.out.with_suffix("." + mode + ".stderr.txt").read_bytes().count(b"correction=adopted")
                                   for mode in ["off", "on"]},
                "items": len(items), "categories": dict(collections.Counter(i["category"] for i in items)),
-               "cpu_forced": args.cpu, "warm_seconds": args.warm, "settle_seconds": args.settle,
+               "history_rewriter": True, "cpu_forced": args.cpu, "warm_seconds": args.warm, "settle_seconds": args.settle,
                "key_interval_seconds": args.key_interval, "elapsed_seconds": time.monotonic() - started,
                "changed_items": len(changes), "changes": changes,
                "modes": {mode: {"key_max_ms": max(r["key_max_ms"] for r in data),

@@ -1,3 +1,30 @@
+# 実環境の履歴による誤変換と英語辞書の拡張（2026-10-10）
+
+BUILD6331は利用者の実入力で「あしをいためた」→「脚を炒めた」のFAIL。
+本PCの稼働server/TIP/モデル/実行環境は6331MSIと一致。AIは痛めたを選んでいたが、
+後続の文節履歴が炒めたを先頭へ戻していた。履歴の原本を変更せずコピーで再現・修正。
+AI評価済みの先頭を履歴から保護し、AI未使用時の学習と別候補を保持した。
+Tab→Esc→即Spaceで補正が消える別件も、同じ予測入力だけ世代を保つ専用取消しで修正。
+詳細ADR0050。回帰は修正前FAIL→修正後PASS、関連7ターゲットPASS。
+
+英語辞書を24手書き表記から31,068読み・36,402組へ拡張。固定公開辞書をbuild時に取得・加工し、
+入力時は静的配列を検索する。CC BY-SA 3.0の出典・変更内容とTSV/metadataをMSIへ同梱する。
+英語全17テストPASS、実モデル+既存履歴コピー18例（英語12、補正/医療/料理/ニュアンス6）PASS。
+正式英字accessibilityが略語a11yの奥に埋もれる失敗も修正済み。詳細ADR0051。
+
+正本C:/Users/aruik/mzcorrection、cache C:/Users/aruik/mzicons、BUILD6332。
+Standard200文は183/200=91.5%で90%条件PASS。117入力の正本/cache/新規clone全一致、3パッチ適用PASS。
+入力マニフェストSHA-256: 6b7c8aa90af32786e7bffa2dcbf6ce1c4041000b78dad182666abf07afb822c8。
+新しいコードのソース固定・ローカルMSI作成へ進む。
+原票C:/Users/aruik/kotori-first-check/history-english-cancel-final-v3.jsonほか。
+Bazelを終了してパッチを再生成済み。次はソースcommit→ローカルMSI→内容/出所検査→実入力受け入れ。
+6330/6331の失敗候補は保存し、rc.4は下書きを維持。新MSIの導入/TSF実入力/削除は未検証。
+Computer UseのInitializeは規定の回復を含む複数回timeoutのため同じ試行を反復していない。
+公開権限は既にある。検証済みCLI/MSIとWindows実入力の証拠を混同しない。
+私的な学習履歴、ユーザー辞書、生ログはGitへ入れない。
+
+以下は過去の記録。BUILD6331の「実入力確認待ち」は今回のFAILで更新された。
+
 # rc.4修正版MSIの完成・実入力確認待ち（2026-10-10）
 
 ソースb217ad4197db2d7ad1594ae98aae4d21398e65b9を固定し、全buildをローカルで実施。

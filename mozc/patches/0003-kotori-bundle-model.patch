@@ -1070,14 +1070,15 @@ index 000000000..990756638
 +==============================================================================
 diff --git a/src/data/kotori/NOTICE-third-party.txt b/src/data/kotori/NOTICE-third-party.txt
 new file mode 100644
-index 000000000..e1258a5a3
+index 000000000..7e497f5de
 --- /dev/null
 +++ b/src/data/kotori/NOTICE-third-party.txt
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,33 @@
 +Kotori日本語入力に同梱している第三者のソフトウェア
 +
 +この PC のインストール先(C:\Program Files (x86)\Kotori)にあるファイルと、そのライセンスの一覧です。
 +AI のモデルは NOTICE-zenz.txt と NOTICE-tinyswallow.txt にあります。
++カタカナ英語辞書は NOTICE-katakana-english.txt、加工済みデータは KotoriEnglish.tsv にあります。
 +
 +■ Mozc(mozc_*.exe、mozc_tip*.dll、辞書)
 +  BSD-3-Clause、Copyright Google Inc. https://github.com/google/mozc
@@ -1741,10 +1742,10 @@ HcmV?d00001
 
 diff --git a/src/data/kotori/license.rtf b/src/data/kotori/license.rtf
 new file mode 100644
-index 000000000..0bda7faf0
+index 000000000..0dfc0e697
 --- /dev/null
 +++ b/src/data/kotori/license.rtf
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,21 @@
 +{\rtf1\ansi\ansicpg932\deff0{\fonttbl{\f0\fnil\fcharset128 Yu Gothic UI;}}\viewkind4\uc1\pard\f0\fs18 Kotori\u26085?\u26412?\u-30050?\u20837?\u21147? \u20351?\u29992?\u-30159?\u-29954?\u12392?\u31532?\u19977?\u-32763?\u12477?\u12501?\u12488?\u12454?\u12455?\u12450?\u12398?\u-30616?\u31034?\par
 +\par
 +Kotori\u26085?\u26412?\u-30050?\u20837?\u21147?(\u20197?\u19979? Kotori)\u12399? Mozc(Copyright 2010-2026 Google Inc.\u12289?BSD-3-Clause)\u12434?\u25913?\u22793?\u12375?\u12383?\u26085?\u26412?\u-30050?\u20837?\u21147?\u12391?\u12377?\u12290?Kotori \u12399? Google \u12364?\u25552?\u20379?\u12539?\u25512?\u22888?\u12377?\u12427?\u12418?\u12398?\u12391?\u12399?\u12354?\u12426?\u12414?\u12379?\u12435?\u12290?Kotori \u29420?\u-32278?\u12398?\u25913?\u22793?\u-28440?\u20998?\u12418? BSD-3-Clause \u12391?\u25552?\u20379?\u12375?\u12414?\u12377?\u12290?\par
@@ -1759,22 +1760,26 @@ index 000000000..0bda7faf0
 +\u12539?zenz-v2.5-small: CC BY-SA 4.0(\u169? Keita Miwa\u12290?\u20803?\u12399? ku-nlp/gpt2-small-japanese-char)\u12290?8 bit \u12395?\u-28209?\u23376?\u21270?\u12375?\u12390?\u21516?\u26801?\par
 +\u12539?zenz-v2.5-medium: CC BY-SA 4.0(\u169? Keita Miwa\u12290?\u20803?\u12399? ku-nlp/gpt2-medium-japanese-char)\u12290?8 bit \u12395?\u-28209?\u23376?\u21270?\u12375?\u12390?\u21516?\u26801?\par
 +\u12539?TinySwallow-1.5B: Apache-2.0(Sakana AI)\u12290?5 bit \u12395?\u-28209?\u23376?\u21270?\u12375?\u12390?\u21516?\u26801?\par
++\u12539?\u12459?\u12479?\u12459?\u12490?\u-32015?\u-30050?\u-28770?\u26360?: CC BY-SA 3.0(\u12459?\u12479?\u12459?\u12490?\u-30050?\u-32015?\u23383?\u-28770?\u20856?\u12467?\u12511?\u12517?\u12491?\u12486?\u12451?\u12289?KEINOS\u12289?EDICT/EDRDG)\u12290?\u21152?\u24037?\u28168?\u12415?\u12487?\u12540?\u12479?\u12392?\u20986?\u25152?\u12399? KotoriEnglish.tsv\u12289?KotoriEnglish-source.json\u12289?NOTICE-katakana-english.txt\par
 +\u12539?Microsoft Visual C++ \u12521?\u12531?\u12479?\u12452?\u12512?: Microsoft \u12398?\u12521?\u12452?\u12475?\u12531?\u12473?\par
 +\par
-+\u21508?\u12521?\u12452?\u12475?\u12531?\u12473?\u12398?\u20840?\u25991?\u12392?\u24112?\u23646?\u-30616?\u31034?\u12399?\u12289?\u12452?\u12531?\u12473?\u12488?\u12540?\u12523?\u20808?(C:\\Program Files (x86)\\Kotori)\u12398? NOTICE-*.txt \u12392? documents \u12501?\u12457?\u12523?\u12480?\u12395?\u12354?\u12426?\u12414?\u12377?\u12290?\par
++\u21508?\u12521?\u12452?\u12475?\u12531?\u12473?\u12398?\u20869?\u23481?\u12539?\u21442?\u29031?\u20808?\u12392?\u24112?\u23646?\u-30616?\u31034?\u12399?\u12289?\u12452?\u12531?\u12473?\u12488?\u12540?\u12523?\u20808?(C:\\Program Files (x86)\\Kotori)\u12398? NOTICE-*.txt \u12392? documents \u12501?\u12457?\u12523?\u12480?\u12395?\u12354?\u12426?\u12414?\u12377?\u12290?\par
 +\par
 +Kotori \u12399?\u12452?\u12531?\u12479?\u12540?\u12493?\u12483?\u12488?\u12395?\u25509?\u32154?\u12375?\u12414?\u12379?\u12435?\u12290?\u22793?\u25563?\u12392? AI \u12398?\u20966?\u29702?\u12399?\u12289?\u12377?\u12409?\u12390?\u12371?\u12398? PC \u12398?\u20013?\u12391?\u-30644?\u12356?\u12414?\u12377?\u12290?\par
 +}
 \ No newline at end of file
 diff --git a/src/win32/installer/BUILD.bazel b/src/win32/installer/BUILD.bazel
-index 1c31b5159..158fca9fa 100644
+index 1c31b5159..c25d57e8c 100644
 --- a/src/win32/installer/BUILD.bazel
 +++ b/src/win32/installer/BUILD.bazel
-@@ -93,6 +93,24 @@ genrule(
+@@ -93,6 +93,27 @@ genrule(
          "//base:mozc_version_txt",
          "//data/images/win:product_icon.ico",
          "//data/installer:credits_en.html",
 +        "//data/kotori:NOTICE-zenz.txt",
++        "//rewriter:KotoriEnglish.tsv",
++        "//rewriter:KotoriEnglish-source.json",
++        "//rewriter:NOTICE-katakana-english.txt",
 +        "//data/kotori:zenz-v2.5-small-q8_0.gguf",
 +        "//data/kotori:zenz-v2.5-medium-q8_0.gguf",
 +        "//data/kotori:NOTICE-tinyswallow.txt",
@@ -1795,13 +1800,14 @@ index 1c31b5159..158fca9fa 100644
          "@qt_win//:bin/Qt6Core.dll",
          "@wix//:wix.exe",
      ] + select({
-@@ -117,6 +135,19 @@ genrule(
+@@ -117,6 +138,20 @@ genrule(
          "--custom_action=$(location //win32/custom_action)",
          "--icon_path=$(location //data/images/win:product_icon.ico)",
          "--credit_file=$(location //data/installer:credits_en.html)",
 +        "--zenz_model=$(location //data/kotori:zenz-v2.5-small-q8_0.gguf)",
 +        "--zenz_medium_model=$(location //data/kotori:zenz-v2.5-medium-q8_0.gguf)",
 +        "--zenz_notice=$(location //data/kotori:NOTICE-zenz.txt)",
++        "--english_dictionary=$(location //rewriter:KotoriEnglish.tsv)",
 +        "--llm_model=$(location //data/kotori:tinyswallow-1.5b-q5_k_m.gguf)",
 +        "--llm_notice=$(location //data/kotori:NOTICE-tinyswallow.txt)",
 +        "--llama_dll=$(location @llama_cpp_win//:llama.dll)",
@@ -1816,10 +1822,10 @@ index 1c31b5159..158fca9fa 100644
          "--wxs_path=$(location " + _WXS_FILE + ")",
          "--wix_path=$(location @wix//:wix.exe)",
 diff --git a/src/win32/installer/build_installer.py b/src/win32/installer/build_installer.py
-index c2e71a077..7459f6a3c 100644
+index c2e71a077..52a5cefe2 100644
 --- a/src/win32/installer/build_installer.py
 +++ b/src/win32/installer/build_installer.py
-@@ -154,6 +154,22 @@ def run_wix4(args) -> None:
+@@ -154,6 +154,23 @@ def run_wix4(args) -> None:
        '-define', f'MozcTIP64Path={mozc_tip64}',
        '-define', f'MozcBroker64Path={mozc_broker}',
        '-define', f'MozcServer64Path={mozc_server}',
@@ -1828,6 +1834,7 @@ index c2e71a077..7459f6a3c 100644
 +      '-define', f'KotoriZenzNoticePath={pathlib.Path(args.zenz_notice).resolve()}',
 +      # Kotori: 第三者の表示は NOTICE-zenz.txt と同じ data/kotori に置く(カード 41)。
 +      '-define', f'KotoriNoticeDir={pathlib.Path(args.zenz_notice).resolve().parent}',
++      '-define', f'KotoriEnglishDir={pathlib.Path(args.english_dictionary).resolve().parent}',
 +      '-define', f'KotoriLlmModelPath={pathlib.Path(args.llm_model).resolve()}',
 +      '-define', f'KotoriLlmNoticePath={pathlib.Path(args.llm_notice).resolve()}',
 +      '-define', f'LlamaRuntimeDir={pathlib.Path(args.llama_dll).resolve().parent}',
@@ -1842,13 +1849,14 @@ index c2e71a077..7459f6a3c 100644
        '-define', f'MozcCacheService64Path={mozc_cache_service}',
        '-define', f'MozcRenderer64Path={mozc_renderer}',
        '-define', f'MozcToolPath={mozc_tool}',
-@@ -192,6 +208,13 @@ def main():
+@@ -192,6 +209,14 @@ def main():
    parser.add_argument('--custom_action', type=str)
    parser.add_argument('--icon_path', type=str)
    parser.add_argument('--credit_file', type=str)
 +  parser.add_argument('--zenz_model', type=str)
 +  parser.add_argument('--zenz_medium_model', type=str)
 +  parser.add_argument('--zenz_notice', type=str)
++  parser.add_argument('--english_dictionary', type=str)
 +  for name in ('llm_model', 'llm_notice', 'llama_dll', 'llama_license', 'ui_ext',
 +               'license_rtf', 'banner_bmp', 'dialog_bmp', 'settings_icon',
 +               'dictionary_icon'):
@@ -1857,7 +1865,7 @@ index c2e71a077..7459f6a3c 100644
    parser.add_argument('--wxs_path', type=str)
    parser.add_argument('--wix_path', type=str)
 diff --git a/src/win32/installer/installer_oss_64bit.wxs b/src/win32/installer/installer_oss_64bit.wxs
-index e30c37ad4..e723577c6 100644
+index e30c37ad4..4735595d1 100644
 --- a/src/win32/installer/installer_oss_64bit.wxs
 +++ b/src/win32/installer/installer_oss_64bit.wxs
 @@ -48,7 +48,7 @@
@@ -1922,7 +1930,7 @@ index e30c37ad4..e723577c6 100644
        <ComponentRef Id="MozcTIP32" />
        <ComponentRef Id="MozcTIP64" />
        <?if $(var.MozcTIP64ArmPath) != "" and $(var.MozcTIP64XPath) != "" ?>
-@@ -148,6 +154,18 @@
+@@ -148,6 +154,21 @@
        <?endif?>
        <ComponentRef Id="MozcBroker" />
        <ComponentRef Id="MozcConverter" />
@@ -1935,13 +1943,16 @@ index e30c37ad4..e723577c6 100644
 +      <ComponentRef Id="KotoriLlmNotice" />
 +      <ComponentRef Id="KotoriLlamaLicense" />
 +      <ComponentRef Id="KotoriThirdPartyNotice" />
++      <ComponentRef Id="KotoriEnglishDictionary" />
++      <ComponentRef Id="KotoriEnglishSource" />
++      <ComponentRef Id="KotoriEnglishNotice" />
 +      <ComponentRef Id="KotoriLlvmOpenmpLicense" />
 +      <ComponentRef Id="KotoriGpl3License" />
 +      <ComponentGroupRef Id="KotoriLlamaRuntime" />
        <ComponentRef Id="MozcCacheService" />
        <ComponentRef Id="MozcRenderer" />
        <ComponentRef Id="MozcTool" />
-@@ -242,6 +260,35 @@
+@@ -242,6 +263,45 @@
  
      <StandardDirectory Id="ProgramFilesFolder">
        <Directory Id="MozcDir" Name="Kotori">
@@ -1965,6 +1976,16 @@ index e30c37ad4..e723577c6 100644
 +          <File Id="NOTICE_zenz.txt" Name="NOTICE-zenz.txt" DiskId="1" Source="$(var.KotoriZenzNoticePath)" />
 +        </Component>
 +        <!-- Kotori: 第三者の表示(Qt の差し替え方とソース、LLVM OpenMP、GPL-3.0 の全文。カード 41)。 -->
++        <!-- Kotori: 辞書の加工済みデータとCC BY-SA 3.0の表示を同梱。 -->
++        <Component Id="KotoriEnglishDictionary">
++          <File Id="KotoriEnglish.tsv" Name="KotoriEnglish.tsv" DiskId="1" Source="$(var.KotoriEnglishDir)\KotoriEnglish.tsv" />
++        </Component>
++        <Component Id="KotoriEnglishSource">
++          <File Id="KotoriEnglish_source.json" Name="KotoriEnglish-source.json" DiskId="1" Source="$(var.KotoriEnglishDir)\KotoriEnglish-source.json" />
++        </Component>
++        <Component Id="KotoriEnglishNotice">
++          <File Id="NOTICE_katakana_english.txt" Name="NOTICE-katakana-english.txt" DiskId="1" Source="$(var.KotoriEnglishDir)\NOTICE-katakana-english.txt" />
++        </Component>
 +        <Component Id="KotoriThirdPartyNotice">
 +          <File Id="NOTICE_third_party.txt" Name="NOTICE-third-party.txt" DiskId="1" Source="$(var.KotoriNoticeDir)\NOTICE-third-party.txt" />
 +        </Component>
@@ -1977,7 +1998,7 @@ index e30c37ad4..e723577c6 100644
          <Component Id="MozcConverter">
            <File Id="mozc_server.exe" Name="mozc_server.exe" DiskId="1" Checksum="yes" Source="$(var.MozcServer64Path)" Vital="yes" />
          </Component>
-@@ -381,5 +428,41 @@
+@@ -381,5 +441,41 @@
      <Component Id="PrelaunchProcesses" Directory="TARGETDIR">
        <RegistryValue Id="RunBroker" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="Kotori Prelauncher" Action="write" Type="string" Value="&quot;[MozcDir]mozc_broker.exe&quot; --mode=prelaunch_processes" />
      </Component>

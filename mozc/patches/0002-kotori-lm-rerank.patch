@@ -1,5 +1,5 @@
 diff --git a/src/MODULE.bazel b/src/MODULE.bazel
-index eb74e536e..2e53c117e 100644
+index eb74e536e..709f3f461 100644
 --- a/src/MODULE.bazel
 +++ b/src/MODULE.bazel
 @@ -366,6 +366,39 @@ http_archive(
@@ -42,6 +42,48 @@ index eb74e536e..2e53c117e 100644
  # Japanese Usage Dictionary (2025-01-25)
  JA_USAGE_DICT_TAG = "2025-01-25"
  
+@@ -395,3 +428,41 @@ http_archive(
+     sha256 = "3adc97d8e19e1168a6cdcb2fce759d0e9e613a9a3b630cc180aecfd56ae81eaf",
+     url = "https://github.com/hiroyuki-komatsu/japanpost_zipcode/raw/621d059fbcbfae17bfca15b439692bae934268c3/ken_all.zip",
+ )
++
++# Kotori: カタカナ英語辞書。固定コミットとSHA-256で取得し、入力時の通信はしない。
++http_file(
++    name = "kotori_english_dict_1",
++    downloaded_file_path = "dict1.txt",
++    sha256 = "1cb89e52e5c664c262121ee89cfa7361f930c0277e564c6ccb4a01fb865e888f",
++    urls = ["https://raw.githubusercontent.com/KEINOS/google-ime-user-dictionary-ja-en/7d241dafcf6ee1f9eafefc0ae7a929c095860246/Google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E5%85%B8/google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E6%9B%B801-%E3%81%82%EF%BD%9E%E3%81%8A%281%29.txt"],
++)
++http_file(
++    name = "kotori_english_dict_2",
++    downloaded_file_path = "dict2.txt",
++    sha256 = "2256b916a46a82b52ae5f9cbca5499a5aea0e897835408947fd6912bf6f73cf5",
++    urls = ["https://raw.githubusercontent.com/KEINOS/google-ime-user-dictionary-ja-en/7d241dafcf6ee1f9eafefc0ae7a929c095860246/Google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E5%85%B8/google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E6%9B%B802-%E3%81%8A%E3%81%9E%E3%82%93%EF%BD%9E%E3%81%95%E3%81%B0%E3%82%89.txt"],
++)
++http_file(
++    name = "kotori_english_dict_3",
++    downloaded_file_path = "dict3.txt",
++    sha256 = "c9314791c3d43bac9acdcbaec96542abf0928de403f52a3d301a129715f84de0",
++    urls = ["https://raw.githubusercontent.com/KEINOS/google-ime-user-dictionary-ja-en/7d241dafcf6ee1f9eafefc0ae7a929c095860246/Google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E5%85%B8/google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E6%9B%B803-%E3%81%95%E3%81%AF%E3%82%8A%E3%82%93%EF%BD%9E%E3%81%A7%E3%81%83%E3%82%93%E3%81%8E%E3%83%BC.txt"],
++)
++http_file(
++    name = "kotori_english_dict_4",
++    downloaded_file_path = "dict4.txt",
++    sha256 = "a2f3e4daa220056b26b44318105ec41ed43e897637aedfb0d850f3264168eb75",
++    urls = ["https://raw.githubusercontent.com/KEINOS/google-ime-user-dictionary-ja-en/7d241dafcf6ee1f9eafefc0ae7a929c095860246/Google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E5%85%B8/google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E6%9B%B804-%E3%81%A7%E3%81%83%E3%82%93%E3%81%94%EF%BD%9E%E3%81%B2%E3%81%A3%E3%81%B7.txt"],
++)
++http_file(
++    name = "kotori_english_dict_5",
++    downloaded_file_path = "dict5.txt",
++    sha256 = "374e65a906b6a8666728a8aae1dc1e9a0835725e98a7bc146ed6332dd61e18fd",
++    urls = ["https://raw.githubusercontent.com/KEINOS/google-ime-user-dictionary-ja-en/7d241dafcf6ee1f9eafefc0ae7a929c095860246/Google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E5%85%B8/google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E6%9B%B805-%E3%81%B2%E3%81%A3%E3%81%B7%EF%BD%9E%E3%81%BF%E3%81%99%E3%81%9F%E3%81%84%E3%81%B7.txt"],
++)
++http_file(
++    name = "kotori_english_dict_6",
++    downloaded_file_path = "dict6.txt",
++    sha256 = "9f2e56634b45094da5b59a2f973eb3c47ef97f83b3f4995684920cb18631926d",
++    urls = ["https://raw.githubusercontent.com/KEINOS/google-ime-user-dictionary-ja-en/7d241dafcf6ee1f9eafefc0ae7a929c095860246/Google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E5%85%B8/google-ime-jp-%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A%E8%8B%B1%E8%AA%9E%E8%BE%9E%E6%9B%B806-%E3%81%BF%E3%81%9A%E3%81%A0%E3%81%93%EF%BD%9E%E3%82%93%E3%81%B3%E3%82%89.txt"],
++)
 diff --git a/src/base/BUILD.bazel b/src/base/BUILD.bazel
 index d8ebba55d..8c61d9c94 100644
 --- a/src/base/BUILD.bazel
@@ -19861,7 +19903,7 @@ zL@613W7Zf1G&4<#nt(BZ;xoE2_j8mrXY(!KeiIne+sK-zQeq6KNh!`3eBt9B?)?Em
 Ce@$lq
 
 diff --git a/src/engine/engine_converter.cc b/src/engine/engine_converter.cc
-index fd03a6c0c..6c3fc0383 100644
+index fd03a6c0c..fdaf00e70 100644
 --- a/src/engine/engine_converter.cc
 +++ b/src/engine/engine_converter.cc
 @@ -130,6 +130,39 @@ EngineConverter::EngineConverter(
@@ -20032,15 +20074,35 @@ index fd03a6c0c..6c3fc0383 100644
            .SetComposer(composer)
            .SetRequestView(*request_)
            .SetContextView(context)
-@@ -691,6 +803,7 @@ void EngineConverter::MaybeExpandPrediction(
+@@ -690,7 +802,27 @@ void EngineConverter::MaybeExpandPrediction(
+   UpdateSelectedCandidateIndex();
  }
  
++// Kotori: Tabの予測表示を取り消すだけなら、同じ入力への評価結果を保持する。
++// 読み・カーソル・保護欄・設定が変わった場合や普通の変換取り消しは通常の世代破棄へ。
++void EngineConverter::KotoriCancelPrediction(const composer::Composer& composer) {
++  if (!CheckState(PREDICTION)) {
++    Cancel();
++    return;
++  }
++  const ConversionRequest::KotoriInputGeneration before{
++      kotori_input_generation_, kotori_input_generation_->load()};
++  const auto current = KotoriObserveInput(composer);
++  if (!current.IsSet() || !before.IsSame(current)) {
++    Cancel();
++    return;
++  }
++  ResetResult();
++  converter_->CancelConversion(&segments_);
++  ResetState();
++}
++
  void EngineConverter::Cancel() {
 +  KotoriInvalidateInput();
    DCHECK(CheckState(SUGGESTION | PREDICTION | CONVERSION));
    ResetResult();
  
-@@ -700,6 +813,7 @@ void EngineConverter::Cancel() {
+@@ -700,6 +832,7 @@ void EngineConverter::Cancel() {
  }
  
  void EngineConverter::Reset() {
@@ -20048,7 +20110,7 @@ index fd03a6c0c..6c3fc0383 100644
    DCHECK(CheckState(COMPOSITION | SUGGESTION | PREDICTION | CONVERSION));
  
    // Even if composition mode, call ResetConversion
-@@ -717,6 +831,7 @@ void EngineConverter::Reset() {
+@@ -717,6 +850,7 @@ void EngineConverter::Reset() {
  
  void EngineConverter::Commit(const composer::Composer& composer,
                               const commands::Context& context) {
@@ -20056,7 +20118,7 @@ index fd03a6c0c..6c3fc0383 100644
    DCHECK(CheckState(PREDICTION | CONVERSION));
    ResetResult();
  
-@@ -748,6 +863,7 @@ void EngineConverter::Commit(const composer::Composer& composer,
+@@ -748,6 +882,7 @@ void EngineConverter::Commit(const composer::Composer& composer,
  
  void EngineConverter::CommitContext(const composer::Composer& composer,
                                      const commands::Context& context) {
@@ -20064,7 +20126,7 @@ index fd03a6c0c..6c3fc0383 100644
    const ConversionRequest conversion_request = ConversionRequestBuilder()
                                                     .SetComposer(composer)
                                                     .SetRequestView(*request_)
-@@ -760,6 +876,7 @@ void EngineConverter::CommitContext(const composer::Composer& composer,
+@@ -760,6 +895,7 @@ void EngineConverter::CommitContext(const composer::Composer& composer,
  bool EngineConverter::CommitSuggestionInternal(
      const composer::Composer& composer, const commands::Context& context,
      size_t* consumed_key_size) {
@@ -20072,7 +20134,7 @@ index fd03a6c0c..6c3fc0383 100644
    DCHECK(consumed_key_size);
    DCHECK(CheckState(SUGGESTION));
    ResetResult();
-@@ -860,6 +977,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
+@@ -860,6 +996,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
                                               const commands::Context& context,
                                               size_t segments_to_commit,
                                               size_t* consumed_key_size) {
@@ -20080,7 +20142,7 @@ index fd03a6c0c..6c3fc0383 100644
    DCHECK(CheckState(PREDICTION | CONVERSION));
    DCHECK(segments_.conversion_segments_size() >= segments_to_commit);
    ResetResult();
-@@ -919,6 +1037,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
+@@ -919,6 +1056,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
  
  void EngineConverter::CommitPreedit(const composer::Composer& composer,
                                      const commands::Context& context) {
@@ -20088,7 +20150,7 @@ index fd03a6c0c..6c3fc0383 100644
    const std::string key = composer.GetQueryForConversion();
    const std::string preedit = composer.GetStringForSubmission();
    std::string normalized_preedit = TextNormalizer::NormalizeText(preedit);
-@@ -956,6 +1075,7 @@ void EngineConverter::CommitPreedit(const composer::Composer& composer,
+@@ -956,6 +1094,7 @@ void EngineConverter::CommitPreedit(const composer::Composer& composer,
  void EngineConverter::CommitHead(size_t count,
                                   const composer::Composer& composer,
                                   size_t* consumed_key_size) {
@@ -20096,7 +20158,7 @@ index fd03a6c0c..6c3fc0383 100644
    std::string preedit = composer.GetStringForSubmission();
    if (count > preedit.length()) {
      *consumed_key_size = preedit.length();
-@@ -1112,14 +1232,121 @@ void EngineConverter::SegmentWidthShrink(const composer::Composer& composer) {
+@@ -1112,14 +1251,121 @@ void EngineConverter::SegmentWidthShrink(const composer::Composer& composer) {
    ResizeSegmentWidth(composer, -1);
  }
  
@@ -20218,7 +20280,7 @@ index fd03a6c0c..6c3fc0383 100644
    SegmentFocus();
  }
  
-@@ -1128,6 +1355,11 @@ void EngineConverter::CandidateNextPage() {
+@@ -1128,6 +1374,11 @@ void EngineConverter::CandidateNextPage() {
    ResetResult();
  
    candidate_list_.MoveNextPage();
@@ -20230,7 +20292,7 @@ index fd03a6c0c..6c3fc0383 100644
    candidate_list_visible_ = true;
    UpdateSelectedCandidateIndex();
    SegmentFocus();
-@@ -1138,6 +1370,11 @@ void EngineConverter::CandidatePrev() {
+@@ -1138,6 +1389,11 @@ void EngineConverter::CandidatePrev() {
    ResetResult();
  
    candidate_list_.MovePrev();
@@ -20242,7 +20304,7 @@ index fd03a6c0c..6c3fc0383 100644
    candidate_list_visible_ = true;
    UpdateSelectedCandidateIndex();
    SegmentFocus();
-@@ -1148,6 +1385,11 @@ void EngineConverter::CandidatePrevPage() {
+@@ -1148,6 +1404,11 @@ void EngineConverter::CandidatePrevPage() {
    ResetResult();
  
    candidate_list_.MovePrevPage();
@@ -20254,7 +20316,7 @@ index fd03a6c0c..6c3fc0383 100644
    candidate_list_visible_ = true;
    UpdateSelectedCandidateIndex();
    SegmentFocus();
-@@ -1297,6 +1539,7 @@ void EngineConverter::FillOutput(const composer::Composer& composer,
+@@ -1297,6 +1558,7 @@ void EngineConverter::FillOutput(const composer::Composer& composer,
    if (CheckState(SUGGESTION | PREDICTION | CONVERSION) &&
        candidate_list_visible_) {
      FillCandidateWindow(output->mutable_candidate_window());
@@ -20262,7 +20324,7 @@ index fd03a6c0c..6c3fc0383 100644
    }
  
    // All candidate words
-@@ -1319,6 +1562,9 @@ EngineConverter* EngineConverter::Clone() const {
+@@ -1319,6 +1581,9 @@ EngineConverter* EngineConverter::Clone() const {
    EngineConverter* engine_converter =
        new EngineConverter(converter_, request_, config_);
    *engine_converter = *this;
@@ -20272,7 +20334,7 @@ index fd03a6c0c..6c3fc0383 100644
  
    if (engine_converter->CheckState(SUGGESTION | PREDICTION | CONVERSION)) {
      // UpdateCandidateList() is not simple setter and it uses some members.
-@@ -1712,6 +1958,26 @@ void EngineConverter::FillCandidateWindow(
+@@ -1712,6 +1977,26 @@ void EngineConverter::FillCandidateWindow(
    output::FillCandidateWindow(segment, candidate_list_, position,
                                candidate_window);
  
@@ -20299,7 +20361,7 @@ index fd03a6c0c..6c3fc0383 100644
    // Shortcut keys
    if (CheckState(PREDICTION | CONVERSION)) {
      output::FillShortcuts(GetCandidateShortcuts(selection_shortcut_),
-@@ -1823,12 +2089,18 @@ void EngineConverter::FillIncognitoCandidateWords(
+@@ -1823,12 +2108,18 @@ void EngineConverter::FillIncognitoCandidateWords(
  void EngineConverter::SetRequest(
      std::shared_ptr<const commands::Request> request) {
    DCHECK(request);
@@ -20318,7 +20380,7 @@ index fd03a6c0c..6c3fc0383 100644
    config_ = std::move(config);
    updated_command_ = converter::Candidate::DEFAULT_COMMAND;
    selection_shortcut_ = config_->selection_shortcut();
-@@ -1836,6 +2108,7 @@ void EngineConverter::SetConfig(std::shared_ptr<const config::Config> config) {
+@@ -1836,6 +2127,7 @@ void EngineConverter::SetConfig(std::shared_ptr<const config::Config> config) {
  }
  
  void EngineConverter::OnStartComposition(const commands::Context& context) {
@@ -20327,7 +20389,7 @@ index fd03a6c0c..6c3fc0383 100644
    if (context.has_revision()) {
      revision_changed = (context.revision() != client_revision_);
 diff --git a/src/engine/engine_converter.h b/src/engine/engine_converter.h
-index 6d061cfca..06710e972 100644
+index 6d061cfca..893ed574c 100644
 --- a/src/engine/engine_converter.h
 +++ b/src/engine/engine_converter.h
 @@ -32,6 +32,7 @@
@@ -20359,7 +20421,15 @@ index 6d061cfca..06710e972 100644
    // Sends a prediction request to the converter.
    // Brings base class overloads into scope to avoid name hiding.
    using EngineConverterInterface::Predict;
-@@ -274,6 +282,19 @@ class EngineConverter : public EngineConverterInterface {
+@@ -116,6 +124,7 @@ class EngineConverter : public EngineConverterInterface {
+ 
+   // Clears conversion segments, but keep the context.
+   void Cancel() override;
++  void KotoriCancelPrediction(const composer::Composer& composer) override;
+ 
+   // Clears conversion segments and the context.
+   void Reset() override;
+@@ -274,6 +283,19 @@ class EngineConverter : public EngineConverterInterface {
  
    friend class EngineConverterTest;
  
@@ -20379,7 +20449,7 @@ index 6d061cfca..06710e972 100644
    // Resets the result value stored at the previous command.
    void ResetResult();
  
-@@ -344,6 +365,8 @@ class EngineConverter : public EngineConverterInterface {
+@@ -344,6 +366,8 @@ class EngineConverter : public EngineConverterInterface {
    // Returns true if the selected candidate on the first segment covers all
    // conversion segments.
    bool IsFullSentenceCandidateSelected() const;
@@ -20389,7 +20459,7 @@ index 6d061cfca..06710e972 100644
    // Returns the length of committed candidate's key in characters.
    // True is returned if the selected candidate is successfully committed.
 diff --git a/src/engine/engine_converter_interface.h b/src/engine/engine_converter_interface.h
-index f8e3b43ec..f20b5eaf8 100644
+index f8e3b43ec..cdc093111 100644
 --- a/src/engine/engine_converter_interface.h
 +++ b/src/engine/engine_converter_interface.h
 @@ -141,6 +141,17 @@ class EngineConverterInterface {
@@ -20410,8 +20480,18 @@ index f8e3b43ec..f20b5eaf8 100644
    // Sends a prediction request to the converter.
    virtual bool Predict(const composer::Composer& composer,
                         const commands::Context& context,
+@@ -162,6 +173,9 @@ class EngineConverterInterface {
+   // Clear conversion segments, but keep the context.
+   virtual void Cancel() = 0;
+ 
++  // Kotori: Tab予測だけを取り消す。同じ入力の評価を保持できない実装は通常の取り消しへ。
++  virtual void KotoriCancelPrediction(const composer::Composer&) { Cancel(); }
++
+   // Clear conversion segments and the context.
+   virtual void Reset() = 0;
+ 
 diff --git a/src/engine/engine_converter_test.cc b/src/engine/engine_converter_test.cc
-index 808058c64..87b4f2d89 100644
+index 808058c64..4b1821399 100644
 --- a/src/engine/engine_converter_test.cc
 +++ b/src/engine/engine_converter_test.cc
 @@ -111,6 +111,7 @@ class EngineConverterTest : public testing::TestWithTempUserProfile {
@@ -20565,7 +20645,7 @@ index 808058c64..87b4f2d89 100644
  TEST_F(EngineConverterTest, FullSentenceCandidateInConversion) {
    auto mock_converter = std::make_shared<MockConverter>();
    EngineConverter converter(mock_converter, request_, config_);
-@@ -4822,5 +4945,118 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
+@@ -4822,5 +4945,147 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
    EXPECT_EQ(consumed_key_size, Util::CharsLen("きょうは"));
  }
  
@@ -20649,6 +20729,35 @@ index 808058c64..87b4f2d89 100644
 +  converter.SetConfig(config);
 +  EXPECT_FALSE(public_input.IsCurrent());
 +  EXPECT_FALSE(ObserveKotoriInput(converter, *composer_).IsSet());
++}
++
++// Kotori: Tab予測をEscで戻しても、同じ未確定入力の評価済み補正は保持する。
++TEST_F(EngineConverterTest, KotoriPredictionCancelKeepsOnlyUnchangedInput) {
++  auto mock = std::make_shared<MockConverter>();
++  config_->set_kotori_lm_enabled(true);
++  EngineConverter converter(mock, request_, config_);
++  composer_->InsertCharacterPreedit("ちょとまってください");
++  const auto original = ObserveKotoriInput(converter, *composer_);
++  SetState(EngineConverterInterface::PREDICTION, &converter);
++  EXPECT_CALL(*mock, CancelConversion(_)).Times(1);
++  converter.KotoriCancelPrediction(*composer_);
++  EXPECT_TRUE(original.IsCurrent());
++  EXPECT_TRUE(original.IsSame(ObserveKotoriInput(converter, *composer_)));
++
++  // 読み・カーソルを変更してからのキャンセルでは以前の世代を捨てる。
++  const auto before_edit = ObserveKotoriInput(converter, *composer_);
++  composer_->MoveCursorLeft();
++  SetState(EngineConverterInterface::PREDICTION, &converter);
++  EXPECT_CALL(*mock, CancelConversion(_)).Times(1);
++  converter.KotoriCancelPrediction(*composer_);
++  EXPECT_FALSE(before_edit.IsCurrent());
++
++  // 普通の変換取り消しの世代検査は緩めない。
++  const auto before_conversion = ObserveKotoriInput(converter, *composer_);
++  SetState(EngineConverterInterface::CONVERSION, &converter);
++  EXPECT_CALL(*mock, CancelConversion(_)).Times(1);
++  converter.KotoriCancelPrediction(*composer_);
++  EXPECT_FALSE(before_conversion.IsCurrent());
 +}
 +
 +TEST_F(EngineConverterTest, KotoriGenerationInvalidatesOnInputLifecycle) {
@@ -22629,18 +22738,51 @@ index 0d2eb3455..1b13074f1 100644
    // For example, "私の" is created from composition "わたしのなまえ".
    bool create_partial_candidates = false;
 diff --git a/src/rewriter/BUILD.bazel b/src/rewriter/BUILD.bazel
-index 4bbcddeca..9370db961 100644
+index 4bbcddeca..20a5baad2 100644
 --- a/src/rewriter/BUILD.bazel
 +++ b/src/rewriter/BUILD.bazel
-@@ -675,6 +675,7 @@ mozc_cc_library(
-         "//dictionary:pos_matcher",
-         "//protocol:commands_cc_proto",
-         "//request:conversion_request",
-+        "@com_google_absl//absl/container:flat_hash_map",
+@@ -663,10 +663,31 @@ mozc_cc_test(
+     ],
+ )
+ 
++
++# Kotori: 大規模辞書を静的検索表へ加工。生成物そのものはコミットしない。
++mozc_py_binary(
++    name = "gen_kotori_english_dictionary",
++    srcs = ["gen_kotori_english_dictionary.py"],
++    test_lib = False,
++)
++
++genrule(
++    name = "kotori_english_dictionary_data",
++    srcs = ["@kotori_english_dict_%d//file" % i for i in range(1, 7)],
++    outs = ["kotori_english_dictionary.inc", "KotoriEnglish.tsv",
++            "KotoriEnglish-source.json", "NOTICE-katakana-english.txt"],
++    tools = [":gen_kotori_english_dictionary"],
++    cmd = "$(location :gen_kotori_english_dictionary) " +
++          " ".join(["--input=$(location @kotori_english_dict_%d//file)" % i for i in range(1, 7)]) +
++          " --header=$(@D)/kotori_english_dictionary.inc --tsv=$(@D)/KotoriEnglish.tsv" +
++          " --metadata=$(@D)/KotoriEnglish-source.json --notice=$(@D)/NOTICE-katakana-english.txt",
++    visibility = ["//win32/installer:__pkg__"],
++)
++
+ mozc_cc_library(
+     name = "english_variants_rewriter",
+     srcs = ["english_variants_rewriter.cc"],
+-    hdrs = ["english_variants_rewriter.h"],
++    hdrs = ["english_variants_rewriter.h", "kotori_english_dictionary.inc"],
+     deps = [
+         ":rewriter_interface",
+         "//base:util",
+@@ -678,6 +699,7 @@ mozc_cc_library(
          "@com_google_absl//absl/container:flat_hash_set",
          "@com_google_absl//absl/log:check",
          "@com_google_absl//absl/strings",
-@@ -1536,6 +1537,8 @@ mozc_cc_library(
++        "@com_google_absl//absl/types:span",
+     ],
+     alwayslink = 1,
+ )
+@@ -1536,6 +1558,8 @@ mozc_cc_library(
          ":fortune_rewriter",
          ":ivs_variants_rewriter",
          ":language_aware_rewriter",
@@ -22649,7 +22791,7 @@ index 4bbcddeca..9370db961 100644
          ":merger_rewriter",
          ":number_rewriter",
          ":remove_redundant_candidate_rewriter",
-@@ -1743,3 +1746,147 @@ mozc_cc_test(
+@@ -1743,3 +1767,147 @@ mozc_cc_test(
          "//testing:gunit_main",
      ],
  )
@@ -22798,42 +22940,56 @@ index 4bbcddeca..9370db961 100644
 +    ],
 +)
 diff --git a/src/rewriter/english_variants_rewriter.cc b/src/rewriter/english_variants_rewriter.cc
-index b75c03feb..7454b3c42 100644
+index b75c03feb..e1603f1c7 100644
 --- a/src/rewriter/english_variants_rewriter.cc
 +++ b/src/rewriter/english_variants_rewriter.cc
-@@ -34,6 +34,7 @@
+@@ -29,16 +29,20 @@
+ 
+ #include "rewriter/english_variants_rewriter.h"
+ 
++#include <algorithm>
+ #include <cstddef>
++#include <iterator>
+ #include <string>
  #include <utility>
  #include <vector>
  
-+#include "absl/container/flat_hash_map.h"
  #include "absl/container/flat_hash_set.h"
  #include "absl/log/check.h"
++#include "absl/strings/ascii.h"
  #include "absl/strings/match.h"
-@@ -49,6 +50,31 @@
+ #include "absl/strings/str_cat.h"
+ #include "absl/strings/string_view.h"
++#include "absl/types/span.h"
+ #include "base/util.h"
+ #include "converter/attribute.h"
+ #include "converter/candidate.h"
+@@ -49,6 +53,32 @@
  
  namespace mozc {
  
 +namespace {
 +
-+// Kotori: Mozcの辞書に英字表記がない一般的な外来語を補う。
-+// 大きな辞書を再実装せず、表記が明確な語に限定して誤採用を避ける。
-+const char* KatakanaEnglishVariant(absl::string_view value) {
-+  static const absl::flat_hash_map<absl::string_view, const char*> kVariants = {
-+      {"インデックス", "index"},       {"エフェクト", "effect"},
-+      {"インターネット", "internet"}, {"アイフォン", "iPhone"},
-+      {"アイフォーン", "iPhone"},     {"コンピューター", "computer"},
-+      {"コンピュータ", "computer"},   {"ソフトウェア", "software"},
-+      {"ハードウェア", "hardware"},   {"アプリ", "app"},
-+      {"アプリケーション", "application"}, {"ブラウザー", "browser"},
-+      {"ブラウザ", "browser"},         {"サーバー", "server"},
-+      {"サーバ", "server"},            {"ユーザー", "user"},
-+      {"ユーザ", "user"},              {"データ", "data"},
-+      {"ファイル", "file"},            {"フォルダ", "folder"},
-+      {"キーボード", "keyboard"},      {"マウス", "mouse"},
-+      {"ディスプレイ", "display"},     {"スクリーン", "screen"},
-+  };
-+  const auto it = kVariants.find(value);
-+  return it == kVariants.end() ? nullptr : it->second;
++// Kotori: 固定版の大規模辞書を静的配列にする。入力中のI/O・通信・
++// 大きな連想配列の初期化を避け、同音異綴りも検索結果として保持する。
++struct KatakanaEnglishEntry {
++  absl::string_view katakana;
++  const char* english;
++};
++#include "rewriter/kotori_english_dictionary.inc"
++
++absl::Span<const KatakanaEnglishEntry> KatakanaEnglishVariants(
++    absl::string_view value) {
++  const auto first = std::lower_bound(
++      std::begin(kKatakanaEnglishEntries), std::end(kKatakanaEnglishEntries),
++      value, [](const KatakanaEnglishEntry& entry, absl::string_view key) {
++        return entry.katakana < key;
++      });
++  auto last = first;
++  while (last != std::end(kKatakanaEnglishEntries) && last->katakana == value) {
++    ++last;
++  }
++  return {first, static_cast<size_t>(last - first)};
 +}
 +
 +}  // namespace
@@ -22841,7 +22997,7 @@ index b75c03feb..7454b3c42 100644
  // Add space-prefixed variants to enable Space-joined English words conversion.
  // 'Google Japan' consists of 'ぐーぐる': 'Google', and 'じゃぱん': 'Japan'
  // Therefore, when a user types 'ぐーぐるじゃぱん', it will be 'GoogleJapan'
-@@ -141,7 +167,7 @@ bool EnglishVariantsRewriter::IsEnglishCandidate(
+@@ -141,28 +171,87 @@ bool EnglishVariantsRewriter::IsEnglishCandidate(
  }
  
  bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
@@ -22850,7 +23006,19 @@ index b75c03feb..7454b3c42 100644
    CHECK(seg);
  
    bool modified = false;
-@@ -156,13 +182,40 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+   absl::flat_hash_set<std::string> expanded_t13n_candidates;
+   absl::flat_hash_set<std::string> original_candidates;
++  absl::flat_hash_set<std::string> original_english_spellings;
+ 
+   for (size_t i = 0; i < seg->candidates_size(); ++i) {
+     original_candidates.insert(seg->candidate(i).value);
++    const auto& content = seg->candidate(i).content_value;
++    if (Util::IsEnglishTransliteration(content)) {
++      original_english_spellings.insert(absl::AsciiStrToLower(content));
++    }
+   }
+ 
+   for (int i = seg->candidates_size() - 1; i >= 0; --i) {
      converter::Candidate* original_candidate = seg->mutable_candidate(i);
      DCHECK(original_candidate);
  
@@ -22859,24 +23027,51 @@ index b75c03feb..7454b3c42 100644
 +        original_candidate->content_value.empty()
 +            ? absl::string_view(original_candidate->value)
 +            : absl::string_view(original_candidate->content_value);
-+    const char* english = KatakanaEnglishVariant(katakana);
-+    if (english != nullptr) {
-+      const std::string new_value =
-+          absl::StrCat(english, original_candidate->content_value.empty()
-+                                   ? absl::string_view()
-+                                   : original_candidate->functional_value());
-+      if (original_candidates.insert(new_value).second) {
-+        modified = true;
-+        converter::Candidate* new_candidate = seg->insert_candidate(i + 1);
-+        DCHECK(new_candidate);
-+        *new_candidate = *original_candidate;
-+        new_candidate->value = new_value;
-+        new_candidate->content_value = english;
-+        new_candidate->inner_segment_boundary.clear();
-+        new_candidate->description.clear();
-+        new_candidate->kotori_ai_evaluated = false;
-+        new_candidate->kotori_confident_prediction = false;
-+        new_candidate->attributes |= converter::Attribute::NO_VARIANTS_EXPANSION;
++    const auto variants = KatakanaEnglishVariants(katakana);
++    if (!variants.empty()) {
++      // 同じ読みの優先順を保ち、同じ値を重複挿入しない。
++      size_t next_pos = i + 1;
++      for (const auto& variant : variants) {
++        const char* english = variant.english;
++        const std::string new_value =
++            absl::StrCat(english, original_candidate->content_value.empty()
++                                     ? absl::string_view()
++                                     : original_candidate->functional_value());
++        // 先頭のカタカナ語の正式英字が一覧の奥にある場合は、その語の次へ。
++        // 日本語の先頭は保持し、既存の英字候補の大小文字の展開順位は変えない。
++        if (i == 0) {
++          size_t existing = seg->candidates_size();
++          for (size_t pos = 1; pos < seg->candidates_size(); ++pos) {
++            if (seg->candidate(pos).value == new_value) {
++              existing = pos;
++              break;
++            }
++          }
++          if (existing != seg->candidates_size()) {
++            if (existing != next_pos) {
++              seg->move_candidate(existing, next_pos);
++              modified = true;
++            }
++            ++next_pos;
++            continue;
++          }
++        }
++        if (original_english_spellings.contains(absl::AsciiStrToLower(english))) {
++          continue;
++        }
++        if (original_candidates.insert(new_value).second) {
++          modified = true;
++          converter::Candidate* new_candidate = seg->insert_candidate(next_pos++);
++          DCHECK(new_candidate);
++          *new_candidate = *original_candidate;
++          new_candidate->value = new_value;
++          new_candidate->content_value = english;
++          new_candidate->inner_segment_boundary.clear();
++          new_candidate->description.clear();
++          new_candidate->kotori_ai_evaluated = false;
++          new_candidate->kotori_confident_prediction = false;
++          new_candidate->attributes |= converter::Attribute::NO_VARIANTS_EXPANSION;
++        }
 +      }
 +      continue;
 +    }
@@ -22897,7 +23092,7 @@ index b75c03feb..7454b3c42 100644
        continue;
      }
  
-@@ -246,10 +299,7 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+@@ -246,10 +335,7 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
  
  int EnglishVariantsRewriter::capability(
      const ConversionRequest& request) const {
@@ -22909,7 +23104,7 @@ index b75c03feb..7454b3c42 100644
  }
  
  bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
-@@ -266,7 +316,10 @@ bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
+@@ -266,7 +352,10 @@ bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
      // need_space_prefix = true
      const bool need_space_prefix =
          enable_space_insersion && is_previous_candidate_english;
@@ -22935,10 +23130,18 @@ index 07e114229..af9330424 100644
    const dictionary::PosMatcher pos_matcher_;
  };
 diff --git a/src/rewriter/english_variants_rewriter_test.cc b/src/rewriter/english_variants_rewriter_test.cc
-index 9c9f95e8f..a4dea718f 100644
+index 9c9f95e8f..5d320df18 100644
 --- a/src/rewriter/english_variants_rewriter_test.cc
 +++ b/src/rewriter/english_variants_rewriter_test.cc
-@@ -161,6 +161,27 @@ TEST_F(EnglishVariantsRewriterTest, ExpandSpacePrefixedVariants) {
+@@ -32,6 +32,7 @@
+ #include <cstddef>
+ #include <memory>
+ #include <string>
++#include <utility>
+ #include <vector>
+ 
+ #include "absl/strings/string_view.h"
+@@ -161,6 +162,29 @@ TEST_F(EnglishVariantsRewriterTest, ExpandSpacePrefixedVariants) {
  }
  
  TEST_F(EnglishVariantsRewriterTest, RewriteTest) {
@@ -22958,15 +23161,17 @@ index 9c9f95e8f..a4dea718f 100644
 +    candidate->attributes &= ~converter::Attribute::NO_VARIANTS_EXPANSION;
 +
 +    EXPECT_TRUE(rewriter_->Rewrite(request, &segments));
-+    ASSERT_EQ(seg->candidates_size(), 2);
++    ASSERT_EQ(seg->candidates_size(), 4);
 +    EXPECT_EQ(seg->candidate(1).value, "index");
 +    EXPECT_EQ(seg->candidate(1).content_value, "index");
++    EXPECT_EQ(seg->candidate(2).value, "indices");
++    EXPECT_EQ(seg->candidate(3).value, "indexes");
 +  }
 +
    // T13N
    {
      Segments segments;
-@@ -343,6 +364,57 @@ TEST_F(EnglishVariantsRewriterTest, RewriteTest) {
+@@ -343,6 +367,136 @@ TEST_F(EnglishVariantsRewriterTest, RewriteTest) {
    }
  }
  
@@ -22994,7 +23199,7 @@ index 9c9f95e8f..a4dea718f 100644
 +      candidate->kotori_confident_prediction = true;
 +    }
 +    EXPECT_TRUE(rewriter_->Rewrite(request, &segments));
-+    ASSERT_EQ(seg->candidates_size(), 3);
++    ASSERT_EQ(seg->candidates_size(), 5);
 +    EXPECT_EQ(seg->candidate(0).value, "インデックスの");
 +    int rank = -1;
 +    ASSERT_TRUE(GetRankFromValue(*seg, "indexの", &rank));
@@ -23005,7 +23210,7 @@ index 9c9f95e8f..a4dea718f 100644
 +    EXPECT_FALSE(english.kotori_ai_evaluated);
 +    EXPECT_FALSE(english.kotori_confident_prediction);
 +    EXPECT_FALSE(rewriter_->Rewrite(request, &segments));
-+    EXPECT_EQ(seg->candidates_size(), 3);
++    EXPECT_EQ(seg->candidates_size(), 5);
 +  }
 +}
 +
@@ -23017,14 +23222,93 @@ index 9c9f95e8f..a4dea718f 100644
 +                           .SetRequestType(ConversionRequest::SUGGESTION)
 +                           .Build();
 +  EXPECT_TRUE(rewriter_->Rewrite(request, &segments));
-+  ASSERT_EQ(seg->candidates_size(), 2);
++  ASSERT_EQ(seg->candidates_size(), 3);
 +  EXPECT_EQ(seg->candidate(1).value, "internet");
++  EXPECT_EQ(seg->candidate(2).value, "the Internet");
++}
++
++// Kotori: 以前の24語以外も、初回・Tab・Spaceの各候補へ提供する。
++TEST_F(EnglishVariantsRewriterTest, LargeKatakanaDictionaryCoverage) {
++  const std::pair<const char*, const char*> cases[] = {
++      {"アーキテクチャ", "architecture"}, {"アルゴリズム", "algorithm"},
++      {"オーケストラ", "orchestra"}, {"エンサイクロペディア", "encyclopedia"},
++      {"オブジェクト", "object"}, {"スケジュール", "schedule"},
++      {"アドバタイズメント", "advertisement"}, {"コラボレーション", "collaboration"},
++      {"デモンストレーション", "demonstration"}, {"イノベーション", "innovation"},
++      {"エンターテインメント", "entertainment"}, {"トランザクション", "transaction"},
++      {"コンフィギュレーション", "configuration"}, {"ストロベリー", "strawberry"},
++      {"アボカド", "avocado"}, {"プログラミング", "programming"},
++      {"アクセシビリティ", "accessibility"}, {"エクスプレッション", "expression"},
++      {"サステナビリティ", "sustainability"}, {"インフラストラクチャー", "infrastructure"},
++      {"コミュニケーション", "communication"}, {"ライブラリー", "library"},
++      {"レストラン", "restaurant"}, {"チョコレート", "chocolate"},
++      {"ミュージック", "music"}, {"ワイヤレス", "wireless"}, {"ハイブリッド", "hybrid"},
++  };
++  for (const auto type : {ConversionRequest::SUGGESTION,
++                          ConversionRequest::PREDICTION,
++                          ConversionRequest::CONVERSION}) {
++    const auto request = ConversionRequestBuilder().SetRequestType(type).Build();
++    for (const auto& [katakana, english] : cases) {
++      SCOPED_TRACE(katakana);
++      Segments segments;
++      auto* seg = segments.push_back_segment();
++      auto* candidate = seg->add_candidate();
++      candidate->value = katakana;
++      candidate->content_value = katakana;
++      ASSERT_TRUE(rewriter_->Rewrite(request, &segments));
++      EXPECT_EQ(seg->candidate(0).value, katakana);
++      int rank = -1;
++      ASSERT_TRUE(GetRankFromValue(*seg, english, &rank));
++      EXPECT_GT(rank, 0);
++      const auto count = seg->candidates_size();
++      EXPECT_FALSE(rewriter_->Rewrite(request, &segments));
++      EXPECT_EQ(seg->candidates_size(), count);
++    }
++  }
++}
++
++// Kotori: 正式な英語表記が既存一覧の奥にあっても、略語より先に選べるようにする。
++TEST_F(EnglishVariantsRewriterTest, PreferredEnglishAlreadyBelowVisibleCandidates) {
++  Segments segments;
++  auto* seg = segments.push_back_segment();
++  for (const auto* value : {"アクセシビリティ", "アクセシビリティー",
++                            "あくせしびりてぃ", "accessibility"}) {
++    auto* candidate = seg->add_candidate();
++    candidate->value = value;
++    candidate->content_value = value;
++  }
++  const auto request = ConversionRequestBuilder()
++                           .SetRequestType(ConversionRequest::SUGGESTION)
++                           .Build();
++  ASSERT_TRUE(rewriter_->Rewrite(request, &segments));
++  EXPECT_EQ(seg->candidate(0).value, "アクセシビリティ");
++  EXPECT_EQ(seg->candidate(1).value, "accessibility");
++  int count = 0;
++  for (size_t i = 0; i < seg->candidates_size(); ++i) {
++    count += seg->candidate(i).value == "accessibility";
++  }
++  EXPECT_EQ(count, 1);
++  EXPECT_FALSE(rewriter_->Rewrite(request, &segments));
++}
++
++TEST_F(EnglishVariantsRewriterTest, AmbiguousEnglishSpellingsStaySelectable) {
++  Segments segments;
++  auto* seg = segments.push_back_segment();
++  seg->add_candidate()->value = "ライト";
++  const auto request = ConversionRequestBuilder()
++                           .SetRequestType(ConversionRequest::PREDICTION)
++                           .Build();
++  ASSERT_TRUE(rewriter_->Rewrite(request, &segments));
++  EXPECT_EQ(seg->candidate(0).value, "ライト");
++  int rank = -1;
++  EXPECT_TRUE(GetRankFromValue(*seg, "light", &rank));
++  EXPECT_TRUE(GetRankFromValue(*seg, "right", &rank));
 +}
 +
  TEST_F(EnglishVariantsRewriterTest, Regression3242753) {
    Segments segments;
    const ConversionRequest request;
-@@ -604,7 +676,7 @@ TEST_F(EnglishVariantsRewriterTest, MobileEnvironmentTest) {
+@@ -604,7 +758,7 @@ TEST_F(EnglishVariantsRewriterTest, MobileEnvironmentTest) {
      request.set_mixed_conversion(false);
      const ConversionRequest convreq =
          ConversionRequestBuilder().SetRequest(request).Build();
@@ -23033,6 +23317,142 @@ index 9c9f95e8f..a4dea718f 100644
    }
  }
  
+diff --git a/src/rewriter/gen_kotori_english_dictionary.py b/src/rewriter/gen_kotori_english_dictionary.py
+new file mode 100644
+index 000000000..0d138b862
+--- /dev/null
++++ b/src/rewriter/gen_kotori_english_dictionary.py
+@@ -0,0 +1,130 @@
++# Kotori: 固定版の公開辞書を検査し、検索用の静的配列と再配布データを作る。
++# 生成物はCC BY-SA 3.0。プログラム自体はMozcと同じBSDライセンス。
++import argparse
++import collections
++import hashlib
++import json
++from pathlib import Path
++import re
++import unicodedata
++
++COMMIT = "7d241dafcf6ee1f9eafefc0ae7a929c095860246"
++SOURCE_URL = "https://github.com/KEINOS/google-ime-user-dictionary-ja-en"
++# 以前の24表記は優先順と製品の正式表記を維持する。
++PREFERRED = {
++    "インデックス": "index", "エフェクト": "effect", "インターネット": "internet",
++    "アイフォン": "iPhone", "アイフォーン": "iPhone", "コンピューター": "computer",
++    "コンピュータ": "computer", "ソフトウェア": "software", "ハードウェア": "hardware",
++    "アプリ": "app", "アプリケーション": "application", "ブラウザー": "browser",
++    "ブラウザ": "browser", "サーバー": "server", "サーバ": "server", "ユーザー": "user",
++    "ユーザ": "user", "データ": "data", "ファイル": "file", "フォルダ": "folder",
++    "キーボード": "keyboard", "マウス": "mouse", "ディスプレイ": "display", "スクリーン": "screen",
++    "プログラミング": "programming", "アクセシビリティ": "accessibility",
++    "キャッシュ": "cache", "ヒップ": "hip",
++}
++
++
++def katakana(reading):
++    return "".join(chr(ord(c) + 0x60) if "ぁ" <= c <= "ゖ" else c for c in reading)
++
++
++def build(paths):
++    entries = collections.defaultdict(list)
++    rejected = collections.Counter()
++    sources = []
++    raw_rows = 0
++    for path in paths:
++        data = Path(path).read_bytes()
++        sources.append({"sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data)})
++        for line in data.decode("utf-8-sig").splitlines():
++            raw_rows += 1
++            columns = line.split("\t")
++            if len(columns) not in (3, 4):
++                rejected["columns"] += 1
++                continue
++            reading, word = [unicodedata.normalize("NFKC", c).strip() for c in columns[:2]]
++            if reading.startswith("@"):
++                reading = reading[1:]
++            key = katakana(reading)
++            if not re.fullmatch("[ァ-ヺー・]+", key) or len(key) < 3:
++                rejected["reading"] += 1
++                continue
++            if len(columns) == 4 and key != unicodedata.normalize("NFKC", columns[3]).strip():
++                rejected["reading_annotation_mismatch"] += 1
++                continue
++            # 英語の説明文は候補に出さず、単語・短い複合語だけを採用する。
++            word = word.split("(", 1)[0].strip()
++            if (not re.fullmatch(r"[A-Za-z](?:[A-Za-z0-9 .'-]*[A-Za-z0-9.])?", word)
++                    or len(word) > 80 or len(word.split()) > 5):
++                rejected["english_text"] += 1
++                continue
++            if word not in entries[key]:
++                entries[key].append(word)
++    for key, preferred in PREFERRED.items():
++        entries[key] = [preferred] + [v for v in entries[key] if v != preferred]
++    # 同音異綴りは保持。1つの候補の展開は4件までとし一覧の増大を抑える。
++    all_pairs = sum(len(values) for values in entries.values())
++    rows = [(key, word) for key in sorted(entries) for word in entries[key][:4]]
++    metadata = {"source": SOURCE_URL, "source_commit": COMMIT,
++                "license": "CC-BY-SA-3.0", "input_files": sources,
++                "raw_rows": raw_rows, "readings": len(entries), "pairs": len(rows),
++                "pairs_before_per_reading_limit": all_pairs, "rejected": dict(rejected),
++                "max_variants_per_reading": 4,
++                "adaptations": ["NFKC and hiragana to katakana normalization", "reading/annotation validation",
++                                "English explanatory suffix removal", "invalid row filtering and deduplication",
++                                "preferred spelling overrides", "at most 4 variants per reading"]}
++    return rows, metadata
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--input", action="append", required=True)
++    ap.add_argument("--header", required=True)
++    ap.add_argument("--tsv", required=True)
++    ap.add_argument("--metadata", required=True)
++    ap.add_argument("--notice", required=True)
++    args = ap.parse_args()
++    rows, metadata = build(args.input)
++    if len(args.input) != 6 or metadata["raw_rows"] != 46001 or metadata["readings"] < 30000:
++        raise ValueError("Pinned upstream dictionary is incomplete: " + json.dumps(metadata))
++    header = ["// Generated from KEINOS/google-ime-user-dictionary-ja-en; CC BY-SA 3.0.",
++              "// Attribution, adaptations and license: NOTICE-katakana-english.txt.",
++              "constexpr KatakanaEnglishEntry kKatakanaEnglishEntries[] = {"]
++    header += ["  {" + json.dumps(key, ensure_ascii=False) + ", " + json.dumps(word) + "}," for key, word in rows]
++    header += ["};", ""]
++    tsv = "# Kotori adaptation; CC BY-SA 3.0; see NOTICE-katakana-english.txt\n"
++    tsv += "".join(key + "\t" + word + "\n" for key, word in rows)
++    metadata["data_sha256"] = hashlib.sha256(tsv.encode("utf-8")).hexdigest()
++    notice = f"""Kotoriカタカナ英語辞書 / Kotori Katakana English Dictionary
++
++出典: Google IME カタカナ語英字辞典コミュニティ、KEINOSと各寄稿者
++{SOURCE_URL}
++固定版: {COMMIT}
++原典としてEDICTを使用することが上流READMEに記載されています。
++EDICT: Jim Breen / Electronic Dictionary Research and Development Group
++https://www.edrdg.org/edrdg/licence.html
++
++辞書データのライセンス: Creative Commons Attribution-ShareAlike 3.0 Unported
++https://creativecommons.org/licenses/by-sa/3.0/
++https://creativecommons.org/licenses/by-sa/3.0/legalcode
++
++Kotoriでは文字種正規化、読みの検査、英語の説明部分の除去、不正行の除外、
++重複除去、優先表記の補完、同じ読みに最大4表記という変更を加えました。
++変更済みデータKotoriEnglish.tsvとそのC++配列もCC BY-SA 3.0で提供します。
++読み数: {metadata['readings']} / 読みと表記の組数: {metadata['pairs']}
++元データ取得先とSHA-256はMozcパッチのMODULE.bazel、加工手順は
++rewriter/gen_kotori_english_dictionary.pyにあります。
++https://github.com/aruiki/KotoriIME-japanese-/tree/codex/complete-user-improvements/mozc
++
++上流の免責を含め、辞書の正確性や特定目的での利用は保証されません。
++読みが同じでも文脈により英語表記が異なる場合があります。
++"""
++    for name, text in [(args.header, "\n".join(header)), (args.tsv, tsv),
++                       (args.metadata, json.dumps(metadata, ensure_ascii=False, indent=2) + "\n"),
++                       (args.notice, notice)]:
++        Path(name).write_text(text, encoding="utf-8", newline="\n")
++    print(json.dumps({k: metadata[k] for k in ["raw_rows", "readings", "pairs", "data_sha256"]}))
++
++
++if __name__ == "__main__":
++    main()
 diff --git a/src/rewriter/kotori_model_identity.cc b/src/rewriter/kotori_model_identity.cc
 new file mode 100644
 index 000000000..4ca262269
@@ -28693,6 +29113,73 @@ index d92e814fd..6c3ff56e2 100644
    AddRewriter(make_unique_from_tuples<A11yDescriptionRewriter>(
        data_manager.GetA11yDescriptionRewriterData()));
  }
+diff --git a/src/rewriter/user_segment_history_rewriter.cc b/src/rewriter/user_segment_history_rewriter.cc
+index 3765a2c9a..8ca158b5f 100644
+--- a/src/rewriter/user_segment_history_rewriter.cc
++++ b/src/rewriter/user_segment_history_rewriter.cc
+@@ -359,7 +359,13 @@ bool UserSegmentHistoryRewriter::SortCandidates(
+   constexpr uint32_t kScoreGap = 20;  // TODO(taku): no justification
+   absl::btree_set<std::string> seen;
+ 
+-  size_t next_pos = 0;
++  // Kotori: AI評価済みの先頭候補を、過去の文節履歴で上書きしない。
++  // 学習した別候補はその後ろへ並べ、AI未使用時の学習動作は維持する。
++  const size_t first_pos = segment->candidate(0).kotori_ai_evaluated ? 1 : 0;
++  size_t next_pos = first_pos;
++  if (first_pos != 0) {
++    seen.insert(segment->candidate(0).value);
++  }
+   for (size_t n = 0; n < size; ++n) {
+     // Move candidates when the score is close to the top score.
+     if (kScoreGap < (top_score - sorted_scores[n].score)) {
+diff --git a/src/rewriter/user_segment_history_rewriter_test.cc b/src/rewriter/user_segment_history_rewriter_test.cc
+index d322feaee..89296272a 100644
+--- a/src/rewriter/user_segment_history_rewriter_test.cc
++++ b/src/rewriter/user_segment_history_rewriter_test.cc
+@@ -206,6 +206,43 @@ class UserSegmentHistoryRewriterTest : public testing::TestWithTempUserProfile {
+   const PosGroup pos_group_;
+ };
+ 
++
++// Kotori: 本番で有効な学習履歴が、AIの初回結果を後から覆さない。
++TEST_F(UserSegmentHistoryRewriterTest,
++       KotoriKeepsEvaluatedFirstCandidateAndHistoryBelow) {
++  auto rewriter = CreateUserSegmentHistoryRewriter();
++  const ConversionRequest request = CreateConversionRequest();
++  Segments segments;
++  InitSegments(&segments, 1);
++  segments.mutable_segment(0)->move_candidate(2, 0);
++  segments.mutable_segment(0)->mutable_candidate(0)->attributes |=
++      converter::Attribute::RERANKED;
++  segments.mutable_segment(0)->set_segment_type(Segment::FIXED_VALUE);
++  rewriter->Finish(request, segments);
++
++  // AIが使えない場合は、これまでどおり学習候補を先頭へ。
++  InitSegments(&segments, 1);
++  ASSERT_TRUE(rewriter->Rewrite(request, &segments));
++  EXPECT_EQ(segments.segment(0).candidate(0).value, "candidate2");
++
++  // AI評価済みの先頭を保持し、学習候補はその次へ。候補自体は消さない。
++  InitSegments(&segments, 1);
++  segments.mutable_segment(0)->mutable_candidate(0)->kotori_ai_evaluated = true;
++  ASSERT_TRUE(rewriter->Rewrite(request, &segments));
++  EXPECT_EQ(segments.segment(0).candidate(0).value, "candidate0");
++  EXPECT_TRUE(segments.segment(0).candidate(0).kotori_ai_evaluated);
++  EXPECT_FALSE(segments.segment(0).candidate(0).attributes &
++               converter::Attribute::USER_SEGMENT_HISTORY_REWRITER);
++  EXPECT_EQ(segments.segment(0).candidate(1).value, "candidate2");
++  EXPECT_EQ(segments.segment(0).candidates_size(), kCandidatesSize);
++
++  // 利用者が別候補を選んだ後のFIXED_VALUEは書き換えない。
++  segments.mutable_segment(0)->move_candidate(1, 0);
++  segments.mutable_segment(0)->set_segment_type(Segment::FIXED_VALUE);
++  rewriter->Rewrite(request, &segments);
++  EXPECT_EQ(segments.segment(0).candidate(0).value, "candidate2");
++}
++
+ TEST_F(UserSegmentHistoryRewriterTest, CreateFile) {
+   std::unique_ptr<UserSegmentHistoryRewriter> rewriter(
+       CreateUserSegmentHistoryRewriter());
 diff --git a/src/rewriter/zenz_scorer.cc b/src/rewriter/zenz_scorer.cc
 new file mode 100644
 index 000000000..b04585b07
@@ -29753,7 +30240,7 @@ index eda5d517e..2c99a39c7 100644
    if (run_level == mozc::RunLevel::RESTRICTED) {
      MOZC_VLOG(1) << "Mozc server starts with timeout mode";
 diff --git a/src/session/BUILD.bazel b/src/session/BUILD.bazel
-index 2da5b8d46..c4c944c55 100644
+index 2da5b8d46..837bb82ff 100644
 --- a/src/session/BUILD.bazel
 +++ b/src/session/BUILD.bazel
 @@ -56,6 +56,7 @@ mozc_cc_library(
@@ -29772,8 +30259,224 @@ index 2da5b8d46..c4c944c55 100644
          "//base:vlog",
          "//base/strings:assign",
          "//base/strings:unicode",
+@@ -678,3 +680,18 @@ mozc_cc_test(
+         "@com_google_absl//absl/strings",
+     ],
+ )
++
++# Kotori: インストール済みサーバーを専用セッションで調べる開発用CLI。
++mozc_cc_binary(
++    name = "kotori_installed_probe_main",
++    srcs = ["kotori_installed_probe_main.cc"],
++    deps = [
++        "//base:init_mozc",
++        "//base:system_util",
++        "//composer:key_parser",
++        "//ipc",
++        "//protocol:commands_cc_proto",
++        "//protocol:config_cc_proto",
++        "@com_google_absl//absl/time",
++    ],
++)
+diff --git a/src/session/kotori_installed_probe_main.cc b/src/session/kotori_installed_probe_main.cc
+new file mode 100644
+index 000000000..12f0332ed
+--- /dev/null
++++ b/src/session/kotori_installed_probe_main.cc
+@@ -0,0 +1,191 @@
++// Kotori:
++// インストール済みサーバーの経路を調べる。OSへキーを送らず、専用セッションだけを使用。
++#include <windows.h>
++
++#include <chrono>
++#include <cstdint>
++#include <fstream>
++#include <iostream>
++#include <string>
++#include <thread>
++
++#include "absl/time/time.h"
++#include "base/init_mozc.h"
++#include "base/system_util.h"
++#include "composer/key_parser.h"
++#include "ipc/ipc.h"
++#include "protocol/commands.pb.h"
++#include "protocol/config.pb.h"
++
++namespace {
++class Probe {
++ public:
++  ~Probe() {
++    if (id_ != 0) {
++      mozc::commands::Input input;
++      input.set_type(mozc::commands::Input::DELETE_SESSION);
++      input.set_id(id_);
++      mozc::commands::Output ignored;
++      Call(input, &ignored);
++    }
++  }
++  bool Call(const mozc::commands::Input& input,
++            mozc::commands::Output* output) {
++    const std::string path = mozc::SystemUtil::GetServerPath();
++    mozc::IPCClient ipc("session", path);
++    if (!ipc.Connected()) {
++      std::cerr << "IPC connection failed\n";
++      return false;
++    }
++    const uint32_t pid = ipc.GetServerProcessId();
++    if (pid_ != 0 && pid_ != pid) {
++      std::cerr << "Server changed\n";
++      return false;
++    }
++    if (pid_ == 0) {
++      pid_ = pid;
++      std::cout << "server_path\t" << path << "\nserver_pid\t" << pid
++                << "\nipc_advertised_version\t" << ipc.GetServerProductVersion()
++                << '\n';
++    }
++    std::string bytes, response;
++    if (!input.SerializeToString(&bytes) ||
++        !ipc.Call(bytes, &response, absl::Seconds(5)) ||
++        !output->ParseFromString(response))
++      return false;
++    if (output->error_code() != mozc::commands::Output::SESSION_SUCCESS) {
++      std::cerr << "Server command failed " << output->error_code() << '\n';
++      return false;
++    }
++    return true;
++  }
++  bool Create() {
++    mozc::commands::Input input;
++    input.set_type(mozc::commands::Input::CREATE_SESSION);
++    input.mutable_capability()->set_text_deletion(
++        mozc::commands::Capability::DELETE_PRECEDING_TEXT);
++    input.mutable_application_info()->set_process_id(GetCurrentProcessId());
++    input.mutable_application_info()->set_thread_id(GetCurrentThreadId());
++    mozc::commands::Output output;
++    if (!Call(input, &output) || !output.has_id()) return false;
++    id_ = output.id();
++    input.Clear();
++    input.set_type(mozc::commands::Input::SET_REQUEST);
++    input.set_id(id_);
++    input.mutable_request()
++        ->mutable_decoder_experiment_params()
++        ->set_variation_character_types(
++            mozc::commands::DecoderExperimentParams::SVS_JAPANESE);
++    return Call(input, &output);
++  }
++  bool Config() {
++    mozc::commands::Input input;
++    input.set_type(mozc::commands::Input::GET_CONFIG);
++    input.set_id(id_);
++    mozc::commands::Output output;
++    if (!Call(input, &output) || !output.has_config()) return false;
++    const auto& config = output.config();
++    // Kotori: Tabが確定を行う利用者独自のキー設定では診断入力を送らない。
++    can_tab_ = (config.session_keymap() == mozc::config::Config::MSIME ||
++                config.session_keymap() == mozc::config::Config::NONE) &&
++               config.overlay_keymaps_size() == 0;
++    std::cout << "config\tenabled=" << config.kotori_lm_enabled()
++              << " quality=" << config.kotori_lm_quality()
++              << " model=" << config.kotori_lm_model()
++              << " predict=" << config.kotori_lm_predict()
++              << " correction=" << config.kotori_lm_correction()
++              << " incognito=" << config.incognito_mode()
++              << " keymap=" << config.session_keymap() << '\n';
++    return true;
++  }
++  bool Key(const std::string& text, mozc::commands::Output* output) {
++    if (text == "Tab" && !can_tab_) {
++      std::cerr
++          << "Tab probe requires standard MSIME keymap without overlays\n";
++      return false;
++    }
++    mozc::commands::Input input;
++    input.set_type(mozc::commands::Input::SEND_KEY);
++    input.set_id(id_);
++    if (!mozc::KeyParser::ParseKey(text, input.mutable_key())) return false;
++    return Call(input, output);
++  }
++  bool Refresh(mozc::commands::Output* output) {
++    mozc::commands::Input input;
++    input.set_type(mozc::commands::Input::SEND_COMMAND);
++    input.set_id(id_);
++    input.mutable_command()->set_type(
++        mozc::commands::SessionCommand::KOTORI_REFRESH_SUGGESTION);
++    return Call(input, output);
++  }
++
++ private:
++  bool can_tab_ = false;
++  uint64_t id_ = 0;
++  uint32_t pid_ = 0;
++};
++void Show(const char* label, const mozc::commands::Output& output) {
++  std::string key, text;
++  for (const auto& segment : output.preedit().segment()) {
++    key += segment.key();
++    text += segment.value();
++  }
++  std::cout << label << "\treading=" << key << "\tpreedit=" << text
++            << "\tfirst=";
++  if (output.candidate_window().candidate_size() > 0) {
++    std::cout << output.candidate_window().candidate(0).value();
++  }
++  std::cout << "\tcallback=" << output.has_callback()
++            << "\tcommitted=" << output.has_result() << "\twords=";
++  int count = 0;
++  for (const auto& word : output.all_candidate_words().candidates()) {
++    if (count++ >= 12) break;
++    std::cout << '[' << word.value() << ']';
++  }
++  std::cout << '\n';
++}
++}  // namespace
++int main(int argc, char** argv) {
++  mozc::InitMozc(argv[0], &argc, &argv);
++  if (argc < 2) return 2;
++  Probe probe;
++  if (!probe.Create() || !probe.Config()) return 3;
++  mozc::commands::Output output;
++  if (!probe.Key("ON", &output)) return 4;
++  for (const char ch : std::string(argv[1])) {
++    if (!probe.Key(std::string(1, ch), &output)) return 5;
++    std::this_thread::sleep_for(std::chrono::milliseconds(30));
++  }
++  Show("typed", output);
++  if (argc > 3) {
++    std::string reading;
++    for (const auto& segment : output.preedit().segment())
++      reading += segment.key();
++    std::ifstream expected_file(argv[3]);
++    std::string expected;
++    if (!std::getline(expected_file, expected) || reading != expected) {
++      std::cerr << "Reading mismatch: " << reading << '\n';
++      return 10;
++    }
++  }
++  if (argc < 3 || std::string(argv[2]) != "immediate") {
++    for (int i = 0; i < 5 && output.has_callback(); ++i) {
++      std::this_thread::sleep_for(
++          std::chrono::milliseconds(output.callback().delay_millisec()));
++      if (!probe.Refresh(&output)) return 6;
++      Show("refresh", output);
++    }
++  }
++  if (argc > 4 && std::string(argv[4]) == "tab") {
++    if (!probe.Key("Tab", &output)) return 11;
++    Show("tab", output);
++    if (output.has_result()) return 12;
++    if (!probe.Key("ESC", &output)) return 13;
++  }
++  if (!probe.Key("Space", &output)) return 7;
++  Show("space1", output);
++  if (!probe.Key("Space", &output)) return 8;
++  Show("space2", output);
++  if (!probe.Key("ESC", &output)) return 9;
++  return 0;
++}
 diff --git a/src/session/session.cc b/src/session/session.cc
-index 8186b0a8d..b865d49c7 100644
+index 8186b0a8d..1d7433553 100644
 --- a/src/session/session.cc
 +++ b/src/session/session.cc
 @@ -44,6 +44,7 @@
@@ -29870,6 +30573,15 @@ index 8186b0a8d..b865d49c7 100644
  bool Session::UpdateCompositionInternal(commands::Command* command) {
    command->mutable_output()->set_consumed(true);
  
+@@ -2676,7 +2745,7 @@ bool Session::ConvertCancel(commands::Command* command) {
+   command->mutable_output()->set_consumed(true);
+ 
+   SetSessionState(ImeContext::COMPOSITION, context_.get());
+-  context_->mutable_converter()->Cancel();
++  context_->mutable_converter()->KotoriCancelPrediction(context_->composer());
+   if (Suggest(command->input())) {
+     Output(command);
+   } else {
 @@ -2867,6 +2936,10 @@ void Session::TransformInput(commands::Input* input) {
  
  bool Session::SwitchInputFieldType(commands::Command* command) {
@@ -29909,6 +30621,20 @@ index a9903ecd3..db1e0dae1 100644
    std::unique_ptr<ImeContext> context_;
  
    // Undo stack. *begin is the oldest, and *back is the newest.
+diff --git a/src/session/session_handler_main.cc b/src/session/session_handler_main.cc
+index 4718077e2..c373cf7f3 100644
+--- a/src/session/session_handler_main.cc
++++ b/src/session/session_handler_main.cc
+@@ -214,7 +214,8 @@ int main(int argc, char** argv) {
+   mozc::InitMozc(argv[0], &argc, &argv);
+   if (!absl::GetFlag(FLAGS_profile).empty()) {
+     const std::string profile = absl::GetFlag(FLAGS_profile);
+-    if (!mozc::FileUtil::CreateDirectory(profile).ok()) {
++    if (const absl::Status status = mozc::FileUtil::CreateDirectory(profile);
++        !status.ok() && !absl::IsAlreadyExists(status)) {
+       std::cout << "ERROR: Failed to create profile directory: " << profile
+                 << std::endl;
+       return 1;
 diff --git a/src/session/session_handler_tool.cc b/src/session/session_handler_tool.cc
 index e22e60a8c..12394a671 100644
 --- a/src/session/session_handler_tool.cc
@@ -30278,7 +31004,7 @@ index 012d822a5..21ac2b3ec 100644
  }  // namespace session
  }  // namespace mozc
 diff --git a/src/version.bzl b/src/version.bzl
-index ada11a64a..59be6b17f 100644
+index ada11a64a..48dcd6389 100644
 --- a/src/version.bzl
 +++ b/src/version.bzl
 @@ -32,10 +32,10 @@ MAJOR = 3
@@ -30290,7 +31016,7 @@ index ada11a64a..59be6b17f 100644
  
  # Number to be increased. This value may be replaced by other tools.
 -BUILD = BUILD_OSS
-+BUILD = 6331
++BUILD = 6332
  
  # Represent the platform and release channel.
  REVISION = 100
