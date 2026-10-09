@@ -4,6 +4,7 @@
 実際の TSF / アプリ上の遅延とは区別する。モデルはインストール先から読む。
 """
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -23,9 +24,13 @@ def main():
     ap.add_argument("--warm", type=float, default=12)
     ap.add_argument("--key-interval", type=float, default=0, help="1文字ずつ送る間隔（秒）")
     ap.add_argument("--expect-variant", help="初回表示・Tab・Spaceに必要な候補")
+    ap.add_argument("--expect-reading", help="最終打鍵時の読み。ローマ字の送り間違いも拒否する")
+    ap.add_argument("--expect-first", help="最初に表示する候補とSpace後の文全体に必要な表記")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     exe = args.exe.resolve()
+    exe_sha256 = hashlib.sha256(exe.read_bytes()).hexdigest()
+    session_started = time.monotonic()
     lines = queue.Queue()
     env = dict(os.environ, KOTORI_MODEL_DIR=args.install,
                KOTORI_RUNTIME_DIR=args.install)
@@ -63,6 +68,7 @@ def main():
                                   text, re.S)
                 return {"command": command,
                         "response_ms": (time.monotonic() - started) * 1000,
+                        "observed_at_ms": (time.monotonic() - session_started) * 1000,
                         "first_candidate": match.group(1) if match else None,
                         "output": text}
 
@@ -91,11 +97,34 @@ def main():
                 p.wait(timeout=60)
                 if p.returncode:
                     raise RuntimeError(f"session handler exit {p.returncode}")
+                if hashlib.sha256(exe.read_bytes()).hexdigest() != exe_sha256:
+                    raise RuntimeError("試験中に実行ファイルが変更されました")
+                last_key_ms = rows[0]["observed_at_ms"] - rows[0]["response_ms"]
+                for row in rows:
+                    row["since_last_key_ms"] = row["observed_at_ms"] - last_key_ms
                 args.out.write_text(json.dumps({"exe": str(exe),
+                    "exe_sha256": exe_sha256,
                     "romaji": args.romaji, "warm_seconds": args.warm,
                     "events": rows}, ensure_ascii=False, indent=2), encoding="utf-8")
                 for row in rows:
                     print(f'{row["response_ms"]:.1f} ms: {row["first_candidate"]}')
+                def preedit_fields(row, field):
+                    text = row["output"]
+                    if "preedit {" not in text:
+                        return ""
+                    body = re.split(r"\n\w+ \{", text.split("preedit {", 1)[1], maxsplit=1)[0]
+                    return "".join(re.findall(r'^\s+' + field + r': "([^"\n]*)"', body, re.M))
+
+                if args.expect_reading:
+                    actual = preedit_fields(rows[0], "key")
+                    if actual != args.expect_reading:
+                        raise AssertionError(f"読みが異なります: {actual!r}")
+                if args.expect_first:
+                    first = next((r for r in rows if r["first_candidate"]), None)
+                    if first is None or first["first_candidate"] != args.expect_first:
+                        raise AssertionError("初回候補が期待した補正文ではありません")
+                    if preedit_fields(rows[-1], "value") != args.expect_first:
+                        raise AssertionError("Space後の文が初回候補と一致しません")
                 if args.expect_variant:
                     needle = 'value: "' + args.expect_variant + '"'
                     first = next((r for r in rows if r["first_candidate"]), None)
