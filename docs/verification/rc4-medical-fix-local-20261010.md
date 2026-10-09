@@ -51,3 +51,23 @@ C:/Users/aruik/kotori-first-check/:
 料理の最初のSpace2条件は通常のひらがな表記を拒否していたため失敗。初回/Space1の条件は保ち、Space2でその表記を許す。
 誤ったローマ字で送った長文のmedical-nuance-after.jsonは読みが異なるため採用しない。
 読みを検査するmedical-nuance-after-valid.jsonを証拠とする。過去の失敗をPASSへ書き換えない。
+
+## 修正版インストーラー（2026-10-10 01:00 JST）
+
+固定ソース: b217ad4197db2d7ad1594ae98aae4d21398e65b9。
+ローカルBazel build終了0、608.637秒。MSI版3.34.6331.100 > 3.34.6330.100。
+1,568,374,784bytes、45ファイル、同梱の必要ファイル/NOTICE/ライセンスあり、ggml-rpc.dllなし。
+3モデルと18実行環境DLLは評価したものとSHA-256完全一致。server/tool/TIP64はパッケージ用出力と一致。
+アイコン3個/背景2枚は正本と一致。デスクトップ/メニューの設定ショートカット名はKotori。
+server版はMSI版と一致。コード署名はNotSigned。
+SHA-256: ed1a3ed93ebd3c81dd8ebdfe39509ad7cc40c0f3cba01bd2d064d73c804cb575。
+内容検査はWiX5.0.2の読み取り専用decompileを用い、check_release.pyと同じ基準を保持。
+
+C:/Users/aruik/kotori-first-check/rc4-release-20261010-b217ad4/ にMSI、SHA、local-build.json、source-manifest.json、release-evidence.jsonを保存。
+verify-package.pyは全条件のassertionが通ってから最終原票を書く。
+初回の検査スクリプトは実行環境DLL数を17と誤計数しFAIL。旧/新の完全一致集合は18だったため数だけを訂正、集合・各ハッシュの同一性検査を保持した。
+標準PowerShell7が未導入でPythonから起動できないため、構成済みshellで版/署名を取得し同じassertionで検査。
+両方の経緯をinspection-harness-correction.txtに残した。製品の変更や検査項目の緩和ではない。
+
+Windows実入力・上書き更新・削除はこの新MSIで未確認。利用者へ今回の2文の最初の候補とSpace1/2の局所確認を依頼。
+モデル読込み中の補正未適用と実機自動操作のtimeoutを、パッケージ成功で解決したとは扱わない。

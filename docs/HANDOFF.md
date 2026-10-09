@@ -1,3 +1,23 @@
+# rc.4修正版MSIの完成・実入力確認待ち（2026-10-10）
+
+ソースb217ad4197db2d7ad1594ae98aae4d21398e65b9を固定し、全buildをローカルで実施。
+MSIは608.637秒で終了0。内容の読み取り専用展開・112入力/3パッチ・同梱モデル/実行環境・本体の同一性PASS。
+ProductVersion3.34.6331.100で6330より大きい。45ファイル、1,568,374,784bytes、未署名。
+SHA-256: ed1a3ed93ebd3c81dd8ebdfe39509ad7cc40c0f3cba01bd2d064d73c804cb575。
+完成ファイル: C:/Users/aruik/kotori-first-check/rc4-release-20261010-b217ad4/Kotori64.msi。
+原票: 同じフォルダのlocal-build.json、source-manifest.json、release-evidence.json。
+詳細: docs/verification/rc4-medical-fix-local-20261010.md。
+
+初回/Spaceの文脈統一、無関係な同音語の優先昇格の撤回、Windows更新先の検査を修正。
+Session190/Nuance9/Engine86、実モデル5例、準備後の即Space2例、特徴/特長の長文PASS。
+修正後Standard183/200=91.5%。これはCLI/MSI内容の証拠であり、Windows実入力PASSではない。
+モデル読込み中の即Spaceでは通常変換に戻り「炒めて」が残りうる。
+Windows Computer Useの規定の回復を含むInitialize3回のtimeout以後、同じ試行は繰り返していない。
+利用者へ具体的なMSIと今回の文の初回/Space1/Space2の確認を提示。結果は未回答。
+rc.4は下書きのまま。今回の新MSIの実入力確認後に公開する。公開権限は既に利用者から与えられている。
+
+以下はビルド前と失敗候補の履歴。
+
 # rc.4修正版のローカルMSI作成へ（2026-10-10）
 
 6330の実入力FAILを受け、無関係な同音語の昇格、初回/Spaceの文脈不一致、Windows更新先の検査を修正。

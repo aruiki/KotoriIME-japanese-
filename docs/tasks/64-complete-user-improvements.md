@@ -28,3 +28,11 @@ CLI・Qt描画・Windows TSFの実測を区別する。未検証を完成とし�
 6330の利用者観測FAILを確認。無関係な同音語の昇格と初回/Spaceの文脈差、Windowsのフォーカス検査を修正。
 [修正のローカル原票](../verification/rc4-medical-fix-local-20261010.md)を追加した。
 BUILD6331のローカルMSIと同じ文の実入力確認は残っている。初回改善の全要望達成/公開完了とは扱わない。
+
+### BUILD6331候補のローカル作成（2026-10-10）
+
+固定ソースb217ad4、ローカルMSI build608.637秒、内容/版/出所/モデルハッシュPASS。
+MSI3.34.6331.100、SHA ed1a3ed93ebd3c81dd8ebdfe39509ad7cc40c0f3cba01bd2d064d73c804cb575。
+前の実入力FAILは保存。新候補の最初の表示/Space1/Space2を利用者が確認するまで下書きを公開しない。
+冷間即Spaceを常に補正できたとは扱わず、このカードを完了へ移していない。
+詳細: docs/verification/rc4-medical-fix-local-20261010.md。
