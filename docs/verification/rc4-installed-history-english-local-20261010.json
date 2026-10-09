@@ -56,5 +56,18 @@
     "all typo correction or cold-load initial correction"
   ],
   "local_evidence_directory": "C:/Users/aruik/kotori-first-check",
-  "private_history_data_committed": false
+  "private_history_data_committed": false,
+  "source_commit": "3a962f4554bf8edfb72afc8872835ecd3df43df0",
+  "local_installer": {
+    "version": "3.34.6332.100",
+    "build_exit_code": 0,
+    "build_seconds": 622.4,
+    "payload_file_count": 48,
+    "size_bytes": 1569157120,
+    "sha256": "2e88913147adbe49da5f32624590980b11a938ed58872fc0235d0206b4467e17",
+    "signature": "NotSigned",
+    "contents_verified": true,
+    "native_input_verified": false
+  },
+  "publication_order": "explicit user request to publish verified local candidate before native installation/debug"
 }
