@@ -22973,10 +22973,10 @@ index 000000000..c31037864
 +}
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..e616bd986
+index 000000000..e8e4f8c52
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
-@@ -0,0 +1,2831 @@
+@@ -0,0 +1,2892 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -24377,6 +24377,31 @@ index 000000000..e616bd986
 +  return std::nullopt;
 +}
 +
++std::optional<std::string> LmRewriter::EvaluatedPredictionBase(
++    const ConversionRequest& request, const std::string& reading,
++    const std::string& context) const {
++  if (!request.config().kotori_lm_enabled() || request.incognito_mode() ||
++      request.context().input_field_type() == commands::Context::PASSWORD ||
++      !request.kotori_input_generation().IsCurrent()) {
++    return std::nullopt;
++  }
++  const std::string key = MemoKey(request.config(), reading, context);
++  const auto memo = FindMemo(key, request);
++  if (!memo || !*memo) return std::nullopt;
++  const Best& best = **memo;
++  if (best.reading != reading || best.context != context || best.keys.empty() ||
++      best.keys.size() != best.values.size() ||
++      (best.correction && best.correction->config_key != key)) {
++    return std::nullopt;
++  }
++  std::string joined_reading, text;
++  for (size_t i = 0; i < best.keys.size(); ++i) {
++    joined_reading += best.keys[i];
++    text += best.values[i];
++  }
++  if (joined_reading != reading || text.empty()) return std::nullopt;
++  return text;
++}
 +bool LmRewriter::StoreMemo(const std::string& key, std::optional<Best> best,
 +                           bool background,
 +                           const std::function<bool()>& cancelled) const {
@@ -25246,6 +25271,7 @@ index 000000000..e616bd986
 +  ZenzScorer* llm = nullptr;
 +  PrepareFor(request.config(), &k, &llm, &beams, &llm_top, true, sync_load_);
 +  if (llm == nullptr) return false;
++  const auto evaluated = EvaluatedPredictionBase(request, reading, context);
 +  // Mozc 自身の予測候補(上位 8 件)と読みの変換も加え、1 トークンあたりの log P で並べる。
 +  std::vector<std::string> pool;
 +  std::vector<bool> from_ai;
@@ -25264,13 +25290,20 @@ index 000000000..e616bd986
 +    pool.push_back(conv);
 +    from_ai.push_back(true);
 +  }
++  if (evaluated && std::find(pool.begin(), pool.end(), *evaluated) == pool.end()) {
++    pool.push_back(*evaluated);
++    from_ai.push_back(true);
++  }
 +  std::vector<std::string> ranked;
 +  std::vector<bool> ranked_ai;
 +  if (auto logp = llm->Score(context, reading, pool)) {
 +    std::vector<size_t> order;
 +    std::vector<double> avg(pool.size());
 +    for (size_t i = 0; i < pool.size(); ++i) {
-+      if (HasDigit(pool[i]) && !HasDigit(reading)) continue;
++      // Kotori: 初回評価済みの「じゅうじ→１０時」は数字の混入ではない。
++      // 未評価の数字や、勝手に数字を変えた予測には従来の制限を残す。
++      if (HasDigit(pool[i]) && !HasDigit(reading) &&
++          (!evaluated || pool[i] != *evaluated)) continue;
 +      // 先頭に並べる枠には、ゴミ(IsJunkPrediction)と、読みのまま変換されていないものを入れない。
 +      // Mozc の候補なら、先頭に出さないだけで、Mozc の候補の一覧には元の位置で残る。
 +      if (filter_junk_ &&
@@ -25287,6 +25320,34 @@ index 000000000..e616bd986
 +      ranked_ai.push_back(from_ai[i]);
 +    }
 +  }
++if (evaluated) {
++  // Kotori: 本文を保持し、初回表示と同じ採用条件を満たす続きだけを先頭へ。
++  // 弱い予測や別表記は、明示的に選べる候補として一覧に残す。
++  std::string leading = *evaluated;
++  for (const std::string& value : ranked) {
++    const auto strong =
++        std::find_if(preds.begin(), preds.end(), [&](const Prediction& p) {
++          return p.text == value && p.can_lead && !p.yomi.empty() &&
++                 absl::StartsWith(p.yomi, reading) &&
++                 absl::StartsWith(p.text, *evaluated);
++        });
++    if (strong != preds.end()) {
++      leading = value;
++      break;
++    }
++  }
++  const auto old = std::find(ranked.begin(), ranked.end(), leading);
++  if (old != ranked.end()) {
++    const auto index = old - ranked.begin();
++    ranked.erase(old);
++    ranked_ai.erase(ranked_ai.begin() + index);
++  }
++  ranked.insert(ranked.begin(), leading);
++  ranked_ai.insert(ranked_ai.begin(), true);
++  // 採点中の取消・設定切替等で失効した補正文を追加しない。
++  if (EvaluatedPredictionBase(request, reading, context) != evaluated)
++    return false;
++}
 +  const size_t shown = std::min<size_t>(
 +      ranked.size(), tab_show_ > 0 ? tab_show_ : predict_beams_ + 1);
 +  ranked.resize(shown);
@@ -25810,10 +25871,10 @@ index 000000000..e616bd986
 +}  // namespace mozc
 diff --git a/src/rewriter/lm_rewriter.h b/src/rewriter/lm_rewriter.h
 new file mode 100644
-index 000000000..2a6df2369
+index 000000000..710f43d84
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.h
-@@ -0,0 +1,435 @@
+@@ -0,0 +1,439 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +//
 +// Kotori: AI による変換(docs/adr/0013、0015、0016)。
@@ -26021,6 +26082,10 @@ index 000000000..2a6df2369
 +                      const std::string& context) const;
 +  std::optional<std::optional<Best>> FindMemo(
 +      const std::string& key, const ConversionRequest& request) const;
++  // Kotori: Tabでも初回に評価した本文を保つ。所有者/モデル/設定は再検査する。
++  std::optional<std::string> EvaluatedPredictionBase(
++      const ConversionRequest& request, const std::string& reading,
++      const std::string& context) const;
 +  bool StoreMemo(const std::string& key, std::optional<Best> best,
 +                 bool background, const std::function<bool()>& cancelled) const;
 +  // 文全体の候補と生成した文から AI で選び、区切りを返す(CheckResizeSegmentsRequest の本体)。
@@ -26251,10 +26316,10 @@ index 000000000..2a6df2369
 +#endif  // MOZC_REWRITER_LM_REWRITER_H_
 diff --git a/src/rewriter/lm_rewriter_test.cc b/src/rewriter/lm_rewriter_test.cc
 new file mode 100644
-index 000000000..bf2aadaa2
+index 000000000..ab92fdb77
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter_test.cc
-@@ -0,0 +1,639 @@
+@@ -0,0 +1,735 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -26789,6 +26854,16 @@ index 000000000..bf2aadaa2
 +    EXPECT_EQ(changed, accepted);
 +    return accepted;
 +  }
++  bool SavePredictionBase(const Best& best) const {
++    return rewriter_->StoreMemo(
++        rewriter_->MemoKey(config_, best.reading, best.context), best, true,
++        [] { return false; });
++  }
++  std::optional<std::string> PredictionBase(const ConversionRequest& request,
++                                          const std::string& reading = "あしをいためた",
++                                          const std::string& context = "") const {
++    return rewriter_->EvaluatedPredictionBase(request, reading, context);
++  }
 +  void ReloadModel() { ++rewriter_->model_epoch_; }
 +  void ReplaceModelHashes() {
 +    std::lock_guard<std::mutex> lock(rewriter_->job_mu_);
@@ -26882,6 +26957,92 @@ index 000000000..bf2aadaa2
 +  EXPECT_FALSE(Save(Corrected({owner, 1})));
 +}
 +
++TEST_F(LmRewriterGenerationTest,
++       PredictionBasePreservesEvaluatedDigitsAndSegments) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  Best best{"あしたのかいぎはじゅうじからです",
++            "",
++            {"あしたの", "かいぎは", "じゅうじからです"},
++            {"明日の", "会議は", "１０時からです"}};
++  ASSERT_TRUE(SavePredictionBase(best));
++  EXPECT_EQ(PredictionBase(Request({owner, 1}), best.reading),
++            "明日の会議は１０時からです");
++}
++
++TEST_F(LmRewriterGenerationTest, PredictionBaseRejectsEditedAndAnotherSession) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  auto other = std::make_shared<std::atomic<uint64_t>>(1);
++  const auto best = Corrected({owner, 1});
++  ASSERT_TRUE(SavePredictionBase(best));
++  EXPECT_EQ(PredictionBase(Request({owner, 1})), "足を痛めた");
++  EXPECT_FALSE(PredictionBase(Request({other, 1})));
++  owner->fetch_add(1);
++  EXPECT_FALSE(PredictionBase(Request({owner, 1})));
++  EXPECT_FALSE(PredictionBase(Request({owner, 2})));
++}
++
++TEST_F(LmRewriterGenerationTest, PredictionBaseRejectsConfigAndModelChanges) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  ASSERT_TRUE(SavePredictionBase(Corrected({owner, 1})));
++  EXPECT_FALSE(PredictionBase(Request({owner, 1}, true)));
++  ReplaceModelHashes();
++  EXPECT_FALSE(PredictionBase(Request({owner, 1})));
++  ASSERT_TRUE(SavePredictionBase(Corrected({owner, 1})));
++  ReloadModel();
++  EXPECT_FALSE(PredictionBase(Request({owner, 1})));
++}
++
++TEST_F(LmRewriterGenerationTest,
++       PredictionBaseRequiresMatchingReadingAndContext) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  const auto best = Corrected({owner, 1});
++  ASSERT_TRUE(SavePredictionBase(best));
++  EXPECT_FALSE(PredictionBase(Request({owner, 1}), "あしをいためる"));
++  EXPECT_FALSE(PredictionBase(Request({owner, 1}), best.reading, "別の文脈"));
++  EXPECT_FALSE(PredictionBase(Request({})));
++}
++
++TEST_F(LmRewriterGenerationTest,
++       PredictionBaseRejectsMalformedAndEmptySegments) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  auto best = Corrected({owner, 1});
++  best.keys = {"あしを"};
++  ASSERT_TRUE(SavePredictionBase(best));
++  EXPECT_FALSE(PredictionBase(Request({owner, 1})));
++  best.keys.clear();
++  ASSERT_TRUE(SavePredictionBase(best));
++  EXPECT_FALSE(PredictionBase(Request({owner, 1})));
++  best.keys = {best.reading};
++  best.values = {""};
++  ASSERT_TRUE(SavePredictionBase(best));
++  EXPECT_FALSE(PredictionBase(Request({owner, 1})));
++}
++
++TEST_F(LmRewriterGenerationTest,
++       PredictionBaseRejectsDisabledIncognitoAndPassword) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  const auto best = Corrected({owner, 1});
++  const auto request = Request({owner, 1});
++  ASSERT_TRUE(SavePredictionBase(best));
++  config::Config disabled = request.config();
++  disabled.set_kotori_lm_enabled(false);
++  EXPECT_FALSE(PredictionBase(ConversionRequestBuilder()
++                                  .SetConversionRequestView(request)
++                                  .SetConfig(disabled)
++                                  .Build()));
++  config::Config incognito = request.config();
++  incognito.set_incognito_mode(true);
++  EXPECT_FALSE(PredictionBase(ConversionRequestBuilder()
++                                  .SetConversionRequestView(request)
++                                  .SetConfig(incognito)
++                                  .Build()));
++  commands::Context context;
++  context.set_input_field_type(commands::Context::PASSWORD);
++  EXPECT_FALSE(PredictionBase(ConversionRequestBuilder()
++                                  .SetConversionRequestView(request)
++                                  .SetContext(context)
++                                  .Build()));
++}
 +TEST_F(LmRewriterGenerationTest, OrdinaryRankingMemoKeepsExistingReuse) {
 +  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
 +  auto best = Corrected({owner, 1});

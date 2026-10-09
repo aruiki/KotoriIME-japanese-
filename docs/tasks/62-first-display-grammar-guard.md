@@ -22,8 +22,8 @@ ADR0042、0045、0047。HasSafeCorrectionReading、GenerateSafeCorrection、firs
 
 ## 完了条件
 
-- [ ] 関連するローカルbuild/testが成功し、実モデルの補正例と正常文への影響を記録
-- [ ] 初回/Space/Tabの結果と未検証の実TSFを区別した記録
+- [x] 関連するローカルbuild/testが成功し、実モデルの補正例と正常文への影響を記録
+- [x] 初回/Space/Tabの結果と未検証の実TSFを区別した記録
 - [ ] 自由生成の既定有効化・新しい配布版は別途受け入れ後に行う
 
 ## ローカル作業の境界（2026-10-09）
@@ -32,3 +32,5 @@ ADR0042、0045、0047。HasSafeCorrectionReading、GenerateSafeCorrection、firs
 当方の実行中だったMSIジョブ2件は取消を依頼した。共有の4つのworkflowの恒久停止は自動承認審査に拒否され、変更していない。
 新しい差分は当面ローカル枝へ保存し、GitHub上の自動buildを新たに開始しない。
 既存テスト・公開インストーラーは変更しない。
+
+ローカルの文法保護はe91784aで保存。通常100文の記録はcorrection-grammar。Tabの追加修正はカード63。
