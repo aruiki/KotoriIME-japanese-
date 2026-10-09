@@ -184,7 +184,7 @@ jobs:
         working-directory: .\mozc-src\src
         env:
           ANDROID_NDK_HOME: ""
-        run: bazelisk test //request:conversion_request_test //engine:engine_converter_test //rewriter:lm_rewriter_test //rewriter:english_variants_rewriter_test //base:kotori_diagnostics_test //session:session_test --config release_build --disk_cache=D:\bazel-disk-cache
+        run: bazelisk test //request:conversion_request_test //engine:engine_converter_test //rewriter:kotori_model_identity_test //rewriter:lm_rewriter_test //rewriter:english_variants_rewriter_test //base:kotori_diagnostics_test //session:session_test --config release_build --disk_cache=D:\bazel-disk-cache
       # 実際のMSIで導入・TSF経由の日本語入力・アンインストールを確認する。
       # 開発者のPCではなく、この使い捨てWindowsランナーだけを変更する。
       - name: インストーラーの導入・実入力・削除を確かめる

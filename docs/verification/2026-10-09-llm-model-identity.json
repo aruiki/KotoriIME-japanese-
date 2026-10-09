@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-09",
+  "exe_sha256": "bc8953b488ea6a6ebadcbe3494a322d3c6bde418767ea23b33c134a5a4bb2979",
+  "models": {
+    "zenz_sha256": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c",
+    "llm_sha256": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8"
+  },
+  "off_first": "足を炒めたので病院に行きます",
+  "on_first": "足を痛めたので病院に行きます",
+  "on_space_matches_first": true,
+  "lifecycle_phases": [
+    "test-key-clone",
+    "after-test-key-clone",
+    "after-cancel",
+    "after-ai-disabled",
+    "after-password-field",
+    "after-incognito"
+  ],
+  "unit_tests": {
+    "model_identity": 6,
+    "lm_rewriter": 31,
+    "session_target": "passed"
+  },
+  "limits": [
+    "controlled NSENT=1 BEAMS=0 PREDICT=0 TYPO=0",
+    "not default settings or interactive TSF",
+    "normal session100/semantic guards/CPU pending"
+  ]
+}

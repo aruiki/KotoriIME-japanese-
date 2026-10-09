@@ -21293,7 +21293,7 @@ index 0d2eb3455..1b13074f1 100644
    // For example, "私の" is created from composition "わたしのなまえ".
    bool create_partial_candidates = false;
 diff --git a/src/rewriter/BUILD.bazel b/src/rewriter/BUILD.bazel
-index 4bbcddeca..b063db06f 100644
+index 4bbcddeca..e0b597d36 100644
 --- a/src/rewriter/BUILD.bazel
 +++ b/src/rewriter/BUILD.bazel
 @@ -675,6 +675,7 @@ mozc_cc_library(
@@ -21312,7 +21312,7 @@ index 4bbcddeca..b063db06f 100644
          ":merger_rewriter",
          ":number_rewriter",
          ":remove_redundant_candidate_rewriter",
-@@ -1743,3 +1745,98 @@ mozc_cc_test(
+@@ -1743,3 +1745,122 @@ mozc_cc_test(
          "//testing:gunit_main",
      ],
  )
@@ -21325,11 +21325,35 @@ index 4bbcddeca..b063db06f 100644
 +    deps = ["@llama_cpp//:llama"],
 +)
 +
++# Kotori: WindowsのSHA-256。未対応OSでは識別不能として補正を無効にする。
++mozc_cc_library(
++    name = "kotori_model_identity",
++    srcs = ["kotori_model_identity.cc"],
++    hdrs = ["kotori_model_identity.h"],
++    linkopts = select({
++        "//bazel/cc_target_os:windows": ["bcrypt.lib"],
++        "//conditions:default": [],
++    }),
++)
++
++mozc_cc_test(
++    name = "kotori_model_identity_test",
++    size = "small",
++    srcs = ["kotori_model_identity_test.cc"],
++    deps = [
++        ":kotori_model_identity",
++        "//base:file_util",
++        "//testing:mozctest",
++        "//testing:gunit_main",
++    ],
++)
++
 +mozc_cc_library(
 +    name = "zenz_scorer",
 +    srcs = ["zenz_scorer.cc"],
 +    hdrs = ["zenz_scorer.h"],
 +    deps = [
++        ":kotori_model_identity",
 +        ":llama_runtime",
 +        "//base:util",
 +        "@com_google_absl//absl/strings",
@@ -21647,6 +21671,218 @@ index 9c9f95e8f..a4dea718f 100644
    }
  }
  
+diff --git a/src/rewriter/kotori_model_identity.cc b/src/rewriter/kotori_model_identity.cc
+new file mode 100644
+index 000000000..4ca262269
+--- /dev/null
++++ b/src/rewriter/kotori_model_identity.cc
+@@ -0,0 +1,81 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++#include "rewriter/kotori_model_identity.h"
++
++#include <array>
++#include <memory>
++#include <string>
++#include <vector>
++
++#ifdef _WIN32
++#include <windows.h>
++#include <bcrypt.h>
++#endif  // _WIN32
++
++namespace mozc {
++#ifdef _WIN32
++namespace {
++struct HashHandles {
++  BCRYPT_ALG_HANDLE algorithm = nullptr;
++  BCRYPT_HASH_HANDLE hash = nullptr;
++  ~HashHandles() {
++    if (hash != nullptr) BCryptDestroyHash(hash);
++    if (algorithm != nullptr) BCryptCloseAlgorithmProvider(algorithm, 0);
++  }
++};
++}  // namespace
++#endif  // _WIN32
++
++std::unique_ptr<KotoriModelIdentity> KotoriModelIdentity::Open(
++    const std::string& path) {
++#ifdef _WIN32
++  if (path.empty() || path.find('\0') != std::string::npos) return nullptr;
++  const int length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
++                                         path.data(), path.size(), nullptr, 0);
++  if (length <= 0) return nullptr;
++  std::wstring wide(length, L'\0');
++  if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path.data(),
++                         path.size(), wide.data(), length) != length) {
++    return nullptr;
++  }
++  const HANDLE file = CreateFileW(wide.c_str(), GENERIC_READ, FILE_SHARE_READ,
++      nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
++      nullptr);
++  if (file == INVALID_HANDLE_VALUE) return nullptr;
++  auto identity = std::unique_ptr<KotoriModelIdentity>(new KotoriModelIdentity());
++  identity->file_ = file;
++  HashHandles handles;
++  if (BCryptOpenAlgorithmProvider(&handles.algorithm, BCRYPT_SHA256_ALGORITHM,
++                                   nullptr, 0) < 0 ||
++      BCryptCreateHash(handles.algorithm, &handles.hash, nullptr, 0,
++                         nullptr, 0, 0) < 0) return nullptr;
++  std::vector<unsigned char> buffer(1024 * 1024);
++  DWORD count = 0;
++  for (;;) {
++    if (!ReadFile(file, buffer.data(), buffer.size(), &count, nullptr)) {
++      return nullptr;
++    }
++    if (count == 0) break;
++    if (BCryptHashData(handles.hash, buffer.data(), count, 0) < 0) return nullptr;
++  }
++  std::array<unsigned char, 32> digest;
++  if (BCryptFinishHash(handles.hash, digest.data(), digest.size(), 0) < 0) {
++    return nullptr;
++  }
++  constexpr char hex[] = "0123456789abcdef";
++  identity->sha256_.reserve(64);
++  for (unsigned char byte : digest) {
++    identity->sha256_ += hex[byte >> 4];
++    identity->sha256_ += hex[byte & 15];
++  }
++  return identity;
++#else
++  return nullptr;
++#endif  // _WIN32
++}
++
++KotoriModelIdentity::~KotoriModelIdentity() {
++#ifdef _WIN32
++  if (file_ != nullptr) CloseHandle(file_);
++#endif  // _WIN32
++}
++}  // namespace mozc
+diff --git a/src/rewriter/kotori_model_identity.h b/src/rewriter/kotori_model_identity.h
+new file mode 100644
+index 000000000..5e8cfcc0b
+--- /dev/null
++++ b/src/rewriter/kotori_model_identity.h
+@@ -0,0 +1,26 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++#ifndef MOZC_REWRITER_KOTORI_MODEL_IDENTITY_H_
++#define MOZC_REWRITER_KOTORI_MODEL_IDENTITY_H_
++
++#include <memory>
++#include <string>
++
++namespace mozc {
++// Kotori: 非同期ロードでのみ使用する。実内容のSHA-256を取得し、所有中は
++// Windowsの共有モードで同じファイルの書き換え・置換を拒否する。
++// 開けない、読み切れない、未対応のOSの場合は識別不能としてnullptrを返す。
++class KotoriModelIdentity {
++ public:
++  static std::unique_ptr<KotoriModelIdentity> Open(const std::string& path);
++  ~KotoriModelIdentity();
++  KotoriModelIdentity(const KotoriModelIdentity&) = delete;
++  KotoriModelIdentity& operator=(const KotoriModelIdentity&) = delete;
++  const std::string& sha256() const { return sha256_; }
++
++ private:
++  KotoriModelIdentity() = default;
++  void* file_ = nullptr;
++  std::string sha256_;
++};
++}  // namespace mozc
++#endif  // MOZC_REWRITER_KOTORI_MODEL_IDENTITY_H_
+diff --git a/src/rewriter/kotori_model_identity_test.cc b/src/rewriter/kotori_model_identity_test.cc
+new file mode 100644
+index 000000000..13b1ec304
+--- /dev/null
++++ b/src/rewriter/kotori_model_identity_test.cc
+@@ -0,0 +1,87 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++#include "rewriter/kotori_model_identity.h"
++
++#include <fstream>
++#include <string>
++
++#include "base/file_util.h"
++#include "testing/mozctest.h"
++#include "testing/gunit.h"
++
++namespace mozc {
++#ifdef _WIN32
++TEST(KotoriModelIdentityTest, KnownDigestsAndMultipleReadHandles) {
++  auto file = testing::MakeTempFileOrDie();
++  ASSERT_TRUE(FileUtil::SetContents(file.path(), "abc").ok());
++  auto identity = KotoriModelIdentity::Open(file.path());
++  ASSERT_NE(identity, nullptr);
++  EXPECT_EQ(identity->sha256(),
++      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
++  auto same = KotoriModelIdentity::Open(file.path());
++  ASSERT_NE(same, nullptr);
++  EXPECT_EQ(identity->sha256(), same->sha256());
++  identity.reset();
++  same.reset();
++  ASSERT_TRUE(FileUtil::SetContents(file.path(), "").ok());
++  identity = KotoriModelIdentity::Open(file.path());
++  ASSERT_NE(identity, nullptr);
++  EXPECT_EQ(identity->sha256(),
++      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
++}
++
++TEST(KotoriModelIdentityTest, HashesAllChunks) {
++  auto file = testing::MakeTempFileOrDie();
++  ASSERT_TRUE(FileUtil::SetContents(file.path(), std::string(2 * 1024 * 1024 + 7, 'a')).ok());
++  auto identity = KotoriModelIdentity::Open(file.path());
++  ASSERT_NE(identity, nullptr);
++  EXPECT_EQ(identity->sha256(), "9894227c2ddb433377d6e71695ea85c203eaabb67f7dadedf4ae462d41e715e6");
++}
++
++TEST(KotoriModelIdentityTest, UnicodePath) {
++  auto directory = testing::MakeTempDirectoryOrDie();
++  const std::string path = FileUtil::JoinPath(directory.path(), "小鳥モデル.gguf");
++  ASSERT_TRUE(FileUtil::SetContents(path, "abc").ok());
++  auto identity = KotoriModelIdentity::Open(path);
++  ASSERT_NE(identity, nullptr);
++  EXPECT_EQ(identity->sha256(),
++      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
++}
++
++TEST(KotoriModelIdentityTest, KeepsHashedFileUnchangedUntilOwnerReleasesIt) {
++  auto file = testing::MakeTempFileOrDie();
++  ASSERT_TRUE(FileUtil::SetContents(file.path(), "abc").ok());
++  auto identity = KotoriModelIdentity::Open(file.path());
++  ASSERT_NE(identity, nullptr);
++  EXPECT_FALSE(FileUtil::SetContents(file.path(), "changed").ok());
++  EXPECT_FALSE(FileUtil::Unlink(file.path()).ok());
++  auto destination = testing::MakeTempFileOrDie();
++  EXPECT_FALSE(FileUtil::AtomicRename(file.path(), destination.path()).ok());
++  ASSERT_TRUE(FileUtil::GetContents(file.path()).ok());
++  EXPECT_EQ(*FileUtil::GetContents(file.path()), "abc");
++  identity.reset();
++  ASSERT_TRUE(FileUtil::SetContents(file.path(), "changed").ok());
++  auto changed = KotoriModelIdentity::Open(file.path());
++  ASSERT_NE(changed, nullptr);
++  EXPECT_NE(changed->sha256(),
++      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
++}
++
++TEST(KotoriModelIdentityTest, RejectsAlreadyWritableFile) {
++  auto file = testing::MakeTempFileOrDie();
++  std::ofstream writer(file.path(), std::ios::binary);
++  ASSERT_TRUE(writer.good());
++  EXPECT_EQ(KotoriModelIdentity::Open(file.path()), nullptr);
++  writer.close();
++  EXPECT_NE(KotoriModelIdentity::Open(file.path()), nullptr);
++}
++#endif  // _WIN32
++
++TEST(KotoriModelIdentityTest, RejectsUnavailableFileAndInvalidPath) {
++  EXPECT_EQ(KotoriModelIdentity::Open(""), nullptr);
++  auto directory = testing::MakeTempDirectoryOrDie();
++  EXPECT_EQ(KotoriModelIdentity::Open(
++      FileUtil::JoinPath(directory.path(), "missing.gguf")), nullptr);
++  EXPECT_EQ(KotoriModelIdentity::Open(std::string("bad\0path", 8)), nullptr);
++  EXPECT_EQ(KotoriModelIdentity::Open(std::string("\xff", 1)), nullptr);
++}
++}  // namespace mozc
 diff --git a/src/rewriter/llama_runtime.cc b/src/rewriter/llama_runtime.cc
 new file mode 100644
 index 000000000..27b0aafdc
@@ -22305,10 +22541,10 @@ index 000000000..c31037864
 +}
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..9c2b06580
+index 000000000..5ed65b7fb
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
-@@ -0,0 +1,2787 @@
+@@ -0,0 +1,2822 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -23386,12 +23622,15 @@ index 000000000..9c2b06580
 +  if (const char* v = Env("KOTORI_LM_MIN_CONTINUATION")) {
 +    min_continuation_chars_ = std::atoi(v);
 +  }
-+  // モデルの読み込みと、入力中のサジェストに出す予測を裏で行うスレッド。
-+  worker_ = std::thread([this] { WorkerLoop(); });
 +  // 今の設定のモデルを裏で読み込んでおく(最初の変換で 1 秒以上待たないため)。
 +  // KOTORI_LM_PRELOAD=0(評価)なら、要求の中で読み込む(読み込みを待ってから変換する)。
 +  const char* preload = Env("KOTORI_LM_PRELOAD");
 +  sync_load_ = preload != nullptr && *preload == '0';
++  const char* correction = Env("KOTORI_LM_CORRECTION");
++  identify_correction_models_ = !sync_load_ && correction != nullptr &&
++                                  std::string(correction) == "1";
++  // Kotori: 設定の初期化を終えてからワーカーを開始する。
++  worker_ = std::thread([this] { WorkerLoop(); });
 +  if (!sync_load_) RequestLoad(config::ConfigHandler::GetCopiedConfig());
 +}
 +
@@ -23527,7 +23766,8 @@ index 000000000..9c2b06580
 +  loaded_path_ = path;
 +  scorer_.reset();
 +  if (!FileUtil::FileExists(path).ok()) return;
-+  scorer_ = ZenzScorer::Open(path, threads_, runtime_dir_);
++  scorer_ = ZenzScorer::Open(path, threads_, runtime_dir_,
++                              identify_correction_models_);
 +}
 +
 +void LmRewriter::EnsureLlmLoaded(const std::string& path) const {
@@ -23537,7 +23777,8 @@ index 000000000..9c2b06580
 +  llm_path_ = path;
 +  llm_.reset();
 +  if (path.empty() || !FileUtil::FileExists(path).ok()) return;
-+  llm_ = ZenzScorer::Open(path, threads_, runtime_dir_);
++  llm_ = ZenzScorer::Open(path, threads_, runtime_dir_,
++                           identify_correction_models_);
 +}
 +
 +ZenzScorer* LmRewriter::Prepare(const ConversionRequest& request, size_t* k,
@@ -23593,7 +23834,8 @@ index 000000000..9c2b06580
 +          long_path_ = long_path;
 +          long_scorer_.reset();
 +          if (FileUtil::FileExists(long_path).ok()) {
-+            long_scorer_ = ZenzScorer::Open(long_path, threads_, runtime_dir_);
++            long_scorer_ = ZenzScorer::Open(long_path, threads_, runtime_dir_,
++                                            identify_correction_models_);
 +          }
 +        }
 +      }
@@ -23648,6 +23890,29 @@ index 000000000..9c2b06580
 +  return path + "|" + extra_path_;
 +}
 +
++std::shared_ptr<const LmRewriter::CorrectionModels>
++LmRewriter::BindCorrectionModels(const ZenzScorer* scorer,
++                                  const ZenzScorer* llm) const {
++  if (scorer == nullptr || llm == nullptr ||
++      scorer->model_sha256().empty() || llm->model_sha256().empty()) {
++    return nullptr;
++  }
++  const uint64_t epoch = model_epoch_.load();
++  std::lock_guard<std::mutex> lock(job_mu_);
++  if (!correction_models_ || correction_models_->epoch != epoch ||
++      correction_models_->zenz_sha256 != scorer->model_sha256() ||
++      correction_models_->llm_sha256 != llm->model_sha256()) {
++    correction_models_ = std::make_shared<const CorrectionModels>(
++        CorrectionModels{epoch, scorer->model_sha256(), llm->model_sha256()});
++    if (Env("KOTORI_LM_DEBUG") != nullptr) {
++      std::fprintf(stderr, "[kotori] correction models zenz=%s llm=%s\n",
++          correction_models_->zenz_sha256.c_str(),
++          correction_models_->llm_sha256.c_str());
++    }
++  }
++  return correction_models_;
++}
++
 +std::string LmRewriter::MemoKey(const config::Config& config,
 +                                const std::string& reading,
 +                                const std::string& context) const {
@@ -23663,7 +23928,8 @@ index 000000000..9c2b06580
 +      const auto& origin = *best->correction;
 +      if (!origin.input.IsCurrent() ||
 +          !origin.input.IsSame(request.kotori_input_generation()) ||
-+          origin.model_epoch != model_epoch_.load()) return std::nullopt;
++          !origin.models || origin.models != correction_models_ ||
++          origin.models->epoch != model_epoch_.load()) return std::nullopt;
 +    }
 +    return best;
 +  }
@@ -23678,7 +23944,9 @@ index 000000000..9c2b06580
 +  if (background && cancelled()) return false;
 +  if (best && best->correction &&
 +      (!best->correction->input.IsCurrent() ||
-+       best->correction->model_epoch != model_epoch_.load())) return false;
++       !best->correction->models ||
++       best->correction->models != correction_models_ ||
++       best->correction->models->epoch != model_epoch_.load())) return false;
 +  for (auto it = memo_.begin(); it != memo_.end(); ++it) {
 +    if (it->first == key) {
 +      memo_.erase(it);
@@ -23845,7 +24113,8 @@ index 000000000..9c2b06580
 +                                  false, sync_load_, Util::CharsLen(reading));
 +  if (scorer == nullptr) return std::nullopt;
 +  const auto t_load = std::chrono::steady_clock::now();
-+  const uint64_t model_epoch = model_epoch_.load();
++  const auto correction_models = background && identify_correction_models_
++      ? BindCorrectionModels(scorer, llm) : nullptr;
 +  budget_ms = BudgetMs();
 +  // 上限は要求が来た時点から数える(ロックを待った時間も含める)。この要求の中でモデルを読み込んだ
 +  // とき(評価)は、読み込みの後から数える。
@@ -23926,8 +24195,8 @@ index 000000000..9c2b06580
 +  const auto t_gen = std::chrono::steady_clock::now();
 +  // 生成で時間を使い切ったら、採点もせずに Mozc の結果を出す(待たせないため)。
 +  // Kotori: 生成補正は非同期初回評価だけで試す。評価用の明示設定で有効化する。
-+  // TODO: 肯否の保護とモデルSHAの対応付けは未完のため、既定では有効にしない。
-+  const bool llm_correction = background &&
++  // TODO: 意味の保護と実アプリ検証が未完のため、既定では有効にしない。
++  const bool llm_correction = background && correction_models != nullptr &&
 +      request.kotori_input_generation().IsCurrent() &&
 +      Env("KOTORI_LM_CORRECTION") != nullptr &&
 +      std::string(Env("KOTORI_LM_CORRECTION")) == "1";
@@ -24003,7 +24272,7 @@ index 000000000..9c2b06580
 +    best.keys = {reading};
 +    best.values = {fixed};
 +    best.correction = CorrectionOrigin{request.kotori_input_generation(),
-+        model_epoch, MemoKey(request.config(), reading, context)};
++        correction_models, MemoKey(request.config(), reading, context)};
 +  } else if (typo_correct_ && llm != nullptr && llogp && dictionary_ != nullptr && !over() &&
 +      Util::CharsLen(reading) <= kMaxTypoChars &&
 +      FindTypoCorrection(scorer, llm, context, reading, values[top],
@@ -24059,10 +24328,12 @@ index 000000000..9c2b06580
 +                               bool* changed_out) const {
 +  *changed_out = false;
 +  if (best.correction) {
++    std::lock_guard<std::mutex> lock(job_mu_);
 +    const auto& origin = *best.correction;
 +    if (!origin.input.IsCurrent() ||
 +        !origin.input.IsSame(request.kotori_input_generation()) ||
-+        origin.model_epoch != model_epoch_.load() ||
++        !origin.models || origin.models != correction_models_ ||
++        origin.models->epoch != model_epoch_.load() ||
 +        origin.config_key != MemoKey(request.config(), best.reading, context)) {
 +      return false;
 +    }
@@ -25098,10 +25369,10 @@ index 000000000..9c2b06580
 +}  // namespace mozc
 diff --git a/src/rewriter/lm_rewriter.h b/src/rewriter/lm_rewriter.h
 new file mode 100644
-index 000000000..829494d23
+index 000000000..2a6df2369
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.h
-@@ -0,0 +1,423 @@
+@@ -0,0 +1,435 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +//
 +// Kotori: AI による変換(docs/adr/0013、0015、0016)。
@@ -25222,9 +25493,14 @@ index 000000000..829494d23
 + private:
 +  friend class LmRewriterGenerationTest;
 +
++  struct CorrectionModels {
++    uint64_t epoch;
++    std::string zenz_sha256;
++    std::string llm_sha256;
++  };
 +  struct CorrectionOrigin {
 +    ConversionRequest::KotoriInputGeneration input;
-+    uint64_t model_epoch;
++    std::shared_ptr<const CorrectionModels> models;
 +    std::string config_key;
 +  };
 +  struct Best {
@@ -25266,6 +25542,10 @@ index 000000000..829494d23
 +      ABSL_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 +  // 生成の結果を覚えるときの、そのモデルの名前(先回りの変換の結果を使い回してよいか)。
 +  std::string ModelKey(const ZenzScorer* scorer) const
++      ABSL_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
++  // Kotori: 実際に採点・補正に使うモデルのSHAとロード世代を固定する。
++  std::shared_ptr<const CorrectionModels> BindCorrectionModels(
++      const ZenzScorer* scorer, const ZenzScorer* llm) const
 +      ABSL_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
 +  // 実際に動いている AI の状態を、ユーザーのプロファイルの kotori_ai_status.txt に書く
 +  // (設定画面が読んで表示する。docs/adr/0026)。state は loading / ready。
@@ -25443,6 +25723,7 @@ index 000000000..829494d23
 +  mutable std::atomic<bool> loading_{false};
 +  // 要求の中で読み込む(KOTORI_LM_PRELOAD=0。評価用)。
 +  bool sync_load_ = false;
++  bool identify_correction_models_ = false;
 +  // 変換で AI に使う時間の上限(ms、KOTORI_LM_BUDGET。0 なら上限なし、負なら GPU の有無で決める)。
 +  int budget_ms_ = -1;
 +  // 先回りの変換(KOTORI_LM_PRECONVERT)と、打つ手が止まってから始めるまでの時間。
@@ -25485,6 +25766,8 @@ index 000000000..829494d23
 +  int live_first_ms_ = -1;
 +  int live_next_ms_ = -1;
 +  mutable std::atomic<uint64_t> model_epoch_{1};
++  // job_mu_で保護。FindMemo/StoreMemo/Applyはこの同じ識別情報を照合する。
++  mutable std::shared_ptr<const CorrectionModels> correction_models_;
 +  std::atomic<bool> stop_{false};
 +  // 裏の予測の仕事が新しく来たか(来たら今の計算をやめる)。
 +  mutable std::atomic<bool> new_job_{false};
@@ -25527,10 +25810,10 @@ index 000000000..829494d23
 +#endif  // MOZC_REWRITER_LM_REWRITER_H_
 diff --git a/src/rewriter/lm_rewriter_test.cc b/src/rewriter/lm_rewriter_test.cc
 new file mode 100644
-index 000000000..cc270ffe8
+index 000000000..650e9c551
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter_test.cc
-@@ -0,0 +1,510 @@
+@@ -0,0 +1,546 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -25930,6 +26213,7 @@ index 000000000..cc270ffe8
 +    config_.set_kotori_lm_enabled(true);
 +    rewriter_ = std::make_unique<LmRewriter>(
 +        nullptr, nullptr, dictionary::PosMatcher(data_.GetPosMatcherData()));
++    ReplaceModelHashes();
 +  }
 +  void TearDown() override {
 +    rewriter_.reset();
@@ -25938,7 +26222,7 @@ index 000000000..cc270ffe8
 +  Best Corrected(Snapshot input) const {
 +    Best best{"あしをいためた", "", {"あしをいためた"}, {"足を痛めた"}};
 +    best.correction = LmRewriter::CorrectionOrigin{
-+        std::move(input), rewriter_->model_epoch_.load(),
++        std::move(input), rewriter_->correction_models_,
 +        rewriter_->MemoKey(config_, best.reading, best.context)};
 +    return best;
 +  }
@@ -25972,6 +26256,17 @@ index 000000000..cc270ffe8
 +    return accepted;
 +  }
 +  void ReloadModel() { ++rewriter_->model_epoch_; }
++  void ReplaceModelHashes() {
++    std::lock_guard<std::mutex> lock(rewriter_->job_mu_);
++    rewriter_->correction_models_ =
++        std::make_shared<const LmRewriter::CorrectionModels>(
++            LmRewriter::CorrectionModels{rewriter_->model_epoch_.load(),
++                std::string(64, 'a'), std::string(64, 'b')});
++  }
++  void RemoveModelIdentity() {
++    std::lock_guard<std::mutex> lock(rewriter_->job_mu_);
++    rewriter_->correction_models_.reset();
++  }
 +
 + private:
 +  testing::MockDataManager data_;
@@ -26029,6 +26324,30 @@ index 000000000..cc270ffe8
 +  EXPECT_TRUE(Recall(Request({owner, 1})));
 +}
 +
++
++TEST_F(LmRewriterGenerationTest, RejectsReplacementIdentityEvenWithSameEpoch) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  const auto best = Corrected({owner, 1});
++  ASSERT_TRUE(Save(best));
++  ReplaceModelHashes();
++  EXPECT_FALSE(Recall(Request({owner, 1})));
++  EXPECT_FALSE(Apply(best, Request({owner, 1})));
++  EXPECT_FALSE(Save(best));
++  const auto current = Corrected({owner, 1});
++  EXPECT_TRUE(Save(current));
++  EXPECT_TRUE(Apply(current, Request({owner, 1})));
++}
++
++TEST_F(LmRewriterGenerationTest, RejectsMissingModelIdentity) {
++  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++  const auto best = Corrected({owner, 1});
++  ASSERT_TRUE(Save(best));
++  RemoveModelIdentity();
++  EXPECT_FALSE(Recall(Request({owner, 1})));
++  EXPECT_FALSE(Apply(best, Request({owner, 1})));
++  EXPECT_FALSE(Save(Corrected({owner, 1})));
++}
++
 +TEST_F(LmRewriterGenerationTest, OrdinaryRankingMemoKeepsExistingReuse) {
 +  auto owner = std::make_shared<std::atomic<uint64_t>>(1);
 +  auto best = Corrected({owner, 1});
@@ -26067,10 +26386,10 @@ index d92e814fd..f44a51783 100644
  #endif  // MOZC_USER_DICTIONARY_REWRITER
 diff --git a/src/rewriter/zenz_scorer.cc b/src/rewriter/zenz_scorer.cc
 new file mode 100644
-index 000000000..10308a82e
+index 000000000..62ec97237
 --- /dev/null
 +++ b/src/rewriter/zenz_scorer.cc
-@@ -0,0 +1,860 @@
+@@ -0,0 +1,865 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/zenz_scorer.h"
@@ -26281,7 +26600,11 @@ index 000000000..10308a82e
 +
 +std::unique_ptr<ZenzScorer> ZenzScorer::Open(const std::string& path,
 +                                             int threads,
-+                                             const std::string& runtime_dir) {
++                                             const std::string& runtime_dir,
++                                             bool identify_model) {
++  // Kotori: 読み込みの前にハッシュと読み取り専用の共有ハンドルを取得する。
++  // ハッシュを取得できなくても既存の採点は使い、自由生成補正だけを無効にする。
++  auto identity = identify_model ? KotoriModelIdentity::Open(path) : nullptr;
 +  if (!EnsureLlamaRuntime(runtime_dir)) return nullptr;
 +  llama_model_params mp = llama_model_default_params();
 +  // 選んだ GPU 1 つだけに全部の層を載せる(なければ CPU で動く)。ほかの GPU(内蔵 GPU など)には
@@ -26307,6 +26630,7 @@ index 000000000..10308a82e
 +    return nullptr;
 +  }
 +  std::unique_ptr<ZenzScorer> s(new ZenzScorer());
++  s->identity_ = std::move(identity);
 +  s->model_ = model;
 +  s->ctx_ = ctx;
 +  s->max_seq_ = kMaxCandidates;
@@ -26933,10 +27257,10 @@ index 000000000..10308a82e
 +}  // namespace mozc
 diff --git a/src/rewriter/zenz_scorer.h b/src/rewriter/zenz_scorer.h
 new file mode 100644
-index 000000000..122fd88cc
+index 000000000..e7dccc482
 --- /dev/null
 +++ b/src/rewriter/zenz_scorer.h
-@@ -0,0 +1,134 @@
+@@ -0,0 +1,142 @@
 +// Copyright 2026, Kotori IME contributors
 +// All rights reserved.
 +//
@@ -26971,6 +27295,7 @@ index 000000000..122fd88cc
 +
 +#include "absl/strings/string_view.h"
 +#include "llama.h"
++#include "rewriter/kotori_model_identity.h"
 +
 +namespace mozc {
 +
@@ -26979,7 +27304,8 @@ index 000000000..122fd88cc
 +  // GGUF を読み込む。失敗したら nullptr。
 +  // runtime_dir は llama.cpp の DLL のあるフォルダ(Windows のみ使う)。
 +  static std::unique_ptr<ZenzScorer> Open(const std::string& path, int threads,
-+                                          const std::string& runtime_dir);
++                                          const std::string& runtime_dir,
++                                          bool identify_model = false);
 +  ~ZenzScorer();
 +
 +  // このスレッドの生成(Generate・Continue)を、1 トークンごとに途中でやめるかを返す関数。
@@ -27025,6 +27351,11 @@ index 000000000..122fd88cc
 +  size_t CountTokens(absl::string_view text);
 +
 +  bool is_zenz() const { return zenz_; }
++  // Kotori: 識別を要求した非同期ロードだけで取得。失敗時は空で補正を拒否する。
++  const std::string& model_sha256() const {
++    static const std::string empty;
++    return identity_ != nullptr ? identity_->sha256() : empty;
++  }
 +
 +  // 計算量の累計(評価用、KOTORI_LM_STATS)。zenz と LLM ごとの、Score・生成の時間、
 +  // その中の llama_decode の時間、decode の回数と評価したトークン数。
@@ -27059,6 +27390,7 @@ index 000000000..122fd88cc
 +  // KV をすべて消す。
 +  void ResetMemory();
 +  std::string Detokenize(const std::vector<llama_token>& tokens);
++  std::unique_ptr<KotoriModelIdentity> identity_;
 +  llama_model* model_ = nullptr;
 +  llama_context* ctx_ = nullptr;
 +  int max_seq_ = 0;
