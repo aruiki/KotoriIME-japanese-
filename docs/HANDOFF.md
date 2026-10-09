@@ -26,13 +26,19 @@ make_patches.shをBazel shutdown後に実行、新規cloneの0001〜0003適用�
 
 ## 次の作業と公開境界
 
-最終ソースのコミットを固定し、MSIをローカルbuild。BUILD6330、前のrc.3は6322。
+ソース25cd371を固定し、MSIを949秒でローカルbuild、終了0。BUILD6330、前のrc.3は6322。
 19:23の旧MSIはその後の生成/予測修正前なので使わない。
-新MSIの版/同梱/ハッシュをcheck_release.py --localで検査し、入力manifestと対象を固定する。
+新MSIの版3.34.6330.100/同梱/ハッシュをWiXの読み取り専用展開でPASS。
+check_release.py --localの管理展開は5分以上止まったため検査clientのみ停止、失敗は保存。
+最終SHAは86dc529a3d1ce6e10f0a51dfd7e033b3620eea9b3c8373daf9004e0b8c4094ec。
+完成ファイルはC:/Users/aruik/kotori-first-check/rc4-release-20261009-25cd371/Kotori64.msi。
+最後の境界修正後もStandard183/200=91.5%。112入力hashを再確認。
 Windows Computer UseのInitializeは規定の回復を含む3回ともタイムアウトし停止。
 最終MSIの実アプリ入力・上書き更新・削除は未実施。原票/Qt/MSI展開をTSF PASSへ置き換えない。
 成果物ができてから具体的な残りの受け入れを提示する。未確認のまま公開済み/全完了と言わない。
-まだ新たなpush/PR/公開リリースはない。共有workflowは停止せず、PRでcloud buildも起動しない。
+ソース25cd371をGitHubの同名開発枝へpush済み。新しいPR/公開リリースはない。
+公開準備のrc.4 draftへ最終MSIを保存する。draftを公開済みと扱わない。
+共有workflowは停止せず、PRでcloud buildも起動しない。
 普段使いのIME/登録/設定は変更していない。
 
 以下は以前の対象ソースと実測の履歴。

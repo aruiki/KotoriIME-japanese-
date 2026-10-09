@@ -22,8 +22,10 @@
     "correct": 183,
     "total": 200,
     "percent": 91.5,
-    "gate_percent": 90,
-    "artifact": "C:\\Users\\aruik\\kotori-first-check\\all-request-ajimee-final.json"
+    "minimum_percent": 90,
+    "scope": "converter with context; not native TSF or competitor comparison",
+    "source_overlay_sha256": "6587c1691d86b239737dd97abf883c05cbafef5886c7503372ba65730f1c75b4",
+    "manifest": "C:\\Users\\aruik\\kotori-first-check\\all-request-rc4-ajimee.json.manifest.json"
   },
   "heldout": {
     "correct": 289,
@@ -38,5 +40,14 @@
     "settled_tab_differences": 0
   },
   "native_acceptance": "not performed; computer-use initialization timed out after documented recovery",
-  "msi": "not yet built from final source"
+  "msi": {
+    "product_version": "3.34.6330.100",
+    "size_bytes": 1568378880,
+    "msi_sha256": "86dc529a3d1ce6e10f0a51dfd7e033b3620eea9b3c8373daf9004e0b8c4094ec",
+    "server_file_version": "3.34.6330.100",
+    "signature": "NotSigned",
+    "method": "WiX 5.0.2 read-only decompile / cabinet extraction; same content criteria as check_release.py",
+    "native_acceptance": "pending"
+  },
+  "source_commit": "25cd371b1b916cdb81577c87beff37e0def12bc9"
 }

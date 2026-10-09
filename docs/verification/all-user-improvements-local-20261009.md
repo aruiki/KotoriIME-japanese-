@@ -62,3 +62,20 @@ Windows Computer UseのInitializeは規定の回復を含め3回タイムアウ�
 専用runner用installer_smoke/IMEBenchの保護条件は偽装しない。
 MSI展開、CLI成功、GUIの描画を実機受け入れPASSへ置き換えない。
 完成した成果物ができてから、残る実機確認を具体的に提示する。
+
+## 最終ローカルMSI（21:07完成）
+
+- ソース25cd371b1b916cdb81577c87beff37e0def12bc9、112入力manifest 6587c1691d86b239737dd97abf883c05cbafef5886c7503372ba65730f1c75b4。
+- build終了0、949.23秒。MSIは1,568,378,880 byte（約1.46 GiB）。
+- ProductVersion/同梱serverは3.34.6330.100、前のrc.3/このPCの導入版3.34.6322.100より先頭3項目が大きい。
+- SHA-256: 86dc529a3d1ce6e10f0a51dfd7e033b3620eea9b3c8373daf9004e0b8c4094ec。
+- 署名NotSigned。通常版のLatestにはしない。
+- check_release.py --localの管理展開は出力先ができないまま5分以上停止し、検査用clientだけを停止した。元の非0終了/記録を保存。共有Windows Installerサービスは停止していない。
+- WiX 5.0.2の読み取り専用decompileでMSIを変更せず9.37秒で展開。check_release.pyの同梱/除外/サイズ/版の条件を同じまま確認した。導入試験ではない。
+- 45ファイル。3モデルと17runtime DLLのハッシュは実モデル評価に使った既存ファイルと一致。
+- server/tool/TIP64は最終buildの出力と同一、3アイコンと2背景は正本と同一。設定ショートカットはデスクトップ/メニューともKotori。
+- 境界修正後の最終converterもAJIMEE183/200=91.5%（32秒）。対象112入力のハッシュを再確認。元のmanifestのgit commit欄はMozc cache側のHEADであり、配布ソースは上記25cd371とoverlay SHAで対応させる。原票は変更しない。
+- 完成ファイル: C:/Users/aruik/kotori-first-check/rc4-release-20261009-25cd371/Kotori64.msi、同.sha256、source-manifest.json、release-evidence.json。
+
+実機の上書き導入・メモ帳等の初回/Tab/Space・削除は引き続き未確認。現在のインストール済みバイナリは6322のまま。
+公開承認は利用者から既にある。残っているのは同じ許可の再取得ではなく、実機受け入れの結果。
