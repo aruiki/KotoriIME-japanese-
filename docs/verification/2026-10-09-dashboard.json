@@ -1,0 +1,198 @@
+{
+  "date": "2026-10-09",
+  "pr": 147,
+  "branch": "codex/unified-app-name",
+  "source_parent_commit": "4ef2ba3",
+  "source_tree": "C:\\Users\\aruik\\mzappname",
+  "build_tree": "C:\\Users\\aruik\\mzicons",
+  "source_sha256": {
+    "src/gui/config_dialog/BUILD.bazel": "e5a8bb3c98b8fc46f4b7e164b79991e22568d8e0ef57cd71523091887086630b",
+    "src/gui/config_dialog/config_dialog.cc": "c96011c2fac6081c5bbbc61ee36571c4a8d9b6f7777ccfc738f2404f5855bdc4",
+    "src/gui/config_dialog/kotori_dashboard_test.cc": "6cb6402189c10f57fa0c90471f00e69c72a8a9a5d4313466755027be6d8f46d5",
+    "src/rewriter/lm_rewriter.cc": "e0d42a20b0408e807388efbdc8110c616ce1382212180407870aa898a995b1f9",
+    "src/win32/installer/installer_oss_64bit.wxs": "cc4cdb29ea854adee377b1e23563ccf78aeece70aba5ef759a00485c21f5a1a4"
+  },
+  "patch_sha256": {
+    "0001-kotori-branding.patch": "7fc85afbdcd397a00d0fa52738415142b8ac483a00e6d457d1107173e852969b",
+    "0002-kotori-lm-rerank.patch": "d3cbc66d9fb9663a78b2d82633715980fbd1ca241de47b6ff15da597a48a8000",
+    "0003-kotori-bundle-model.patch": "d53c2e3d71892d35e5a56a6c7d747c8184dc5da3ba8c37d98ff5849793c351ab"
+  },
+  "tested_binaries": {
+    "gui": {
+      "path": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\gui\\tool\\mozc_tool.exe",
+      "sha256": "56936275a31d0acbf6af6ca5c3661473d83a0cb245ebb02d70fccfff1c03bced"
+    },
+    "session": {
+      "path": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
+      "sha256": "fb940202677fb9acbf2d38a1d7d7da729ca57a85944c950d9235dd67250ea867"
+    }
+  },
+  "tests": {
+    "windows_100": {
+      "target": "//gui/config_dialog:kotori_dashboard_test",
+      "cases": 2,
+      "result": "PASS",
+      "bazel_seconds": 17.005,
+      "log": "C:\\Users\\aruik\\kotori-first-check\\dashboard-native-controls-tests-20261009.log"
+    },
+    "windows_150": {
+      "target": "//gui/config_dialog:kotori_dashboard_test",
+      "cases": 2,
+      "result": "PASS",
+      "bazel_seconds": 5.773,
+      "log": "C:\\Users\\aruik\\kotori-first-check\\dashboard-native-150-final-20261009.log"
+    },
+    "ci_qt_mode": {
+      "targets": [
+        "//gui/config_dialog:kotori_dashboard_test",
+        "//rewriter:lm_rewriter_test"
+      ],
+      "cases": {
+        "gui": 2,
+        "lm": 4
+      },
+      "result": "PASS",
+      "bazel_seconds": 2.981,
+      "log": "C:\\Users\\aruik\\kotori-first-check\\dashboard-ci-qt-final-20261009.log"
+    },
+    "build": {
+      "targets": [
+        "//gui/tool:mozc_tool_win",
+        "//session:session_handler_main"
+      ],
+      "result": "PASS",
+      "bazel_seconds": 8.716,
+      "log": "C:\\Users\\aruik\\kotori-first-check\\dashboard-native-final-build-20261009.log"
+    },
+    "patch_apply": {
+      "result": "PASS",
+      "scratch": "/tmp/kotori-patch.qMkO5W",
+      "changed_source_blocks": [
+        "src/gui/config_dialog/BUILD.bazel",
+        "src/gui/config_dialog/config_dialog.cc",
+        "src/gui/config_dialog/kotori_dashboard_test.cc",
+        "src/rewriter/lm_rewriter.cc"
+      ],
+      "installer_patch_unchanged": true,
+      "built_source_identical": true,
+      "log": "C:\\Users\\aruik\\kotori-first-check\\dashboard-patches-20261009.log"
+    },
+    "model_telemetry": {
+      "exe": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\session\\session_handler_main.exe",
+      "exe_sha256": "fb940202677fb9acbf2d38a1d7d7da729ca57a85944c950d9235dd67250ea867",
+      "scope": "isolated model/session telemetry, not installed TSF or GUI live server",
+      "samples": [
+        {
+          "seconds": 0.00026930000058200676,
+          "status": {
+            "state": "loading",
+            "device": "NVIDIA GeForce RTX 3060",
+            "stats": "zenz work=0ms decode=0ms calls=0 tokens=0 | llm work=0ms decode=0ms calls=0 tokens=0",
+            "pid": "31348",
+            "process_started": "134359988060550130"
+          }
+        },
+        {
+          "seconds": 1.0069968000007066,
+          "status": {
+            "state": "llm",
+            "device": "NVIDIA GeForce RTX 3060",
+            "zenz": "zenz-v2.5-small-q8_0.gguf",
+            "llm": "tinyswallow-1.5b-q5_k_m.gguf",
+            "stats": "zenz work=0ms decode=0ms calls=0 tokens=0 | llm work=0ms decode=0ms calls=0 tokens=0",
+            "pid": "31348",
+            "process_started": "134359988060550130"
+          }
+        },
+        {
+          "seconds": 2.5147019000005457,
+          "status": {
+            "state": "llm",
+            "device": "NVIDIA GeForce RTX 3060",
+            "zenz": "zenz-v2.5-small-q8_0.gguf",
+            "llm": "tinyswallow-1.5b-q5_k_m.gguf",
+            "stats": "zenz work=132ms decode=126ms calls=42 tokens=425 | llm work=82ms decode=59ms calls=2 tokens=62",
+            "pid": "31348",
+            "process_started": "134359988060550130"
+          }
+        }
+      ],
+      "checks": {
+        "pid_matches": true,
+        "counters_positive": true,
+        "no_input_fields": true
+      }
+    },
+    "tools": {
+      "result": "PASS",
+      "release_unit_cases": 10,
+      "workflow_yaml": "PASS",
+      "workflow_powershell_syntax": "PASS",
+      "python_ast": "PASS"
+    }
+  },
+  "images": [
+    {
+      "scale_percent": 100,
+      "path": "C:\\Users\\aruik\\.codex\\visualizations\\2026\\10\\07\\01a11587-7270-7000-9329-8dd3a0f79322\\kotori-dashboard\\dashboard.png",
+      "sha256": "632379c244a66e1674b6f634bf0e11a27cf3ba6b370f786e4c5c5cd5f5518d60",
+      "width": 900,
+      "height": 860,
+      "scope": "native Windows QPA client-area render; server client mocked; PC counters actual"
+    },
+    {
+      "scale_percent": 100,
+      "path": "C:\\Users\\aruik\\.codex\\visualizations\\2026\\10\\07\\01a11587-7270-7000-9329-8dd3a0f79322\\kotori-dashboard\\dashboard-details.png",
+      "sha256": "dd3066ff44cc3a7921c3465e0f42bcb49728ab8316389d4ff9390e90cf0166b3",
+      "width": 900,
+      "height": 860,
+      "scope": "native Windows QPA client-area render; server client mocked; PC counters actual"
+    },
+    {
+      "scale_percent": 100,
+      "path": "C:\\Users\\aruik\\.codex\\visualizations\\2026\\10\\07\\01a11587-7270-7000-9329-8dd3a0f79322\\kotori-dashboard\\ai-settings.png",
+      "sha256": "f91d12693ac7ef3a7b51c3493afbc5909a7c740f7afaa4e7771e17da4a5d0df4",
+      "width": 900,
+      "height": 860,
+      "scope": "native Windows QPA client-area render; server client mocked; PC counters actual"
+    },
+    {
+      "scale_percent": 150,
+      "path": "C:\\Users\\aruik\\.codex\\visualizations\\2026\\10\\07\\01a11587-7270-7000-9329-8dd3a0f79322\\kotori-dashboard-150\\dashboard.png",
+      "sha256": "71aac4a0ffe4a6b5cf915bc108e270d8e522d4739b8135a94bb2e97eff97da11",
+      "width": 1350,
+      "height": 1020,
+      "scope": "native Windows QPA client-area render; server client mocked; PC counters actual"
+    },
+    {
+      "scale_percent": 150,
+      "path": "C:\\Users\\aruik\\.codex\\visualizations\\2026\\10\\07\\01a11587-7270-7000-9329-8dd3a0f79322\\kotori-dashboard-150\\dashboard-details.png",
+      "sha256": "68dca93d0fab47fdf3335c2abc32eff3e44a516b1442435371f85b2e8b5c0cee",
+      "width": 1350,
+      "height": 1020,
+      "scope": "native Windows QPA client-area render; server client mocked; PC counters actual"
+    },
+    {
+      "scale_percent": 150,
+      "path": "C:\\Users\\aruik\\.codex\\visualizations\\2026\\10\\07\\01a11587-7270-7000-9329-8dd3a0f79322\\kotori-dashboard-150\\ai-settings.png",
+      "sha256": "f460b8b3a03fe92b0698afeefe491b2ed8ac1b0509fb80e97f3e5af60f5ff55b",
+      "width": 1350,
+      "height": 1020,
+      "scope": "native Windows QPA client-area render; server client mocked; PC counters actual"
+    }
+  ],
+  "limits": [
+    "Screenshots are client-area captures of the real Qt dialog using Windows QPA; not an installed GUI/server acceptance test",
+    "Server IPC is mocked in GUI tests; only whole-PC counters are measured there",
+    "Model telemetry is an isolated dictionary/model session, not TSF or conversion quality/latency evidence",
+    "OS title bar, live installed dashboard, high contrast and dark-mode switching, low-end machines not observed here",
+    "MSI/full CI and merge pending; published rc.3 unchanged"
+  ],
+  "source_commit": "77a82dfa3a8a38831b27e6f41271f62408be062a",
+  "parent_release_metadata": {
+    "pr": 146,
+    "merge_commit": "3316acad2fd24c36ea3c4eb10153e8c7d6030ce2",
+    "checks_passed": 9,
+    "main_readme_links_verified": true
+  }
+}

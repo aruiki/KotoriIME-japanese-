@@ -275,6 +275,11 @@ Mozc の学習とユーザー辞書がそのまま使えます。ユーザー辞
 
 ほかの症状と対処は [使い方と困ったとき](docs/USER_GUIDE.md#困ったとき) にあります。
 
+## 開発を支援する
+
+Kotoriは無料のオープンソースとして開発しています。[Stripeの開発支援ページ](https://buy.stripe.com/cNi14m7jRdq005f0781ZS08)から支援できます。
+支援の有無によって機能を制限することはありません。
+
 ## 開発者向け
 
 - 現状と次の作業: [docs/HANDOFF.md](docs/HANDOFF.md)、作業カード: [docs/tasks/](docs/tasks/)
