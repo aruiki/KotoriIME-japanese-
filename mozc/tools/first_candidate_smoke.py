@@ -24,6 +24,7 @@ def main():
     ap.add_argument("--warm", type=float, default=12)
     ap.add_argument("--key-interval", type=float, default=0, help="1文字ずつ送る間隔（秒）")
     ap.add_argument("--expect-variant", help="初回表示・Tab・Spaceに必要な候補")
+    ap.add_argument("--expect-second-space", help="2回目Spaceで変更語へフォーカスする表記")
     ap.add_argument("--expect-reading", help="最終打鍵時の読み。ローマ字の送り間違いも拒否する")
     ap.add_argument("--expect-first", help="最初に表示する候補とSpace後の文全体に必要な表記")
     ap.add_argument("--check-lifecycle", action="store_true",
@@ -107,6 +108,8 @@ def main():
                     if clone_refresh["first_candidate"] != args.expect_first:
                         raise AssertionError("TestSendKeyのコピーが元の補正を失効しました")
                 rows.append(send("SEND_KEY\tSpace"))
+                if args.expect_second_space:
+                    rows.append(send("SEND_KEY\tSpace"))
                 if args.check_lifecycle:
                     def clear():
                         send("SEND_KEY\tESC")
@@ -180,6 +183,17 @@ def main():
                         raise AssertionError("初回候補が期待した補正文ではありません")
                     if preedit_fields(rows[-1], "value") != args.expect_first:
                         raise AssertionError("Space後の文が初回候補と一致しません")
+                if args.expect_second_space:
+                    output = rows[-1]["output"]
+                    preedit = output.split("preedit {", 1)[1].split("\n}", 1)[0]
+                    highlighted = re.findall(r'Segment \{\s*annotation: HIGHLIGHT\s*value: "([^"\n]*)"', preedit, re.I)
+                    if not any(args.expect_second_space in text for text in highlighted):
+                        raise AssertionError("2回目Spaceで変更語へフォーカスしていません: " + repr(highlighted))
+                    before = rows[-2]["output"].split("preedit {", 1)[1].split("\n}", 1)[0]
+                    before_values = re.findall(r'value: "([^"\n]*)"', before)
+                    after_values = re.findall(r'value: "([^"\n]*)"', preedit)
+                    if len(before_values) != len(after_values) or sum(a != b for a, b in zip(before_values, after_values)) != 1:
+                        raise AssertionError("2回目Spaceで変更語以外も変わりました")
                 if args.expect_variant:
                     needle = 'value: "' + args.expect_variant + '"'
                     first = next((r for r in rows if r["first_candidate"]), None)

@@ -652,10 +652,10 @@ index 18a83698f..5372cc894 100644
    prefix.clear();
    suffix.clear();
 diff --git a/src/converter/candidate.h b/src/converter/candidate.h
-index b75c095d5..7a601e8d9 100644
+index b75c095d5..1f473158e 100644
 --- a/src/converter/candidate.h
 +++ b/src/converter/candidate.h
-@@ -84,6 +84,11 @@ class Candidate {
+@@ -84,6 +84,13 @@ class Candidate {
  
    uint32_t consumed_key_size = 0;
  
@@ -663,6 +663,8 @@ index b75c095d5..7a601e8d9 100644
 +  // 保存・学習用の属性ではなく、この要求の候補だけに付ける。
 +  bool kotori_confident_prediction = false;
 +  bool kotori_ai_evaluated = false;
++  // Kotori: 意味の別候補を選んだら変更箇所へ焦点を移す。
++  bool kotori_nuance_alternative = false;
 +
    // Number of whole conversion segments covered/consumed by this candidate,
    // starting from the current segment.
@@ -19859,7 +19861,7 @@ zL@613W7Zf1G&4<#nt(BZ;xoE2_j8mrXY(!KeiIne+sK-zQeq6KNh!`3eBt9B?)?Em
 Ce@$lq
 
 diff --git a/src/engine/engine_converter.cc b/src/engine/engine_converter.cc
-index fd03a6c0c..88994a61a 100644
+index fd03a6c0c..4ddcc6b04 100644
 --- a/src/engine/engine_converter.cc
 +++ b/src/engine/engine_converter.cc
 @@ -130,6 +130,39 @@ EngineConverter::EngineConverter(
@@ -20094,7 +20096,115 @@ index fd03a6c0c..88994a61a 100644
    std::string preedit = composer.GetStringForSubmission();
    if (count > preedit.length()) {
      *consumed_key_size = preedit.length();
-@@ -1319,6 +1439,9 @@ EngineConverter* EngineConverter::Clone() const {
+@@ -1112,6 +1232,99 @@ void EngineConverter::SegmentWidthShrink(const composer::Composer& composer) {
+   ResizeSegmentWidth(composer, -1);
+ }
+ 
++bool EngineConverter::KotoriFocusNuanceAlternative() {
++  if (!CheckState(CONVERSION) || segment_index_ != 0 ||
++      segments_.conversion_segments_size() < 2) return false;
++  const auto& selected = GetSelectedCandidate(0);
++  if (!selected.kotori_nuance_alternative ||
++      selected.effective_converted_segment_count() !=
++          segments_.conversion_segments_size()) return false;
++  const std::string desired = selected.value;
++  std::vector<std::string> values;
++  for (const Segment& segment : segments_.conversion_segments()) {
++    if (segment.candidates_size() == 0) return false;
++    values.push_back(segment.candidate(0).value);
++  }
++  const auto& top = segments_.conversion_segment(0).candidate(0);
++  const bool whole_top = top.effective_converted_segment_count() == values.size();
++  int head_local_id = 0;
++  if (whole_top) {
++    std::string tail;
++    for (size_t i = 1; i < values.size(); ++i) tail += values[i];
++    if (!values[0].ends_with(tail)) return false;
++    values[0].resize(values[0].size() - tail.size());
++    head_local_id = -1;
++    const Segment& head = segments_.conversion_segment(0);
++    for (size_t i = 0; i < head.candidates_size(); ++i) {
++      const auto& candidate = head.candidate(i);
++      if (candidate.effective_converted_segment_count() == 1 &&
++          candidate.key == head.key() && candidate.value == values[0]) {
++        head_local_id = i;
++        break;
++      }
++    }
++    if (head_local_id < 0) return false;
++  }
++  std::string original;
++  for (size_t i = 0; i < values.size(); ++i) {
++    if (!(i == 0 && whole_top) && segments_.conversion_segment(i)
++        .candidate(0).effective_converted_segment_count() != 1) return false;
++    original += values[i];
++  }
++  size_t offset = 0;
++  for (size_t i = 0; i < segments_.conversion_segments_size(); ++i) {
++    Segment* segment = segments_.mutable_conversion_segment(i);
++    const std::string& value = values[i];
++    const std::string prefix = original.substr(0, offset);
++    const std::string suffix = original.substr(offset + value.size());
++    offset += value.size();
++    if (desired.size() < prefix.size() + suffix.size() ||
++        !desired.starts_with(prefix) || !desired.ends_with(suffix)) continue;
++    const std::string replacement = desired.substr(
++        prefix.size(), desired.size() - prefix.size() - suffix.size());
++    if (replacement.empty() || replacement == value) continue;
++    // ほかの文節を固定/確定せず、変更した文節の実候補へ移す。
++    int candidate_id = -1;
++    for (size_t j = 0; j < segment->candidates_size(); ++j) {
++      const auto& candidate = segment->candidate(j);
++      if (candidate.key == segment->key() && candidate.value == replacement &&
++          candidate.effective_converted_segment_count() == 1) {
++        candidate_id = j;
++        break;
++      }
++    }
++    if (candidate_id < 0) {
++      converter::Candidate local = segment->candidate(0);
++      local.key = local.content_key = std::string(segment->key());
++      local.value = local.content_value = replacement;
++      local.inner_segment_boundary.clear();
++      local.converted_segment_count = 1;
++      local.description = selected.description;
++      local.a11y_description = selected.a11y_description;
++      local.attributes = converter::Attribute::NO_LEARNING;
++      local.kotori_nuance_alternative = false;
++      local.kotori_ai_evaluated = false;
++      local.kotori_confident_prediction = false;
++      candidate_id = segment->candidates_size();
++      *segment->add_candidate() = std::move(local);
++    }
++    // 非フォーカス文節は候補0を使うMozcの規約に合わせる。全文候補は残す。
++    if (whole_top) {
++      segments_.mutable_conversion_segment(0)->move_candidate(head_local_id, 0);
++      if (i == 0 && candidate_id < head_local_id) ++candidate_id;
++    }
++    selected_candidate_indices_[0] = 0;
++    segment_index_ = i;
++    UpdateCandidateList();
++    if (!candidate_list_.MoveToId(candidate_id)) return false;
++    UpdateSelectedCandidateIndex();
++    candidate_list_visible_ = true;
++    SegmentFocus();
++    return true;
++  }
++  return false;
++}
++
+ void EngineConverter::CandidateNext(const composer::Composer& composer) {
+   DCHECK(CheckState(PREDICTION | CONVERSION));
+   ResetResult();
+@@ -1120,6 +1333,7 @@ void EngineConverter::CandidateNext(const composer::Composer& composer) {
+   candidate_list_.MoveNext();
+   candidate_list_visible_ = true;
+   UpdateSelectedCandidateIndex();
++  if (KotoriFocusNuanceAlternative()) return;
+   SegmentFocus();
+ }
+ 
+@@ -1319,6 +1533,9 @@ EngineConverter* EngineConverter::Clone() const {
    EngineConverter* engine_converter =
        new EngineConverter(converter_, request_, config_);
    *engine_converter = *this;
@@ -20104,7 +20214,7 @@ index fd03a6c0c..88994a61a 100644
  
    if (engine_converter->CheckState(SUGGESTION | PREDICTION | CONVERSION)) {
      // UpdateCandidateList() is not simple setter and it uses some members.
-@@ -1823,12 +1946,18 @@ void EngineConverter::FillIncognitoCandidateWords(
+@@ -1823,12 +2040,18 @@ void EngineConverter::FillIncognitoCandidateWords(
  void EngineConverter::SetRequest(
      std::shared_ptr<const commands::Request> request) {
    DCHECK(request);
@@ -20123,7 +20233,7 @@ index fd03a6c0c..88994a61a 100644
    config_ = std::move(config);
    updated_command_ = converter::Candidate::DEFAULT_COMMAND;
    selection_shortcut_ = config_->selection_shortcut();
-@@ -1836,6 +1965,7 @@ void EngineConverter::SetConfig(std::shared_ptr<const config::Config> config) {
+@@ -1836,6 +2059,7 @@ void EngineConverter::SetConfig(std::shared_ptr<const config::Config> config) {
  }
  
  void EngineConverter::OnStartComposition(const commands::Context& context) {
@@ -20132,7 +20242,7 @@ index fd03a6c0c..88994a61a 100644
    if (context.has_revision()) {
      revision_changed = (context.revision() != client_revision_);
 diff --git a/src/engine/engine_converter.h b/src/engine/engine_converter.h
-index 6d061cfca..499ed7792 100644
+index 6d061cfca..06710e972 100644
 --- a/src/engine/engine_converter.h
 +++ b/src/engine/engine_converter.h
 @@ -32,6 +32,7 @@
@@ -20184,6 +20294,15 @@ index 6d061cfca..499ed7792 100644
    // Resets the result value stored at the previous command.
    void ResetResult();
  
+@@ -344,6 +365,8 @@ class EngineConverter : public EngineConverterInterface {
+   // Returns true if the selected candidate on the first segment covers all
+   // conversion segments.
+   bool IsFullSentenceCandidateSelected() const;
++  // Kotori: 文全体の意味の別候補を選んだら、その変更箇所を選択する。
++  bool KotoriFocusNuanceAlternative();
+ 
+   // Returns the length of committed candidate's key in characters.
+   // True is returned if the selected candidate is successfully committed.
 diff --git a/src/engine/engine_converter_interface.h b/src/engine/engine_converter_interface.h
 index f8e3b43ec..f20b5eaf8 100644
 --- a/src/engine/engine_converter_interface.h
@@ -20207,7 +20326,7 @@ index f8e3b43ec..f20b5eaf8 100644
    virtual bool Predict(const composer::Composer& composer,
                         const commands::Context& context,
 diff --git a/src/engine/engine_converter_test.cc b/src/engine/engine_converter_test.cc
-index 808058c64..0bc764376 100644
+index 808058c64..e96dec9d4 100644
 --- a/src/engine/engine_converter_test.cc
 +++ b/src/engine/engine_converter_test.cc
 @@ -124,6 +124,11 @@ class EngineConverterTest : public testing::TestWithTempUserProfile {
@@ -20222,7 +20341,61 @@ index 808058c64..0bc764376 100644
    static void GetSegments(const EngineConverter& converter, Segments* dest) {
      CHECK(dest);
      *dest = converter.segments_;
-@@ -4822,5 +4827,118 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
+@@ -3970,6 +3975,53 @@ TEST_F(EngineConverterTest, PredictWithContext) {
+   EXPECT_TRUE(converter.Predict(*composer_, context));
+ }
+ 
++TEST_F(EngineConverterTest, NuanceAlternativeFocusesChangedSegment) {
++  for (bool whole_top : {true, false}) {
++  for (bool existing : {true, false}) {
++    auto mock_converter = std::make_shared<MockConverter>();
++    EngineConverter converter(mock_converter, request_, config_);
++    Segments segments;
++    AddSegmentWithSingleCandidate(&segments, "わたしは", "私は");
++    AddSegmentWithSingleCandidate(&segments, "そのとくちょうは", "その特徴は");
++    AddSegmentWithSingleCandidate(&segments, "ちゃいろい", "茶色い");
++    auto* whole = segments.mutable_conversion_segment(0)->add_candidate();
++    whole->key = whole->content_key = "わたしはそのとくちょうはちゃいろい";
++    whole->value = whole->content_value = "私はその特長は茶色い";
++    whole->converted_segment_count = 3;
++    whole->kotori_nuance_alternative = true;
++    if (existing) {
++      auto* local = segments.mutable_conversion_segment(1)->add_candidate();
++      local->key = local->content_key = "そのとくちょうは";
++      local->value = local->content_value = "その特長は";
++    }
++    if (whole_top) {
++      auto* original = segments.mutable_conversion_segment(0)->insert_candidate(0);
++      original->key = original->content_key = "わたしはそのとくちょうはちゃいろい";
++      original->value = original->content_value = "私はその特徴は茶色い";
++      original->converted_segment_count = 3;
++      segments.mutable_conversion_segment(0)->move_candidate(2, 1);
++    }
++    EXPECT_CALL(*mock_converter, StartConversion(_, _))
++        .WillOnce(DoAll(SetArgPointee<1>(segments), Return(true)));
++    composer_->Reset();
++    composer_->InsertCharacterPreedit("わたしはそのとくちょうはちゃいろい");
++    ASSERT_TRUE(converter.Convert(*composer_));
++    EXPECT_CALL(*mock_converter, FocusSegmentValue(_, 1, 1))
++        .WillOnce(Return(true));
++    EXPECT_CALL(*mock_converter, CommitSegmentValue(_, _, _)).Times(0);
++    converter.CandidateNext(*composer_);
++    EXPECT_EQ(GetSegmentIndex(converter), 1);
++    commands::Output output;
++    converter.FillOutput(*composer_, &output);
++    ASSERT_EQ(output.preedit().segment_size(), 3);
++    EXPECT_EQ(output.preedit().segment(0).value(), "私は");
++    EXPECT_EQ(output.preedit().segment(1).value(), "その特長は");
++    EXPECT_EQ(output.preedit().segment(1).annotation(), commands::Preedit::Segment::HIGHLIGHT);
++    EXPECT_EQ(output.preedit().segment(2).value(), "茶色い");
++  }
++  }
++}
++
+ TEST_F(EngineConverterTest, FullSentenceCandidateInConversion) {
+   auto mock_converter = std::make_shared<MockConverter>();
+   EngineConverter converter(mock_converter, request_, config_);
+@@ -4822,5 +4874,118 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
    EXPECT_EQ(consumed_key_size, Util::CharsLen("きょうは"));
  }
  
@@ -21293,7 +21466,7 @@ index 0d2eb3455..1b13074f1 100644
    // For example, "私の" is created from composition "わたしのなまえ".
    bool create_partial_candidates = false;
 diff --git a/src/rewriter/BUILD.bazel b/src/rewriter/BUILD.bazel
-index 4bbcddeca..e0b597d36 100644
+index 4bbcddeca..9370db961 100644
 --- a/src/rewriter/BUILD.bazel
 +++ b/src/rewriter/BUILD.bazel
 @@ -675,6 +675,7 @@ mozc_cc_library(
@@ -21304,15 +21477,16 @@ index 4bbcddeca..e0b597d36 100644
          "@com_google_absl//absl/container:flat_hash_set",
          "@com_google_absl//absl/log:check",
          "@com_google_absl//absl/strings",
-@@ -1536,6 +1537,7 @@ mozc_cc_library(
+@@ -1536,6 +1537,8 @@ mozc_cc_library(
          ":fortune_rewriter",
          ":ivs_variants_rewriter",
          ":language_aware_rewriter",
 +        ":lm_rewriter",
++        ":kotori_nuance_rewriter",
          ":merger_rewriter",
          ":number_rewriter",
          ":remove_redundant_candidate_rewriter",
-@@ -1743,3 +1745,122 @@ mozc_cc_test(
+@@ -1743,3 +1746,147 @@ mozc_cc_test(
          "//testing:gunit_main",
      ],
  )
@@ -21326,6 +21500,31 @@ index 4bbcddeca..e0b597d36 100644
 +)
 +
 +# Kotori: WindowsのSHA-256。未対応OSでは識別不能として補正を無効にする。
++mozc_cc_library(
++    name = "kotori_nuance_rewriter",
++    srcs = ["kotori_nuance_rewriter.cc"],
++    hdrs = ["kotori_nuance_rewriter.h"],
++    deps = [
++        ":rewriter_interface",
++        "//base:util",
++        "//converter:segments",
++        "//request:conversion_request",
++    ],
++)
++
++mozc_cc_test(
++    name = "kotori_nuance_rewriter_test",
++    size = "small",
++    srcs = ["kotori_nuance_rewriter_test.cc"],
++    deps = [
++        ":kotori_nuance_rewriter",
++        "//converter:segments",
++        "//protocol:commands_cc_proto",
++        "//request:conversion_request",
++        "//testing:gunit_main",
++    ],
++)
++
 +mozc_cc_library(
 +    name = "kotori_model_identity",
 +    srcs = ["kotori_model_identity.cc"],
@@ -21882,6 +22081,235 @@ index 000000000..13b1ec304
 +  EXPECT_EQ(KotoriModelIdentity::Open(std::string("bad\0path", 8)), nullptr);
 +  EXPECT_EQ(KotoriModelIdentity::Open(std::string("\xff", 1)), nullptr);
 +}
++}  // namespace mozc
+diff --git a/src/rewriter/kotori_nuance_rewriter.cc b/src/rewriter/kotori_nuance_rewriter.cc
+new file mode 100644
+index 000000000..50d523ef2
+--- /dev/null
++++ b/src/rewriter/kotori_nuance_rewriter.cc
+@@ -0,0 +1,107 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++#include "rewriter/kotori_nuance_rewriter.h"
++
++#include <algorithm>
++#include <string>
++#include <vector>
++
++#include "base/util.h"
++#include "converter/attribute.h"
++#include "converter/candidate.h"
++#include "converter/segments.h"
++#include "request/conversion_request.h"
++
++namespace mozc {
++namespace {
++struct Choice { const char* word; const char* meaning; };
++// Kotori: 各組は同じ読み。判断を自動で置き換えず、意味を添えた選択肢にする。
++const std::vector<std::vector<Choice>>& Groups() {
++  static const std::vector<std::vector<Choice>> groups = {
++      {{"特徴", "目立つ性質"}, {"特長", "良いところ・長所"}},
++      {{"意志", "こうしたいという思い"}, {"意思", "考え・意向"}},
++      {{"制作", "作品を作る"}, {"製作", "物を作る"}},
++      {{"保証", "確かだと請け合う"}, {"保障", "権利や安全を守る"}, {"補償", "損失を補う"}},
++      {{"回答", "質問への返事"}, {"解答", "問題の答え"}},
++      {{"対象", "相手・目的となるもの"}, {"対照", "比べ合わせる"}, {"対称", "釣り合った配置"}},
++      {{"関心", "興味を持つこと"}, {"感心", "優れたものと認めること"}},
++  };
++  return groups;
++}
++}  // namespace
++
++bool KotoriNuanceRewriter::Rewrite(const ConversionRequest& request,
++                                    Segments* segments) const {
++  if (request.request_type() != ConversionRequest::CONVERSION ||
++      request.incognito_mode() ||
++      request.context().input_field_type() == commands::Context::PASSWORD ||
++      segments->conversion_segments_size() == 0) return false;
++  const size_t count = segments->conversion_segments_size();
++  std::string reading, original;
++  for (const Segment& segment : segments->conversion_segments()) {
++    if (segment.candidates_size() == 0 || segment.segment_type() == Segment::FIXED_VALUE ||
++        segment.segment_type() == Segment::FIXED_BOUNDARY ||
++        (segment.candidate(0).attributes &
++         (converter::Attribute::USER_DICTIONARY | converter::Attribute::NO_MODIFICATION |
++          converter::Attribute::COMMAND_CANDIDATE))) return false;
++    reading += segment.key();
++  }
++  for (size_t i = 0; i < count;) {
++    const auto& top = segments->conversion_segment(i).candidate(0);
++    const size_t span = top.effective_converted_segment_count();
++    if (span > count - i) return false;
++    original += top.value;
++    i += span;
++  }
++  if (original.empty() || original.size() > 1024 || Util::CharsLen(reading) > 160) return false;
++  Segment* head = segments->mutable_conversion_segment(0);
++  std::vector<converter::Candidate> alternatives;
++  constexpr size_t kMaxAlternatives = 6;
++  for (const auto& group : Groups()) {
++    for (const Choice& from : group) {
++      size_t position = 0;
++      while ((position = original.find(from.word, position)) != std::string::npos) {
++        for (const Choice& to : group) {
++          if (from.word == to.word || std::string(from.word) == to.word) continue;
++          std::string text = original;
++          text.replace(position, std::char_traits<char>::length(from.word), to.word);
++          bool duplicate = false;
++          for (const auto* candidate : head->candidates()) {
++            if (candidate->key == reading && candidate->value == text) { duplicate = true; break; }
++          }
++          if (duplicate || std::any_of(alternatives.begin(), alternatives.end(),
++              [&](const auto& candidate) { return candidate.value == text; })) continue;
++          converter::Candidate candidate = head->candidate(0);
++          candidate.key = candidate.content_key = reading;
++          candidate.value = candidate.content_value = text;
++          candidate.converted_segment_count = count;
++          candidate.inner_segment_boundary.clear();
++          candidate.prefix.clear();
++          candidate.suffix.clear();
++          candidate.display_value.clear();
++          candidate.usage_id = 0;
++          candidate.usage_title.clear();
++          candidate.usage_description.clear();
++          candidate.description = std::string(from.word) + " → " + to.word + "（" + to.meaning + "）";
++          candidate.a11y_description = candidate.description;
++          candidate.attributes = converter::Attribute::NO_LEARNING |
++                                  converter::Attribute::NO_VARIANTS_EXPANSION;
++          candidate.kotori_ai_evaluated = false;
++          candidate.kotori_confident_prediction = false;
++          candidate.kotori_nuance_alternative = true;
++          alternatives.push_back(std::move(candidate));
++          if (alternatives.size() >= kMaxAlternatives) break;
++        }
++        if (alternatives.size() >= kMaxAlternatives) break;
++        position += std::char_traits<char>::length(from.word);
++      }
++      if (alternatives.size() >= kMaxAlternatives) break;
++    }
++    if (alternatives.size() >= kMaxAlternatives) break;
++  }
++  // 最初の候補と既存の順序を保ち、その間に文全体の意味の選択肢を挿入する。
++  for (size_t i = 0; i < alternatives.size(); ++i) {
++    *head->insert_candidate(i + 1) = std::move(alternatives[i]);
++  }
++  return !alternatives.empty();
++}
++}  // namespace mozc
+diff --git a/src/rewriter/kotori_nuance_rewriter.h b/src/rewriter/kotori_nuance_rewriter.h
+new file mode 100644
+index 000000000..7be2ddeaa
+--- /dev/null
++++ b/src/rewriter/kotori_nuance_rewriter.h
+@@ -0,0 +1,13 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++#ifndef MOZC_REWRITER_KOTORI_NUANCE_REWRITER_H_
++#define MOZC_REWRITER_KOTORI_NUANCE_REWRITER_H_
++#include "rewriter/rewriter_interface.h"
++namespace mozc {
++// Kotori: 明示的な変換で、同音語の意味の違いを文全体の別候補にする。
++// 最初の変換は変えず、先頭語の表記違いより前に選べるようにする。
++class KotoriNuanceRewriter : public RewriterInterface {
++ public:
++  bool Rewrite(const ConversionRequest& request, Segments* segments) const override;
++};
++}  // namespace mozc
++#endif  // MOZC_REWRITER_KOTORI_NUANCE_REWRITER_H_
+diff --git a/src/rewriter/kotori_nuance_rewriter_test.cc b/src/rewriter/kotori_nuance_rewriter_test.cc
+new file mode 100644
+index 000000000..8f2516f2f
+--- /dev/null
++++ b/src/rewriter/kotori_nuance_rewriter_test.cc
+@@ -0,0 +1,91 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++#include "rewriter/kotori_nuance_rewriter.h"
++#include "converter/attribute.h"
++#include "converter/segments.h"
++#include "protocol/commands.pb.h"
++#include "request/conversion_request.h"
++#include "testing/gunit.h"
++namespace mozc {
++namespace {
++void Add(Segments& segments, const char* key, const char* value) {
++  Segment* segment = segments.add_segment();
++  segment->set_key(key);
++  auto* candidate = segment->add_candidate();
++  candidate->key = candidate->content_key = key;
++  candidate->value = candidate->content_value = value;
++}
++ConversionRequest Conversion() {
++  return ConversionRequestBuilder().SetRequestType(ConversionRequest::CONVERSION).Build();
++}
++TEST(KotoriNuanceRewriterTest, PreservesSentenceAndPutsMeaningBeforeSpelling) {
++  Segments segments;
++  Add(segments, "わたしは", "私は");
++  Add(segments, "そのとくちょうは", "その特徴は");
++  Add(segments, "ちゃいろいってことだ", "茶色いってことだ");
++  auto* spelling = segments.mutable_conversion_segment(0)->add_candidate();
++  spelling->key = "わたしは";
++  spelling->value = "わたしは";
++  KotoriNuanceRewriter rewriter;
++  EXPECT_TRUE(rewriter.Rewrite(Conversion(), &segments));
++  const auto& head = segments.conversion_segment(0);
++  EXPECT_EQ(head.candidate(0).value, "私は");
++  ASSERT_EQ(head.candidates_size(), 3);
++  EXPECT_EQ(head.candidate(1).value, "私はその特長は茶色いってことだ");
++  EXPECT_EQ(head.candidate(1).key, "わたしはそのとくちょうはちゃいろいってことだ");
++  EXPECT_EQ(head.candidate(1).converted_segment_count, 3);
++  EXPECT_TRUE(head.candidate(1).kotori_nuance_alternative);
++  EXPECT_FALSE(head.candidate(1).kotori_ai_evaluated);
++  EXPECT_NE(head.candidate(1).description.find("良いところ"), std::string::npos);
++  EXPECT_TRUE(head.candidate(1).attributes & converter::Attribute::NO_LEARNING);
++  EXPECT_EQ(head.candidate(2).value, "わたしは");
++  EXPECT_EQ(segments.conversion_segment(1).candidate(0).value, "その特徴は");
++  EXPECT_FALSE(rewriter.Rewrite(Conversion(), &segments));
++  EXPECT_EQ(head.candidates_size(), 3);
++}
++TEST(KotoriNuanceRewriterTest, ReplacesOneOccurrenceAtATime) {
++  Segments segments;
++  Add(segments, "とくちょうととくちょう", "特徴と特徴");
++  KotoriNuanceRewriter rewriter;
++  ASSERT_TRUE(rewriter.Rewrite(Conversion(), &segments));
++  const auto& head = segments.conversion_segment(0);
++  ASSERT_EQ(head.candidates_size(), 3);
++  EXPECT_EQ(head.candidate(1).value, "特長と特徴");
++  EXPECT_EQ(head.candidate(2).value, "特徴と特長");
++}
++TEST(KotoriNuanceRewriterTest, SkipsPredictionAndProtectedRequests) {
++  KotoriNuanceRewriter rewriter;
++  for (auto type : {ConversionRequest::PREDICTION, ConversionRequest::SUGGESTION}) {
++    Segments segments; Add(segments, "とくちょう", "特徴");
++    EXPECT_FALSE(rewriter.Rewrite(ConversionRequestBuilder().SetRequestType(type).Build(), &segments));
++  }
++  Segments segments; Add(segments, "とくちょう", "特徴");
++  commands::Context context; context.set_input_field_type(commands::Context::PASSWORD);
++  auto request = ConversionRequestBuilder().SetRequestType(ConversionRequest::CONVERSION).SetContext(context).Build();
++  EXPECT_FALSE(rewriter.Rewrite(request, &segments));
++  ConversionRequest::Options options; options.incognito_mode = true;
++  const auto incognito = ConversionRequestBuilder().SetRequestType(ConversionRequest::CONVERSION).SetOptions(options).Build();
++  EXPECT_FALSE(rewriter.Rewrite(incognito, &segments));
++}
++TEST(KotoriNuanceRewriterTest, LeavesFixedAndUserWordsAlone) {
++  KotoriNuanceRewriter rewriter;
++  for (auto attribute : {converter::Attribute::USER_DICTIONARY, converter::Attribute::NO_MODIFICATION, converter::Attribute::COMMAND_CANDIDATE}) {
++    Segments segments; Add(segments, "とくちょう", "特徴");
++    segments.mutable_conversion_segment(0)->mutable_candidate(0)->attributes |= attribute;
++    EXPECT_FALSE(rewriter.Rewrite(Conversion(), &segments));
++  }
++  for (auto type : {Segment::FIXED_VALUE, Segment::FIXED_BOUNDARY}) {
++    Segments segments; Add(segments, "とくちょう", "特徴");
++    segments.mutable_conversion_segment(0)->set_segment_type(type);
++    EXPECT_FALSE(rewriter.Rewrite(Conversion(), &segments));
++  }
++}
++TEST(KotoriNuanceRewriterTest, UnrelatedSentenceAndBoundedChoices) {
++  KotoriNuanceRewriter rewriter;
++  Segments unrelated; Add(unrelated, "わたしはねこがすきです", "私は猫が好きです");
++  EXPECT_FALSE(rewriter.Rewrite(Conversion(), &unrelated));
++  Segments many; Add(many, "とくちょう", "特徴特徴特徴特徴特徴特徴特徴特徴");
++  ASSERT_TRUE(rewriter.Rewrite(Conversion(), &many));
++  EXPECT_EQ(many.conversion_segment(0).candidates_size(), 7);
++}
++}  // namespace
 +}  // namespace mozc
 diff --git a/src/rewriter/llama_runtime.cc b/src/rewriter/llama_runtime.cc
 new file mode 100644
@@ -26361,18 +26789,19 @@ index 000000000..650e9c551
 +
 +}  // namespace mozc
 diff --git a/src/rewriter/rewriter.cc b/src/rewriter/rewriter.cc
-index d92e814fd..f44a51783 100644
+index d92e814fd..6c3ff56e2 100644
 --- a/src/rewriter/rewriter.cc
 +++ b/src/rewriter/rewriter.cc
-@@ -51,6 +51,7 @@
+@@ -51,6 +51,8 @@
  #include "rewriter/focus_candidate_rewriter.h"
  #include "rewriter/ivs_variants_rewriter.h"
  #include "rewriter/language_aware_rewriter.h"
 +#include "rewriter/lm_rewriter.h"
++#include "rewriter/kotori_nuance_rewriter.h"
  #include "rewriter/number_rewriter.h"
  #include "rewriter/remove_redundant_candidate_rewriter.h"
  #include "rewriter/single_kanji_rewriter.h"
-@@ -136,6 +137,11 @@ Rewriter::Rewriter(const engine::Modules& modules) {
+@@ -136,6 +138,11 @@ Rewriter::Rewriter(const engine::Modules& modules) {
    const dictionary::SingleKanjiDictionary& single_kanji_dictionary =
        modules.GetSingleKanjiDictionary();
  
@@ -26384,6 +26813,14 @@ index d92e814fd..f44a51783 100644
  #ifdef MOZC_USER_DICTIONARY_REWRITER
    AddRewriter(std::make_unique<UserDictionaryRewriter>());
  #endif  // MOZC_USER_DICTIONARY_REWRITER
+@@ -195,6 +202,7 @@ Rewriter::Rewriter(const engine::Modules& modules) {
+   AddRewriter(make_unique_from_tuples<EnvironmentalFilterRewriter>(
+       data_manager.GetEmojiRewriterData()));
+   AddRewriter(std::make_unique<RemoveRedundantCandidateRewriter>());
++  AddRewriter(std::make_unique<KotoriNuanceRewriter>());
+   AddRewriter(make_unique_from_tuples<A11yDescriptionRewriter>(
+       data_manager.GetA11yDescriptionRewriterData()));
+ }
 diff --git a/src/rewriter/zenz_scorer.cc b/src/rewriter/zenz_scorer.cc
 new file mode 100644
 index 000000000..62ec97237
