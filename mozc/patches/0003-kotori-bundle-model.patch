@@ -1857,7 +1857,7 @@ index c2e71a077..7459f6a3c 100644
    parser.add_argument('--wxs_path', type=str)
    parser.add_argument('--wix_path', type=str)
 diff --git a/src/win32/installer/installer_oss_64bit.wxs b/src/win32/installer/installer_oss_64bit.wxs
-index e30c37ad4..c4b01cc56 100644
+index e30c37ad4..e723577c6 100644
 --- a/src/win32/installer/installer_oss_64bit.wxs
 +++ b/src/win32/installer/installer_oss_64bit.wxs
 @@ -48,7 +48,7 @@
@@ -1986,16 +1986,16 @@ index e30c37ad4..c4b01cc56 100644
 +    <Icon Id="KotoriDictionaryIcon.ico" SourceFile="$(var.KotoriDictionaryIcon)" />
 +    <StandardDirectory Id="DesktopFolder">
 +      <Component Id="KotoriDesktopShortcut">
-+        <Shortcut Id="KotoriDesktopSettings" Name="Kotori日本語入力の設定" Description="Kotori日本語入力の設定"
++        <Shortcut Id="KotoriDesktopSettings" Name="Kotori" Description="日本語入力とAI変換の設定"
 +                  Target="[MozcDir]mozc_tool.exe" Arguments="--mode=config_dialog" WorkingDirectory="MozcDir"
 +                  Icon="KotoriSettingsIcon.ico" />
 +        <RegistryValue Root="HKLM" Key="Software\Kotori\Shortcuts" Name="desktop" Type="integer" Value="1" KeyPath="yes" />
 +      </Component>
 +    </StandardDirectory>
 +    <StandardDirectory Id="ProgramMenuFolder">
-+      <Directory Id="KotoriProgramMenu" Name="Kotori日本語入力">
++      <Directory Id="KotoriProgramMenu" Name="Kotori">
 +        <Component Id="KotoriStartMenuShortcuts">
-+          <Shortcut Id="KotoriMenuSettings" Name="Kotori日本語入力の設定" Description="Kotori日本語入力の設定"
++          <Shortcut Id="KotoriMenuSettings" Name="Kotori" Description="日本語入力とAI変換の設定"
 +                    Target="[MozcDir]mozc_tool.exe" Arguments="--mode=config_dialog" WorkingDirectory="MozcDir"
 +                    Icon="KotoriSettingsIcon.ico" />
 +          <Shortcut Id="KotoriMenuDictionary" Name="Kotori日本語入力の辞書ツール" Description="ユーザー辞書の編集"

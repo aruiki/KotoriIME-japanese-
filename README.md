@@ -7,6 +7,7 @@
   <img alt="Windows 10 / 11" src="https://img.shields.io/badge/Windows-10%20%2F%2011-242C5C?logo=windows">
   <img alt="オフラインで動作" src="https://img.shields.io/badge/%E3%82%AA%E3%83%95%E3%83%A9%E3%82%A4%E3%83%B3-%E9%80%9A%E4%BF%A1%E3%81%97%E3%81%AA%E3%81%84-F25C2E">
   <img alt="実入力 AJIMEE-Bench 88.4%" src="https://img.shields.io/badge/%E5%AE%9F%E5%85%A5%E5%8A%9B%20AJIMEE--Bench-88.4%25-F25C2E">
+  <a href="https://buy.stripe.com/cNi14m7jRdq005f0781ZS08"><img alt="開発を支援（Stripe）" src="https://img.shields.io/badge/%E9%96%8B%E7%99%BA%E3%82%92%E6%94%AF%E6%8F%B4-242C5C?logo=stripe&amp;logoColor=white"></a>
   <a href="#ライセンス"><img alt="ライセンス" src="https://img.shields.io/badge/license-Apache--2.0%20%2F%20MIT-5B6070"></a>
 </p>
 
@@ -150,6 +151,22 @@ Space を押すと、そのまま同じ変換になります。
 - **固まらない**: 変換で AI に使う時間には上限があり、間に合わなければ Mozc の結果をそのまま出します。
   内蔵 GPU には AI を載せません(反応が遅く、入力が止まるため)。
 
+## Kotoriのダッシュボード（開発中）
+
+Kotoriを開くと、AIの状態、計算時間、KotoriとPC全体のCPU・メモリを確認できます。
+使用率は大きな数値とゲージで表示し、CPUの推移をグラフで見られます。Windowsのフォントとタブ・ボタンを使った画面です。
+
+<p align="center"><img src="docs/images/kotori-dashboard.png" alt="開発中のKotoriダッシュボード。PCのCPU・メモリの実測値とCPUの推移。AIは未確認と表示" width="880"></p>
+
+この画像はWindowsの画面テストから取得しました。PCの数値は実測で、テストでは変換サーバーに接続しないためAIは「未確認」です。
+新しいダッシュボードは公開済みv1.1.0-rc.3には含まれません。次の本体配布に向けて開発しています。
+計算時間は起動後の累計で、変換の待ち時間とは異なります。GPUのVRAM表示は搭載容量です。
+
+## 開発を支援
+
+Kotoriは無料で使えるオープンソースのソフトです。開発への支援を受け付けています。
+[開発を支援（Stripe）](https://buy.stripe.com/cNi14m7jRdq005f0781ZS08)。
+
 ## しくみ
 
 <p align="center"><img src="docs/images/how.png" alt="しくみ: 読み → 候補を集める(Mozc の辞書と変換用 AI)→ AI が選ぶ(zenz と日本語 LLM)→ 結果" width="880"></p>
@@ -207,7 +224,7 @@ GPU は自動で見つけて使います。ドライバー以外の準備は要�
 1. [Releases](https://github.com/aruiki/KotoriIME-japanese-/releases/latest) から `Kotori64.msi` をダウンロードして実行します
    (管理者の確認で「はい」)。「Windows によって PC が保護されました」と出たら「詳細情報」→「実行」。
 2. 入力方式に **Kotori日本語入力** が加わります。Windows キー + Space で切り替え、半角/全角キーでオン/オフ。
-3. 設定はデスクトップの「Kotori日本語入力の設定」から開けます。
+3. 設定はデスクトップまたはスタートメニューの「Kotori」から開けます（rc.3以前の表示名は「Kotori日本語入力の設定」）。
 
 新しい版は、前の版の上にそのまま入れられます(v0.3.0-beta.6 以降)。それより前の版が入っているときは、
 一度アンインストールしてから入れてください。アンインストールは「設定」→「アプリ」から行えます。
@@ -236,7 +253,7 @@ GPU は自動で見つけて使います。ドライバー以外の準備は要�
 <details>
 <summary><b>インターネットにつながりますか?</b></summary>
 
-つながりません。辞書も AI も PC の中にあり、入力した文字を外に送りません。AI が覚えておく予測は
+変換とAIはPCの中で動き、入力した文字を外に送りません。開発支援などの外部リンクを押したときだけ、ブラウザーでそのページを開きます。AI が覚えておく予測は
 シークレットモード(プライベートな入力)では作らず、使わないときは捨てます。
 </details>
 
