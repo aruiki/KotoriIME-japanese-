@@ -22,8 +22,14 @@ AGENTS.md、docs/DEVELOPMENT.md 1.5、docs/adr/0037、release_tag.py、両releas
 ## 完了条件
 - [x] 公開済み全18件の名前を変更し、ほかのメタデータ・添付の一致を確認
 - [x] Pythonの命名と既存の版決定テストが成功
-- [ ] 全CI成功後にmerge commitで統合
-- [ ] READMEのmain反映を確認し、第二段階を再開
+- [x] 全CI成功後にmerge commitで統合
+- [x] READMEのmain反映を確認し、第二段階を再開
 
 ## 注意
 rc.3をLatestにするために正式版へ変更しない。MSIの再ビルド・再公開は行わない。
+
+## 完了記録
+
+PR146は全9チェック（MSI含む）成功後、2026-10-09にmerge commit 3316acad2fd24c36ea3c4eb10153e8c7d6030ce2で統合。
+GitHub APIでmainのREADMEにrc.3のMSI直接リンクと正式版リンクがあることを確認した。
+第二段階はPR145/148で再開済み。ダッシュボードのPR147はbaseをmainへ変更し、CIを確認中。

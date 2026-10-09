@@ -187,5 +187,12 @@
     "Model telemetry is an isolated dictionary/model session, not TSF or conversion quality/latency evidence",
     "OS title bar, live installed dashboard, high contrast and dark-mode switching, low-end machines not observed here",
     "MSI/full CI and merge pending; published rc.3 unchanged"
-  ]
+  ],
+  "source_commit": "77a82dfa3a8a38831b27e6f41271f62408be062a",
+  "parent_release_metadata": {
+    "pr": 146,
+    "merge_commit": "3316acad2fd24c36ea3c4eb10153e8c7d6030ce2",
+    "checks_passed": 9,
+    "main_readme_links_verified": true
+  }
 }
