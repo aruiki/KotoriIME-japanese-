@@ -14,5 +14,11 @@
     "interactive window not observed",
     "new MSI installation/upgrade pending CI",
     "rc.3 unchanged"
-  ]
+  ],
+  "follow_up": {
+    "initial_title_scope": "__APPLE__ only; build did not verify Windows title",
+    "fix": "unconditional setWindowTitle after setupUi",
+    "windows_gui_test": "PASS: actual Qt windowTitle is Kotori",
+    "receipt": "2026-10-09-dashboard.json"
+  }
 }

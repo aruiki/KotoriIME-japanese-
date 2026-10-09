@@ -20057,10 +20057,18 @@ index b1af98c8a..ba118cd62 100644
    return name;
  }
 diff --git a/src/gui/config_dialog/BUILD.bazel b/src/gui/config_dialog/BUILD.bazel
-index 335639ca8..661bb7c5d 100644
+index 335639ca8..1295e38c7 100644
 --- a/src/gui/config_dialog/BUILD.bazel
 +++ b/src/gui/config_dialog/BUILD.bazel
-@@ -201,6 +201,7 @@ mozc_cc_qt_library(
+@@ -29,6 +29,7 @@
+ 
+ load(
+     "//:build_defs.bzl",
++    "mozc_cc_test",
+     "mozc_infoplist_strings",
+     "mozc_select",
+ )
+@@ -201,6 +202,7 @@ mozc_cc_qt_library(
          "//base:config_file_stream",
          "//base:file_stream",
          "//base:file_util",
@@ -20068,43 +20076,85 @@ index 335639ca8..661bb7c5d 100644
          "//base:port",
          "//base:process",
          "//base:run_level",
+@@ -277,3 +279,21 @@ mozc_macos_qt_application(
+     ],
+     deps = [":config_dialog_main_lib"],
+ )
++
++# Kotori: 実入力サーバーをモックにしたQtのダッシュボード確認。
++mozc_cc_test(
++    name = "kotori_dashboard_test",
++    size = "small",
++    srcs = ["kotori_dashboard_test.cc"],
++    deps = [
++        ":config_dialog",
++        "//base:file_util",
++        "//base:system_util",
++        "//client",
++        "//client:client_mock",
++        "//gui/base:gui_base",
++        "//protocol:config_cc_proto",
++        "//testing:gunit_main",
++        "//testing:mozctest",
++    ],
++)
 diff --git a/src/gui/config_dialog/config_dialog.cc b/src/gui/config_dialog/config_dialog.cc
-index abbf55d68..814590787 100644
+index abbf55d68..32a4aaaed 100644
 --- a/src/gui/config_dialog/config_dialog.cc
 +++ b/src/gui/config_dialog/config_dialog.cc
-@@ -30,9 +30,31 @@
+@@ -30,12 +30,51 @@
  // Qt component of configure dialog for Mozc
  #include "gui/config_dialog/config_dialog.h"
  
 +#include <QCheckBox>
 +#include <QComboBox>
 +#include <QDateTime>
++#include <QDesktopServices>
 +#include <QDialog>
 +#include <QDialogButtonBox>
++#include <QDir>
++#include <QElapsedTimer>
 +#include <QFile>
-+#include <QFrame>
 +#include <QFileDialog>
++#include <QFileInfo>
++#include <QFontDatabase>
++#include <QFrame>
++#include <QGridLayout>
 +#include <QHBoxLayout>
 +#include <QLabel>
 +#include <QLineEdit>
  #include <QMessageBox>
++#include <QPainter>
++#include <QPainterPath>
 +#include <QPlainTextEdit>
++#include <QProgressBar>
 +#include <QPushButton>
++#include <QRegularExpression>
++#include <QScreen>
++#include <QScrollArea>
 +#include <QStandardPaths>
 +#include <QSysInfo>
++#include <QTimer>
++#include <QUrl>
 +#include <QVBoxLayout>
  #include <algorithm>
 +
 +#ifdef _WIN32
-+#include <windows.h>
 +#include <dxgi.h>
++#include <psapi.h>
++#include <windows.h>
 +#endif  // _WIN32
  #include <cstdint>
++#include <deque>
 +#include <fstream>
  #include <istream>
  #include <map>
  #include <memory>
-@@ -43,6 +65,10 @@
++#include <optional>
+ #include <sstream>
+ #include <string>
+ 
+@@ -43,6 +82,10 @@
  #include "absl/log/log.h"
  #include "absl/strings/string_view.h"
  #include "base/config_file_stream.h"
@@ -20115,7 +20165,7 @@ index abbf55d68..814590787 100644
  #include "client/client.h"
  #include "config/config_handler.h"
  #include "config/stats_config_util.h"
-@@ -83,6 +109,139 @@ void Connect(const QList<T *> &objects, const char *signal,
+@@ -83,6 +126,430 @@ void Connect(const QList<T *> &objects, const char *signal,
  
  namespace mozc {
  namespace gui {
@@ -20123,7 +20173,7 @@ index abbf55d68..814590787 100644
 +
 +// Fluent 2(Windows 11)の配色と形。ブランド色 #0F6CBD、角丸 4px/8px、Segoe UI Variable。
 +constexpr char kKotoriFluentStyle[] = R"(
-+QDialog { background: #F3F3F3; font-family: "Segoe UI Variable Text", "Yu Gothic UI"; font-size: 10pt; color: #1A1A1A; }
++QDialog { background: #F3F3F3; font-size: 10pt; color: #1A1A1A; }
 +QTabWidget::pane { border: 1px solid #E5E5E5; border-radius: 8px; background: #FBFBFB; top: -1px; }
 +QTabBar::tab { background: transparent; color: #5C5C5C; padding: 8px 14px; margin-right: 2px; border: none; }
 +QTabBar::tab:hover { color: #1A1A1A; background: #EAEAEA; border-radius: 4px; }
@@ -20142,13 +20192,12 @@ index abbf55d68..814590787 100644
 +QTabBar::tab:focus { border: 1px solid #0F6CBD; border-radius: 4px; }
 +QComboBox, QLineEdit, QSpinBox { background: #FFFFFF; color: #1A1A1A; border: 1px solid #D1D1D1; border-bottom: 1px solid #8A8A8A; border-radius: 4px; padding: 4px 8px; min-height: 20px; }
 +QComboBox:focus, QLineEdit:focus, QSpinBox:focus { border-bottom: 2px solid #0F6CBD; }
-+QComboBox::drop-down { border: none; width: 24px; }
 +QComboBox QAbstractItemView { background: #FFFFFF; border: 1px solid #E5E5E5; selection-background-color: #EBF3FC; selection-color: #1A1A1A; }
 +QComboBox:disabled, QLineEdit:disabled, QSpinBox:disabled { background: #F5F5F5; color: #A0A0A0; }
 +QCheckBox, QRadioButton { spacing: 8px; color: #1A1A1A; }
 +QCheckBox:disabled, QRadioButton:disabled, QLabel:disabled { color: #A0A0A0; }
 +QLabel { color: #1A1A1A; }
-+QLabel#kotoriNote { color: #5C5C5C; font-size: 9pt; }
++QLabel#kotoriNote, QLabel[kotoriNote="true"] { color: #5C5C5C; font-size: 9pt; }
 +QFrame#kotoriCard { background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 8px; }
 +)";
 +
@@ -20220,27 +20269,41 @@ index abbf55d68..814590787 100644
 +
 +// Kotori: 実際に動いている AI の状態(変換サーバーがユーザーのプロファイルの
 +// kotori_ai_status.txt に書く。rewriter/lm_rewriter.cc の WriteStatus、docs/adr/0026)。
-+std::string KotoriAiStatus() {
-+  std::ifstream in(FileUtil::JoinPath(SystemUtil::GetUserProfileDirectory(),
-+                                      "kotori_ai_status.txt"),
-+                   std::ios::binary);
-+  std::map<std::string, std::string> kv;
-+  for (std::string line; std::getline(in, line);) {
-+    if (!line.empty() && line.back() == '\r') line.pop_back();
-+    const size_t eq = line.find('=');
-+    if (eq != std::string::npos) kv[line.substr(0, eq)] = line.substr(eq + 1);
++using KotoriStatus = std::map<std::string, std::string>;
++constexpr char kKotoriSupportUrl[] =
++    "https://buy.stripe.com/cNi14m7jRdq005f0781ZS08";
++
++KotoriStatus ReadKotoriStatus() {
++  QFile file(QString::fromUtf8(
++      FileUtil::JoinPath(SystemUtil::GetUserProfileDirectory(),
++                         "kotori_ai_status.txt")
++          .c_str()));
++  KotoriStatus status;
++  if (!file.open(QIODevice::ReadOnly) || file.size() > 8192) return status;
++  for (const QByteArray &raw : file.readAll().split('\n')) {
++    const QByteArray line = raw.trimmed();
++    const qsizetype equals = line.indexOf('=');
++    if (equals > 0)
++      status[line.left(equals).toStdString()] =
++          line.mid(equals + 1).toStdString();
 +  }
-+  const std::string& state = kv["state"];
-+  const std::string& device = kv["device"];
++  return status;
++}
++
++std::string FormatKotoriAiStatus(KotoriStatus kv) {
++  const std::string &state = kv["state"];
++  const std::string &device = kv["device"];
 +  const std::string where = device == "CPU" ? "CPU で動作" : "GPU: " + device;
 +  if (state == "llm") {
 +    return "AI の状態: 動いています(変換用の AI と日本語 LLM、" + where + ")。";
 +  } else if (state == "zenz") {
-+    return "AI の状態: 動いています(変換用の AI " + kv["zenz"] + "、" + where + ")。";
++    return "AI の状態: 動いています(変換用の AI " + kv["zenz"] + "、" + where +
++           ")。";
 +  } else if (state == "loading") {
 +    return "AI の状態: モデルを読み込んでいます。";
 +  } else if (state == "sleep") {
-+    return "AI の状態: 休んでいます(しばらく入力がないので、GPU のメモリを空けています。"
++    return "AI の状態: 休んでいます(しばらく入力がないので、GPU "
++           "のメモリを空けています。"
 +           "次に入力すると読み込みます)。";
 +  } else if (state == "error") {
 +    return "AI の状態: 動いていません(" + kv["message"] +
@@ -20251,21 +20314,312 @@ index abbf55d68..814590787 100644
 +  return "AI の状態: まだ分かりません(日本語を一度入力すると表示されます)。";
 +}
 +
++std::string KotoriAiStatus();
++
++QString MemoryText(quint64 bytes) {
++  return QString::fromUtf8("%1 MiB").arg(bytes / (1024.0 * 1024.0), 0, 'f', 1);
++}
++
++// Kotori: GUIが開いている間だけ、実際の変換サーバーを2秒間隔で測る。
++// 状態ファイルのPID・起動時刻・実行ファイルを照合し、古い記録は動作中と表示しない。
++class KotoriDashboardSample {
++ public:
++  QString ai, models, inference, server_memory, server_cpu, pc_memory, pc_cpu;
++  QString ai_state;
++  std::optional<double> pc_cpu_load, pc_memory_load, server_cpu_load,
++      server_ram_mib, ai_seconds;
++
++  void Update() {
++    pc_cpu_load.reset();
++    pc_memory_load.reset();
++    server_cpu_load.reset();
++    server_ram_mib.reset();
++    ai_seconds.reset();
++    ai_state = "unknown";
++    const KotoriStatus status = ReadKotoriStatus();
++    const auto value = [&](const char *key) {
++      const auto found = status.find(key);
++      return found == status.end() ? QString()
++                                   : QString::fromUtf8(found->second.c_str());
++    };
++    ai = QString::fromUtf8(
++        "AIの状態はまだ取得できません。日本語を入力すると更新されます。");
++    models = QString::fromUtf8("実行中のモデル: 未確認");
++    inference = QString::fromUtf8("AI計算時間: まだ計測データがありません");
++    server_memory = QString::fromUtf8("Kotoriのメモリ: 取得できません");
++    server_cpu = QString::fromUtf8("KotoriのCPU: 取得できません");
++    pc_memory = QString::fromUtf8("PCのメモリ: 取得できません");
++    pc_cpu = QString::fromUtf8("PCのCPU: 計測中");
++#ifdef _WIN32
++    MEMORYSTATUSEX memory = {sizeof(memory)};
++    if (::GlobalMemoryStatusEx(&memory)) {
++      pc_memory_load = memory.dwMemoryLoad;
++      pc_memory =
++          QString::fromUtf8("PCのメモリ: %1 / %2 GiB（%3%）")
++              .arg((memory.ullTotalPhys - memory.ullAvailPhys) /
++                       (1024.0 * 1024 * 1024),
++                   0, 'f', 1)
++              .arg(memory.ullTotalPhys / (1024.0 * 1024 * 1024), 0, 'f', 1)
++              .arg(memory.dwMemoryLoad);
++    }
++    FILETIME idle, kernel, user;
++    if (::GetSystemTimes(&idle, &kernel, &user)) {
++      const quint64 total = Ticks(kernel) + Ticks(user), idle_now = Ticks(idle);
++      if (system_total_ != 0 && total > system_total_ &&
++          idle_now >= system_idle_) {
++        const double busy = 1.0 - static_cast<double>(idle_now - system_idle_) /
++                                      (total - system_total_);
++        pc_cpu_load = std::clamp(busy * 100.0, 0.0, 100.0);
++        pc_cpu = QString::fromUtf8("PCのCPU: %1%")
++                     .arg(std::clamp(busy * 100.0, 0.0, 100.0), 0, 'f', 1);
++      }
++      system_total_ = total;
++      system_idle_ = idle_now;
++    }
++    bool pid_ok = false, creation_ok = false;
++    const DWORD pid = value("pid").toUInt(&pid_ok);
++    const quint64 start = value("process_started").toULongLong(&creation_ok);
++    HANDLE process =
++        pid_ok && creation_ok && pid != 0
++            ? ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid)
++            : nullptr;
++    FILETIME created, exited, process_kernel, process_user;
++    wchar_t image[32768];
++    DWORD image_size = std::size(image);
++    DWORD exit_code = 0;
++    const QString expected =
++        QDir::cleanPath(QString::fromUtf8(SystemUtil::GetServerPath().c_str()));
++    const bool active =
++        process && ::GetExitCodeProcess(process, &exit_code) &&
++        exit_code == STILL_ACTIVE &&
++        ::GetProcessTimes(process, &created, &exited, &process_kernel,
++                          &process_user) &&
++        Ticks(created) == start &&
++        ::QueryFullProcessImageNameW(process, 0, image, &image_size) &&
++        QDir::cleanPath(QString::fromWCharArray(image, image_size))
++                .compare(expected, Qt::CaseInsensitive) == 0;
++    if (active) {
++      ai = QString::fromUtf8(FormatKotoriAiStatus(status).c_str());
++      ai_state = value("state");
++      QStringList names;
++      if (!value("zenz").isEmpty()) names << value("zenz");
++      if (!value("llm").isEmpty()) names << value("llm");
++      models = QString::fromUtf8("実行中のモデル: %1")
++                   .arg(names.isEmpty() ? QString::fromUtf8("なし")
++                                        : names.join(" / "));
++      const QRegularExpression counters(
++          "zenz work=([0-9]+)ms decode=([0-9]+)ms calls=([0-9]+) "
++          "tokens=([0-9]+) \\| llm work=([0-9]+)ms decode=([0-9]+)ms "
++          "calls=([0-9]+) tokens=([0-9]+)");
++      const auto match = counters.match(value("stats"));
++      if (match.hasMatch()) {
++        ai_seconds =
++            (match.captured(1).toDouble() + match.captured(5).toDouble()) /
++            1000.0;
++        inference = QString::fromUtf8("AI計算の累計: %1秒　モデル計算: %2回")
++                        .arg((match.captured(1).toDouble() +
++                              match.captured(5).toDouble()) /
++                                 1000.0,
++                             0, 'f', 2)
++                        .arg(match.captured(3).toULongLong() +
++                             match.captured(7).toULongLong());
++      }
++      using MemoryInfo =
++          BOOL(WINAPI *)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
++      const auto get_memory = reinterpret_cast<MemoryInfo>(::GetProcAddress(
++          ::GetModuleHandleW(L"kernel32.dll"), "K32GetProcessMemoryInfo"));
++      PROCESS_MEMORY_COUNTERS_EX counters_memory = {};
++      counters_memory.cb = sizeof(counters_memory);
++      if (get_memory && get_memory(process,
++                                   reinterpret_cast<PPROCESS_MEMORY_COUNTERS>(
++                                       &counters_memory),
++                                   sizeof(counters_memory))) {
++        server_ram_mib = counters_memory.WorkingSetSize / (1024.0 * 1024.0);
++        server_memory =
++            QString::fromUtf8(
++                "Kotoriのメモリ（常駐RAM）: %1\nプライベート確保量: %2")
++                .arg(MemoryText(counters_memory.WorkingSetSize),
++                     MemoryText(counters_memory.PrivateUsage));
++      }
++      const quint64 now = ::GetTickCount64(),
++                    cpu = Ticks(process_kernel) + Ticks(process_user);
++      if (last_pid_ == pid && last_start_ == start && now > last_wall_ &&
++          cpu >= last_cpu_) {
++        SYSTEM_INFO info;
++        ::GetNativeSystemInfo(&info);
++        const double usage =
++            (cpu - last_cpu_) / (10000.0 * (now - last_wall_) *
++                                 std::max<DWORD>(1, info.dwNumberOfProcessors));
++        server_cpu_load = std::clamp(usage * 100.0, 0.0, 100.0);
++        server_cpu = QString::fromUtf8("KotoriのCPU: %1%")
++                         .arg(std::clamp(usage * 100.0, 0.0, 100.0), 0, 'f', 1);
++      } else {
++        server_cpu = QString::fromUtf8("KotoriのCPU: 計測中");
++      }
++      last_pid_ = pid;
++      last_start_ = start;
++      last_wall_ = now;
++      last_cpu_ = cpu;
++    } else {
++      last_pid_ = 0;
++      if (!value("state").isEmpty())
++        ai = QString::fromUtf8(
++            "AIの現在の状態は未確認です。変換サーバーの起動後に更新されます。");
++    }
++    if (process) ::CloseHandle(process);
++#else
++    ai = QString::fromUtf8(FormatKotoriAiStatus(status).c_str());
++#endif
++  }
++
++ private:
++#ifdef _WIN32
++  static quint64 Ticks(FILETIME time) {
++    return (static_cast<quint64>(time.dwHighDateTime) << 32) |
++           time.dwLowDateTime;
++  }
++  quint64 system_total_ = 0, system_idle_ = 0, last_start_ = 0, last_wall_ = 0,
++          last_cpu_ = 0;
++  DWORD last_pid_ = 0;
++#endif
++};
++
++// Kotori: 実測の履歴だけをGUIのメモリに持ち、閉じると破棄する。
++class KotoriUsageGraph : public QWidget {
++ public:
++  explicit KotoriUsageGraph(QWidget *parent) : QWidget(parent) {
++    clock_.start();
++    setMinimumHeight(92);
++    setAccessibleName(QString::fromUtf8("CPU使用率の推移。PC全体とKotori。"));
++  }
++  void Add(std::optional<double> pc, std::optional<double> kotori) {
++    if (!pc && !kotori) return;
++    const qint64 now = clock_.elapsed();
++    if (!samples_.empty() && now - samples_.back().time < 300)
++      samples_.back() = {now, pc, kotori};
++    else
++      samples_.push_back({now, pc, kotori});
++    while (!samples_.empty() && now - samples_.front().time > 60000)
++      samples_.pop_front();
++    setProperty("sampleCount", static_cast<int>(samples_.size()));
++    update();
++  }
++
++ protected:
++  void paintEvent(QPaintEvent *) override {
++    QPainter painter(this);
++    painter.setRenderHint(QPainter::Antialiasing);
++    const bool contrast = KotoriHighContrast();
++    const QColor text = palette().color(QPalette::WindowText);
++    const QColor blue = contrast ? text : QColor("#0F6CBD");
++    const QColor purple =
++        contrast ? palette().color(QPalette::Highlight) : QColor("#8764B8");
++    const QRectF plot(36, 8, std::max(1, width() - 44),
++                      std::max(1, height() - 28));
++    for (int value : {0, 50, 100}) {
++      const double y = plot.bottom() - value * plot.height() / 100.0;
++      painter.setPen(contrast ? text : QColor("#E5E5E5"));
++      painter.drawLine(QPointF(plot.left(), y), QPointF(plot.right(), y));
++      painter.setPen(text);
++      painter.drawText(QRectF(0, y - 7, 30, 14),
++                       Qt::AlignRight | Qt::AlignVCenter,
++                       QString::number(value));
++    }
++    if (samples_.empty()) {
++      painter.drawText(plot, Qt::AlignCenter,
++                       QString::fromUtf8("計測を始めています"));
++      return;
++    }
++    const qint64 end = samples_.back().time;
++    const qint64 span = std::max<qint64>(2000, end - samples_.front().time);
++    const auto draw = [&](bool server, QColor color) {
++      QPainterPath path;
++      bool connected = false;
++      painter.setPen(QPen(color, 2));
++      for (const Sample &sample : samples_) {
++        const auto value = server ? sample.kotori : sample.pc;
++        if (!value) {
++          connected = false;
++          continue;
++        }
++        const QPointF point(
++            plot.right() - (end - sample.time) * plot.width() / span,
++            plot.bottom() -
++                std::clamp(*value, 0.0, 100.0) * plot.height() / 100.0);
++        if (connected)
++          path.lineTo(point);
++        else
++          path.moveTo(point);
++        connected = true;
++        painter.drawEllipse(point, 2, 2);
++      }
++      painter.drawPath(path);
++    };
++    draw(false, blue);
++    draw(true, purple);
++    painter.setPen(text);
++    painter.drawText(
++        QRectF(plot.left(), plot.bottom() + 4, plot.width(), 16),
++        Qt::AlignRight,
++        QString::fromUtf8("直近 %1 秒")
++            .arg(std::max<qint64>(1, (end - samples_.front().time) / 1000)));
++  }
++
++ private:
++  struct Sample {
++    qint64 time;
++    std::optional<double> pc, kotori;
++  };
++  std::deque<Sample> samples_;
++  QElapsedTimer clock_;
++};
++
++std::string KotoriAiStatus() {
++  KotoriDashboardSample sample;
++  sample.Update();
++  return sample.ai.toUtf8().toStdString();
++}
++
++QPushButton *KotoriSupportButton(QWidget *parent) {
++  auto *button =
++      new QPushButton(QString::fromUtf8("開発を支援（Stripe）"), parent);
++  button->setAutoDefault(false);
++  button->setToolTip(
++      QString::fromUtf8("ブラウザーで開発支援のページを開きます。"));
++  QObject::connect(button, &QPushButton::clicked, button, [] {
++    QDesktopServices::openUrl(QUrl(QString::fromUtf8(kKotoriSupportUrl)));
++  });
++  return button;
++}
++
 +}  // namespace
  
  using ::mozc::config::StatsConfigUtil;
  
-@@ -120,7 +279,8 @@ ConfigDialog::ConfigDialog()
+@@ -104,6 +571,14 @@ ConfigDialog::ConfigDialog()
+       initial_use_keyboard_to_change_preedit_method_(false),
+       initial_use_mode_indicator_(true) {
+   setupUi(this);
++  // Kotori: Windowsを含むすべての環境で同じアプリ名を使う。
++  setWindowTitle(QString::fromUtf8("Kotori"));
++#ifdef _WIN32
++  QFont ui_font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
++  ui_font.setFamilies({"Segoe UI Variable Text", "Segoe UI", "Yu Gothic UI"});
++  setFont(ui_font);
++#endif
++
+   setStyleSheet(QString::fromUtf8(kQss.data(), kQss.size()));
+ 
+   // Remove the context help button (question mark button) from the window.
+@@ -120,7 +595,6 @@ ConfigDialog::ConfigDialog()
  #ifdef __APPLE__
    miscDefaultIMEWidget->setVisible(false);
    miscAdministrationWidget->setVisible(false);
 -  setWindowTitle(tr("%1 Preferences").arg(GuiUtil::ProductName()));
-+  // Kotori: 設定画面も本体と同じアプリ名で表示する。
-+  setWindowTitle(QString::fromUtf8("Kotori"));
  #endif  // __APPLE__
  
  #if defined(__linux__)
-@@ -152,6 +312,251 @@ ConfigDialog::ConfigDialog()
+@@ -152,6 +626,474 @@ ConfigDialog::ConfigDialog()
    symbolsSettingComboBox->addItem(QString::fromUtf8("「」／"));
    symbolsSettingComboBox->addItem(QString::fromUtf8("[]・"));
  
@@ -20354,7 +20708,9 @@ index abbf55d68..814590787 100644
 +      gpu->setWordWrap(true);
 +      l->addWidget(gpu);
 +      auto *status = new QLabel(QString::fromUtf8(KotoriAiStatus().c_str()), page);
-+      status->setObjectName("kotoriNote");
++      status->setObjectName("kotoriSettingsAiStatus");
++      status->setTextFormat(Qt::PlainText);
++      status->setProperty("kotoriNote", true);
 +      status->setWordWrap(true);
 +      l->addWidget(status);
 +      QObject::connect(kotoriLmEnabledCheckBox_, &QCheckBox::toggled,
@@ -20497,6 +20853,7 @@ index abbf55d68..814590787 100644
 +        dialog.exec();
 +      });
 +    }
++    outer->addWidget(KotoriSupportButton(page), 0, Qt::AlignLeft);
 +    outer->addStretch();
 +    configDialogTabWidget->insertTab(0, page, QString::fromUtf8("AI 変換"));
 +    configDialogTabWidget->setCurrentIndex(0);
@@ -20514,10 +20871,230 @@ index abbf55d68..814590787 100644
 +                     this, SLOT(EnableApplyButton()));
 +  }
 +
++  // Kotori: Windowsの操作感を保ち、実測の値を最初の画面にまとめる。
++  {
++    auto *page = new QWidget();
++    auto *scroll = new QScrollArea();
++    scroll->setWidgetResizable(true);
++    scroll->setFrameShape(QFrame::NoFrame);
++    scroll->setWidget(page);
++    auto *outer = new QVBoxLayout(page);
++    outer->setContentsMargins(20, 16, 20, 16);
++    outer->setSpacing(12);
++    auto *header = new QHBoxLayout();
++    auto *title = new QLabel(QString::fromUtf8("Kotori"), page);
++    title->setStyleSheet("font-size: 22pt; font-weight: 600;");
++    header->addWidget(title);
++    header->addStretch();
++    auto *badge = new QLabel(page);
++    badge->setObjectName("kotoriDashboardStateBadge");
++    header->addWidget(badge);
++    outer->addLayout(header);
++    auto *lead = new QLabel(QString::fromUtf8("日本語入力と、このPCの状態"), page);
++    lead->setProperty("kotoriNote", true);
++    outer->addWidget(lead);
++    auto card = [&](const char *heading, bool add_to_outer = true) {
++      auto *frame = new QFrame(page);
++      frame->setObjectName("kotoriCard");
++      auto *layout = new QVBoxLayout(frame);
++      layout->setContentsMargins(14, 12, 14, 12);
++      layout->setSpacing(6);
++      auto *label = new QLabel(QString::fromUtf8(heading), frame);
++      label->setStyleSheet("font-size: 11pt; font-weight: 600;");
++      layout->addWidget(label);
++      if (add_to_outer) outer->addWidget(frame);
++      return layout;
++    };
++    auto field = [&](QVBoxLayout *layout, const char *name) {
++      auto *label = new QLabel(page);
++      label->setObjectName(name);
++      label->setWordWrap(true);
++      label->setTextFormat(Qt::PlainText);
++      label->setTextInteractionFlags(Qt::TextSelectableByMouse);
++      layout->addWidget(label);
++      return label;
++    };
++    auto *ai_card = card("AI");
++    auto *ai_columns = new QHBoxLayout();
++    auto *ai_left = new QVBoxLayout();
++    auto *ai_right = new QVBoxLayout();
++    ai_columns->addLayout(ai_left, 3);
++    ai_columns->addSpacing(12);
++    ai_columns->addLayout(ai_right, 2);
++    ai_card->addLayout(ai_columns);
++    auto *ai = field(ai_left, "kotoriDashboardAi");
++    auto *models = field(ai_left, "kotoriDashboardModels");
++    models->setProperty("kotoriNote", true);
++    auto *settings = new QPushButton(QString::fromUtf8("AIの設定を開く"), page);
++    settings->setAutoDefault(false);
++    ai_left->addWidget(settings, 0, Qt::AlignLeft);
++    QObject::connect(settings, &QPushButton::clicked, this,
++                     [this] { configDialogTabWidget->setCurrentIndex(1); });
++    auto *inference_value = field(ai_right, "kotoriDashboardInferenceValue");
++    inference_value->setStyleSheet("font-size: 24pt; font-weight: 600;");
++    auto *inference = field(ai_right, "kotoriDashboardInference");
++    inference->setProperty("kotoriNote", true);
++    auto *inference_note = new QLabel(
++        QString::fromUtf8(
++            "計算時間は起動後の累計です。変換の待ち時間とは異なります。"),
++        page);
++    inference_note->setWordWrap(true);
++    inference_note->setProperty("kotoriNote", true);
++    ai_right->addWidget(inference_note);
++    struct Metric {
++      QLabel *value;
++      QLabel *detail;
++      QProgressBar *bar;
++    };
++    auto *grid = new QGridLayout();
++    grid->setSpacing(12);
++    grid->setColumnStretch(0, 1);
++    grid->setColumnStretch(1, 1);
++    outer->addLayout(grid);
++    const auto metric = [&](const char *heading, const char *name, int row,
++                            int column, const char *gauge_name) {
++      auto *layout = card(heading, false);
++      auto *value = field(layout, (std::string(name) + "Value").c_str());
++      value->setStyleSheet("font-size: 25pt; font-weight: 600;");
++      auto *bar = new QProgressBar(page);
++      bar->setObjectName(gauge_name);
++      bar->setRange(0, 100);
++      bar->setTextVisible(false);
++      bar->setFixedHeight(6);
++      if (!KotoriHighContrast())
++        bar->setStyleSheet(
++            "QProgressBar { background: #E5E5E5; border: none; border-radius: "
++            "3px; } QProgressBar::chunk { background: #0F6CBD; border-radius: "
++            "3px; }");
++      layout->addWidget(bar);
++      auto *detail = field(layout, name);
++      detail->setProperty("kotoriNote", true);
++      grid->addWidget(layout->parentWidget(), row, column);
++      return Metric{value, detail, bar};
++    };
++    const auto pc_cpu =
++        metric("PCのCPU", "kotoriDashboardPcCpu", 0, 0, "kotoriPcCpuGauge");
++    const auto pc_memory = metric("PCのメモリ", "kotoriDashboardPcMemory", 0, 1,
++                                  "kotoriPcMemoryGauge");
++    const auto server_cpu = metric("KotoriのCPU", "kotoriDashboardCpu", 1, 0,
++                                   "kotoriServerCpuGauge");
++    const auto server_memory = metric("Kotoriのメモリ", "kotoriDashboardMemory",
++                                      1, 1, "kotoriServerMemoryGauge");
++    auto *history_card = card("CPUの推移");
++    auto *legend =
++        new QLabel(QString::fromUtf8(
++                       "青: PC全体　紫: Kotori · 画面を開いている間の直近60秒"),
++                   page);
++    legend->setWordWrap(true);
++    legend->setProperty("kotoriNote", true);
++    history_card->addWidget(legend);
++    auto *history = new KotoriUsageGraph(page);
++    history->setObjectName("kotoriDashboardHistory");
++    history_card->addWidget(history);
++    auto *gpu = new QLabel(QString::fromUtf8(KotoriGpuSummary().c_str()), page);
++    gpu->setWordWrap(true);
++    gpu->setProperty("kotoriNote", true);
++    outer->addWidget(gpu);
++    auto *gpu_note = new QLabel(
++        QString::fromUtf8(
++            "GPUのVRAM表示は搭載容量です。現在の使用量ではありません。"),
++        page);
++    gpu_note->setWordWrap(true);
++    gpu_note->setProperty("kotoriNote", true);
++    outer->addWidget(gpu_note);
++    auto *support_row = new QHBoxLayout();
++    auto *support_note = new QLabel(
++        QString::fromUtf8(
++            "無料のオープンソースソフト。開発への支援を受け付けています。"),
++        page);
++    support_note->setWordWrap(true);
++    support_note->setProperty("kotoriNote", true);
++    support_row->addWidget(support_note, 1);
++    support_row->addWidget(KotoriSupportButton(page));
++    outer->addLayout(support_row);
++    auto *updated = new QLabel(page);
++    updated->setProperty("kotoriNote", true);
++    outer->addWidget(updated);
++    outer->addStretch();
++    configDialogTabWidget->insertTab(0, scroll,
++                                     QString::fromUtf8("ダッシュボード"));
++    configDialogTabWidget->setCurrentIndex(0);
++    auto sample = std::make_shared<KotoriDashboardSample>();
++    const auto refresh = [=, this] {
++      if (!isVisible()) return;
++      sample->Update();
++      ai->setText(sample->ai);
++      if (auto *setting_status = findChild<QLabel *>("kotoriSettingsAiStatus"))
++        setting_status->setText(sample->ai);
++      models->setText(sample->models);
++      inference->setText(sample->inference);
++      inference_value->setText(
++          sample->ai_seconds
++              ? QString::fromUtf8("%1 秒").arg(*sample->ai_seconds, 0, 'f', 2)
++              : QString::fromUtf8("—"));
++      const auto show_metric = [](Metric metric, std::optional<double> value,
++                                  const QString &detail, const QString &unit,
++                                  bool percentage) {
++        metric.value->setText(value ? QString::number(*value, 'f', 1) + unit
++                                    : QString::fromUtf8("—"));
++        metric.detail->setText(detail);
++        metric.bar->setVisible(percentage && value.has_value());
++        if (percentage && value)
++          metric.bar->setValue(
++              static_cast<int>(std::clamp(*value, 0.0, 100.0)));
++      };
++      show_metric(pc_cpu, sample->pc_cpu_load, sample->pc_cpu, "%", true);
++      show_metric(pc_memory, sample->pc_memory_load, sample->pc_memory, "%",
++                  true);
++      show_metric(server_cpu, sample->server_cpu_load, sample->server_cpu, "%",
++                  true);
++      show_metric(server_memory, sample->server_ram_mib, sample->server_memory,
++                  " MiB", false);
++      QString label = QString::fromUtf8("未確認"), color = "#5C5C5C";
++      if (sample->ai_state == "llm" || sample->ai_state == "zenz") {
++        label = QString::fromUtf8("AI 動作中");
++        color = "#107C10";
++      } else if (sample->ai_state == "loading") {
++        label = QString::fromUtf8("読み込み中");
++        color = "#9D5D00";
++      } else if (sample->ai_state == "sleep") {
++        label = QString::fromUtf8("AI 休止中");
++        color = "#0F6CBD";
++      } else if (sample->ai_state == "off")
++        label = QString::fromUtf8("AI オフ");
++      else if (sample->ai_state == "error") {
++        label = QString::fromUtf8("AIを確認してください");
++        color = "#C42B1C";
++      }
++      badge->setText(label);
++      if (!KotoriHighContrast())
++        badge->setStyleSheet(
++            QString("color: %1; font-weight: 600; padding: 6px 10px; border: "
++                    "1px solid #D1D1D1; border-radius: 4px;")
++                .arg(color));
++      history->Add(sample->pc_cpu_load, sample->server_cpu_load);
++      updated->setText(
++          QString::fromUtf8("2秒ごとに更新 · %1")
++              .arg(QDateTime::currentDateTime().toString("HH:mm:ss")));
++    };
++    auto *timer = new QTimer(page);
++    timer->setInterval(2000);
++    QObject::connect(timer, &QTimer::timeout, page, refresh);
++    QObject::connect(configDialogTabWidget, &QTabWidget::currentChanged, page,
++                     [refresh](int) { refresh(); });
++    QTimer::singleShot(0, page, refresh);
++    timer->start();
++    const auto *screen = QGuiApplication::primaryScreen();
++    const QSize available =
++        screen ? screen->availableGeometry().size() : QSize(948, 924);
++    resize(std::max(480, std::min(900, available.width() - 48)),
++           std::max(480, std::min(860, available.height() - 64)));
++  }
++
    keymapSettingComboBox->addItem(tr("Custom keymap"));
    keymapSettingComboBox->addItem(tr("ATOK"));
    keymapSettingComboBox->addItem(tr("MS-IME"));
-@@ -524,6 +929,20 @@ void ConfigDialog::ConvertFromProto(const config::Config &config) {
+@@ -524,6 +1466,20 @@ void ConfigDialog::ConvertFromProto(const config::Config &config) {
    custom_keymap_table_ = config.custom_keymap_table();
    custom_roman_table_ = config.custom_roman_table();
  
@@ -20538,7 +21115,7 @@ index abbf55d68..814590787 100644
    // tab2
    SET_COMBOBOX(historyLearningLevelComboBox, HistoryLearningLevel,
                 history_learning_level);
-@@ -612,6 +1031,16 @@ void ConfigDialog::ConvertToProto(config::Config *config) const {
+@@ -612,6 +1568,16 @@ void ConfigDialog::ConvertToProto(config::Config *config) const {
      config->set_custom_roman_table(custom_roman_table_);
    }
  
@@ -20584,6 +21161,194 @@ index 85e1c0075..be00dc3a7 100644
   public:
    ConfigDialog();
  
+diff --git a/src/gui/config_dialog/kotori_dashboard_test.cc b/src/gui/config_dialog/kotori_dashboard_test.cc
+new file mode 100644
+index 000000000..9a46d9cc9
+--- /dev/null
++++ b/src/gui/config_dialog/kotori_dashboard_test.cc
+@@ -0,0 +1,182 @@
++// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
++#include <QApplication>
++#include <QDir>
++#include <QEventLoop>
++#include <QFontInfo>
++#include <QLabel>
++#include <QProgressBar>
++#include <QPushButton>
++#include <QScrollArea>
++#include <QScrollBar>
++#include <QTabWidget>
++#include <QTimer>
++#include <memory>
++
++#include "base/file_util.h"
++#include "base/system_util.h"
++#include "client/client.h"
++#include "client/client_mock.h"
++#include "gui/base/util.h"
++#include "gui/config_dialog/config_dialog.h"
++#include "protocol/config.pb.h"
++#include "testing/gmock.h"
++#include "testing/gunit.h"
++#include "testing/mozctest.h"
++#ifdef _WIN32
++#include <windows.h>
++#endif
++
++// Qtのリソース初期化は生成されたグローバル関数を参照する。
++static void InitializeResources() { Q_INIT_RESOURCE(qrc_config_dialog); }
++
++namespace mozc::gui {
++namespace {
++using ::testing::_;
++using ::testing::DoAll;
++using ::testing::Return;
++using ::testing::SetArgPointee;
++class DashboardClientFactory : public client::ClientFactoryInterface {
++ public:
++  std::unique_ptr<client::ClientInterface> NewClient() override {
++    auto mock = std::make_unique<::testing::NiceMock<client::ClientMock>>();
++    EXPECT_CALL(*mock, CheckVersionOrRestartServer()).WillOnce(Return(true));
++    EXPECT_CALL(*mock, GetConfig(_))
++        .WillOnce(DoAll(SetArgPointee<0>(config::Config()), Return(true)));
++    // 画面を開く・移動するだけでは設定を保存しない。
++    EXPECT_CALL(*mock, SetConfig(_)).Times(0);
++    return mock;
++  }
++};
++class KotoriDashboardTest : public mozc::testing::TestWithTempUserProfile {
++ protected:
++  static void SetUpTestSuite() {
++    if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
++      qputenv("QT_QPA_PLATFORM", "offscreen");
++    static int argc = 1;
++    static char name[] = "kotori_dashboard_test";
++    static char* argv[] = {name, nullptr};
++    app_ = GuiUtil::InitQt(argc, argv);
++    InitializeResources();
++    GuiUtil::InstallTranslator("config_dialog");
++  }
++  static void TearDownTestSuite() { app_.reset(); }
++  void SetUp() override { client::ClientFactory::SetClientFactory(&factory_); }
++  void TearDown() override { client::ClientFactory::SetClientFactory(nullptr); }
++  static void Refresh() {
++    QEventLoop loop;
++    QTimer::singleShot(2100, &loop, &QEventLoop::quit);
++    loop.exec();
++  }
++  inline static std::unique_ptr<QApplication> app_;
++  DashboardClientFactory factory_;
++};
++TEST_F(KotoriDashboardTest, StartsOnDashboardAndUpdatesActualPcCounters) {
++  ConfigDialog dialog;
++  dialog.setAttribute(Qt::WA_DontShowOnScreen);
++  dialog.show();
++  QCoreApplication::processEvents();
++  EXPECT_EQ(dialog.windowTitle(), QString::fromUtf8("Kotori"));
++  auto* tabs = dialog.findChild<QTabWidget*>("configDialogTabWidget");
++  ASSERT_NE(tabs, nullptr);
++  EXPECT_EQ(tabs->currentIndex(), 0);
++  EXPECT_EQ(tabs->tabText(0), QString::fromUtf8("ダッシュボード"));
++  Refresh();
++  auto* memory = dialog.findChild<QLabel*>("kotoriDashboardPcMemory");
++  auto* cpu = dialog.findChild<QLabel*>("kotoriDashboardPcCpu");
++  ASSERT_NE(memory, nullptr);
++  ASSERT_NE(cpu, nullptr);
++#ifdef _WIN32
++  EXPECT_TRUE(memory->text().contains("GiB"));
++  EXPECT_TRUE(cpu->text().endsWith("%"));
++#endif
++  EXPECT_TRUE(dialog.findChild<QLabel*>("kotoriDashboardAi")
++                  ->text()
++                  .contains(QString::fromUtf8("まだ取得できません")));
++  EXPECT_TRUE(dialog.findChild<QLabel*>("kotoriDashboardInference")
++                  ->text()
++                  .contains(QString::fromUtf8("まだ計測")));
++  auto* history = dialog.findChild<QWidget*>("kotoriDashboardHistory");
++  auto* gauge = dialog.findChild<QProgressBar*>("kotoriPcCpuGauge");
++  auto* memory_value = dialog.findChild<QLabel*>("kotoriDashboardMemoryValue");
++  ASSERT_NE(history, nullptr);
++  ASSERT_NE(gauge, nullptr);
++  ASSERT_NE(memory_value, nullptr);
++#ifdef _WIN32
++  EXPECT_GE(history->property("sampleCount").toInt(), 1);
++  EXPECT_GE(gauge->value(), 0);
++  EXPECT_LE(gauge->value(), 100);
++#endif
++  EXPECT_EQ(memory_value->text(), QString::fromUtf8("—"));
++  int support_count = 0;
++  QPushButton* settings = nullptr;
++  for (auto* button : dialog.findChildren<QPushButton*>()) {
++    if (button->text() == QString::fromUtf8("開発を支援（Stripe）")) {
++      ++support_count;
++      EXPECT_FALSE(button->autoDefault());
++    }
++    if (button->text() == QString::fromUtf8("AIの設定を開く"))
++      settings = button;
++  }
++  EXPECT_EQ(support_count, 2);
++  ASSERT_NE(settings, nullptr);
++  const QString capture = qEnvironmentVariable("KOTORI_GUI_CAPTURE_DIR");
++  if (!capture.isEmpty()) {
++    Refresh();
++    QDir().mkpath(capture);
++    EXPECT_TRUE(dialog.grab().save(capture + "/dashboard.png"));
++    for (auto* scroll : dialog.findChildren<QScrollArea*>()) {
++      if (scroll->widget() && scroll->widget()->isAncestorOf(history)) {
++        scroll->verticalScrollBar()->setValue(
++            scroll->verticalScrollBar()->maximum());
++        QCoreApplication::processEvents();
++        EXPECT_TRUE(dialog.grab().save(capture + "/dashboard-details.png"));
++        scroll->verticalScrollBar()->setValue(0);
++      }
++    }
++    qInfo("Dashboard platform=%s font=%s pixelRatio=%.2f",
++          qPrintable(QGuiApplication::platformName()),
++          qPrintable(QFontInfo(dialog.font()).family()),
++          dialog.devicePixelRatioF());
++  }
++  settings->click();
++  EXPECT_EQ(tabs->currentIndex(), 1);
++  EXPECT_EQ(tabs->tabText(1), QString::fromUtf8("AI 変換"));
++  if (!capture.isEmpty()) {
++    settings->setFocus(Qt::TabFocusReason);
++    QCoreApplication::processEvents();
++    EXPECT_TRUE(dialog.grab().save(capture + "/ai-settings.png"));
++  }
++}
++#ifdef _WIN32
++TEST_F(KotoriDashboardTest, RejectsOtherProcessEvenWhenPidAndStartMatch) {
++  FILETIME created, exited, kernel, user;
++  ASSERT_TRUE(::GetProcessTimes(::GetCurrentProcess(), &created, &exited,
++                                &kernel, &user));
++  const uint64_t ticks = (static_cast<uint64_t>(created.dwHighDateTime) << 32) |
++                         created.dwLowDateTime;
++  const std::string state =
++      "state=llm\npid=" + std::to_string(::GetCurrentProcessId()) +
++      "\nprocess_started=" + std::to_string(ticks) + "\nllm=old-model.gguf\n";
++  ASSERT_TRUE(FileUtil::SetContents(
++                  FileUtil::JoinPath(SystemUtil::GetUserProfileDirectory(),
++                                     "kotori_ai_status.txt"),
++                  state)
++                  .ok());
++  ConfigDialog dialog;
++  dialog.setAttribute(Qt::WA_DontShowOnScreen);
++  dialog.show();
++  QCoreApplication::processEvents();
++  auto* ai = dialog.findChild<QLabel*>("kotoriDashboardAi");
++  ASSERT_NE(ai, nullptr);
++  EXPECT_TRUE(ai->text().contains(QString::fromUtf8("未確認")));
++  EXPECT_FALSE(ai->text().contains(QString::fromUtf8("動いています")));
++  auto* settings_ai = dialog.findChild<QLabel*>("kotoriSettingsAiStatus");
++  ASSERT_NE(settings_ai, nullptr);
++  EXPECT_EQ(settings_ai->text(), ai->text());
++  EXPECT_FALSE(dialog.findChild<QLabel*>("kotoriDashboardModels")
++                   ->text()
++                   .contains("old-model"));
++}
++#endif
++}  // namespace
++}  // namespace mozc::gui
 diff --git a/src/gui/tool/BUILD.bazel b/src/gui/tool/BUILD.bazel
 index 1c4726b0c..366630008 100644
 --- a/src/gui/tool/BUILD.bazel
@@ -21484,10 +22249,10 @@ index 000000000..cf2c801ea
 +#endif  // MOZC_REWRITER_LLAMA_RUNTIME_H_
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..eaf737f7d
+index 000000000..535c5a9ed
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
-@@ -0,0 +1,2363 @@
+@@ -0,0 +1,2405 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -22274,11 +23039,29 @@ index 000000000..eaf737f7d
 +  line("device", gpu.empty() ? "CPU" : gpu);
 +  if (scorer_ != nullptr) line("zenz", base(loaded_path_));
 +  if (llm_ != nullptr) line("llm", base(llm_path_));
-+  const std::string path =
-+      FileUtil::JoinPath(SystemUtil::GetUserProfileDirectory(),
-+                         "kotori_ai_status.txt");
-+  std::ofstream out(path, std::ios::binary | std::ios::trunc);
-+  out << text;
++  // Kotori: 状態と計算量のみ。入力文・読み・文脈は記録しない。
++  line("stats", ZenzScorer::Stats());
++#ifdef _WIN32
++  line("pid", std::to_string(::GetCurrentProcessId()));
++  FILETIME created, exited, kernel, user;
++  if (::GetProcessTimes(::GetCurrentProcess(), &created, &exited, &kernel,
++                        &user)) {
++    const uint64_t ticks =
++        (static_cast<uint64_t>(created.dwHighDateTime) << 32) |
++        created.dwLowDateTime;
++    line("process_started", std::to_string(ticks));
++  }
++#endif
++  const std::string path = FileUtil::JoinPath(
++      SystemUtil::GetUserProfileDirectory(), "kotori_ai_status.txt");
++  const std::string temporary = path + ".tmp";
++  {
++    std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
++    if (!out || !(out << text)) return;
++    out.flush();
++    if (!out) return;
++  }
++  FileUtil::AtomicRename(temporary, path).IgnoreError();
 +}
 +
 +void LmRewriter::RequestLoad(const config::Config& config) const {
@@ -23565,23 +24348,45 @@ index 000000000..eaf737f7d
 +void LmRewriter::WorkerLoop() {
 +  // 最後に受けた設定(入力がないときにモデルを外し、状態を書くのに使う)。
 +  std::optional<config::Config> last_config;
++  int64_t last_status_us = 0;
++  bool status_pending = false;
 +  while (true) {
++    // Kotori: 計算後の更新は非同期ワーカーのみ。ファイル書き込みは毎秒最大1回。
++    if (last_config && SteadyNowUs() - last_status_us >= 1000000 &&
++        mutex_.TryLock()) {
++      WriteStatus(*last_config, sleeping_.load() ? "sleep" : "ready");
++      mutex_.Unlock();
++      last_status_us = SteadyNowUs();
++      status_pending = false;
++    }
 +    Job job;
 +    {
 +      std::unique_lock<std::mutex> lock(job_mu_);
 +      const auto ready = [&] {
 +        return stop_ || job_.has_value() || load_job_.has_value();
 +      };
-+      // 仕事がなければ 30 秒ごとに、しばらく入力がないかを見てモデルを外す(docs/adr/0034)。
-+      while (!job_cv_.wait_for(lock, std::chrono::seconds(30), ready)) {
++      // 仕事がなければ 30
++      // 秒ごとに、しばらく入力がないかを見てモデルを外す(docs/adr/0034)。
++      while (!job_cv_.wait_for(lock,
++                               status_pending
++                                   ? std::chrono::milliseconds(1000)
++                                   : std::chrono::milliseconds(30000),
++                               ready)) {
 +        if (!last_config) continue;
 +        lock.unlock();
 +        UnloadIfIdle(*last_config);
++        if (mutex_.TryLock()) {
++          WriteStatus(*last_config, sleeping_.load() ? "sleep" : "ready");
++          mutex_.Unlock();
++          last_status_us = SteadyNowUs();
++          status_pending = false;
++        }
 +        lock.lock();
 +      }
 +      if (stop_) return;
 +      if (load_job_) {
-+        // モデルの読み込み。読み込み中の変換は待たずに AI なしで出す(TryLockForRequest)。
++        // モデルの読み込み。読み込み中の変換は待たずに AI
++        // なしで出す(TryLockForRequest)。
 +        const config::Config config = std::move(*load_job_);
 +        load_job_.reset();
 +        last_config = config;
@@ -23595,7 +24400,8 @@ index 000000000..eaf737f7d
 +          int beams = 0;
 +          ZenzScorer* llm = nullptr;
 +          PrepareFor(config, &k, &llm, &beams, &llm_top, false, true);
-+          // GPU のない PC では、長い読みに使う zenz も読み込んでおく(docs/adr/0035)。
++          // GPU のない PC では、長い読みに使う zenz
++          // も読み込んでおく(docs/adr/0035)。
 +          PrepareFor(config, &k, &llm, &beams, &llm_top, false, true, SIZE_MAX);
 +          // 入力中の AI 予測を使うなら、予測の LLM も読み込んでおく。
 +          if (predict_ && config.kotori_lm_predict()) {
@@ -23614,6 +24420,7 @@ index 000000000..eaf737f7d
 +      }
 +    }
 +    last_config = job.config;
++    status_pending = true;
 +    if (job.preview) {
 +      ConversionRequest::Options options;
 +      options.request_type = ConversionRequest::CONVERSION;
