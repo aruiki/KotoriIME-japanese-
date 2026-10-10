@@ -85,6 +85,8 @@ def manifest(args, exe: Path, env: dict, acc: float, n: int) -> dict:
     return {
         "data": {"path": args.data, "sha256": sha256(Path(args.data)), "items": n},
         "context": args.context,
+        "profile": args.profile,
+        "tracked_working_changes": bool(run(["git", "status", "--porcelain", "--untracked-files=no"])),
         "acc": acc,
         "converter_main": {"path": str(exe), "sha256": sha256(exe)},
         "models": models,
@@ -100,6 +102,7 @@ def main() -> int:
     ap.add_argument("converter_main")
     ap.add_argument("--data", default="eval/data/ajimee-bench.json")
     ap.add_argument("--out", default="")
+    ap.add_argument("--profile", default="", help="試験専用のconverter_mainプロファイル。普段のIMEから分離する")
     ap.add_argument("--context", action="store_true", help="問題の context_text を前の文として AI に渡す")
     ap.add_argument("--timeout", type=float, default=36000, help="全体の制限時間(秒)")
     ap.add_argument("--stderr", default="", help="変換器の stderr(KOTORI_LM_DEBUG などの出力)を保存するファイル")
@@ -124,7 +127,10 @@ def main() -> int:
     script = "".join(f"start {r}\nreset\n{SEP}\n" for r in readings) + "quit\n"
     t0 = time.time()
     try:
-        proc = subprocess.run([str(exe)], input=script.encode("utf-8"), capture_output=True,
+        command = [str(exe)]
+        if args.profile:
+            command.append("--user_profile_dir=" + str(Path(args.profile).resolve()))
+        proc = subprocess.run(command, input=script.encode("utf-8"), capture_output=True,
                               cwd=cwd, env=env, timeout=args.timeout)
     except subprocess.TimeoutExpired:
         print(f"失敗: {args.timeout:.0f} 秒で終わらなかった", file=sys.stderr)

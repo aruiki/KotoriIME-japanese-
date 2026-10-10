@@ -1,0 +1,37 @@
+{
+  "checked_at": "2026-10-10T13:21:08.396099+09:00",
+  "installed_product_version": "3.34.6333.100",
+  "release_tag": "v1.1.0-rc.5",
+  "scope": "Actual installed Windows Qt settings UI via Computer Use; conversion first display not yet verified in native app",
+  "computer_use_recovery": {
+    "before": "node_repl trivial JS and sky initialization timed out",
+    "diagnostic": "MXC launcher failed enumerating two disconnected SMB drives with OS error 1326",
+    "authorized_action": "Temporarily remove active SMB mappings, keep saved reconnect profiles",
+    "after": "Trivial JS, sky initialization, list_windows, installed Kotori settings capture and interaction succeeded",
+    "saved_mapping_profiles_retained": true,
+    "private_diagnostic_folder": "computer-use-recovery-20261010",
+    "sandbox_readonly_shell_restored": true
+  },
+  "settings_native": {
+    "window_title": "Kotori",
+    "binary_path": "C:/Program Files (x86)/Kotori/mozc_tool.exe",
+    "temporary_setting": "suggestion candidate count 3 -> 4 -> 3",
+    "dirty_status": "変更はまだ適用されていません",
+    "saved_status": "設定を適用しました",
+    "apply_disabled_after_save": true,
+    "restored_original_candidate_count": 3,
+    "history_and_dictionary_reset": false
+  },
+  "dashboard_native": {
+    "observed": [
+      "AI idle state with explanation",
+      "PC CPU percentage",
+      "PC memory usage",
+      "Kotori CPU and resident memory",
+      "CPU history graph",
+      "Stripe development support button"
+    ],
+    "buttons_sending_or_opening_external_site_clicked": false
+  },
+  "native_conversion": "Notepad received actual key input, but typed a remained ASCII; user is asked to select Kotori hiragana mode. No native candidate PASS."
+}

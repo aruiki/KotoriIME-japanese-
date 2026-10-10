@@ -1,0 +1,62 @@
+{
+  "source_commit": "4b50257746f8de22a9cc27f9ec1072e1a07e3461",
+  "tag": "v1.1.0-rc.5",
+  "release_url": "https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.5",
+  "product_version": "3.34.6333.100",
+  "published_at": "2026-10-10T01:47:37Z",
+  "msi_sha256": "563045647e34f21edec2fdb6643783ed041bfbea4d66844f4dc8847739d245be",
+  "msi_bytes": 1569165312,
+  "signature": "NotSigned",
+  "payload_file_count": 48,
+  "local_build": {
+    "source_commit": "4b50257746f8de22a9cc27f9ec1072e1a07e3461",
+    "input_manifest_sha256": "224aa0b92f5f732790222979d43517da8b713373c70589fe43da29dee782154a",
+    "started": "2026-10-10T03:36:03.3672191+09:00",
+    "ended": "2026-10-10T03:46:13.7119333+09:00",
+    "elapsed_seconds": 610.3437155,
+    "exit_code": 0,
+    "scope": "local build; not installed native TSF acceptance"
+  },
+  "input_manifest_sha256": "224aa0b92f5f732790222979d43517da8b713373c70589fe43da29dee782154a",
+  "changes_from_rc4": [
+    "src/gui/config_dialog/config_dialog.cc",
+    "src/gui/config_dialog/config_dialog.h",
+    "src/gui/config_dialog/kotori_dashboard_test.cc",
+    "src/version.bzl"
+  ],
+  "gui_test": {
+    "source_commit": "4b50257746f8de22a9cc27f9ec1072e1a07e3461",
+    "input_manifest_sha256": "224aa0b92f5f732790222979d43517da8b713373c70589fe43da29dee782154a",
+    "product_version": "3.34.6333.100",
+    "exit_code": 0,
+    "started": "2026-10-10T03:35:41.0974642+09:00",
+    "ended": "2026-10-10T03:36:03.3348859+09:00",
+    "tests": 4,
+    "binary_sha256": "85d1591b10f5bf525472c2137d68efa5094c5dbff7a474617fec0161538e6b4f",
+    "scope": "local Windows Qt test widgets with mock config service, not installed UI"
+  },
+  "github_asset_digests_verified": 5,
+  "small_assets_redownload_verified": 4,
+  "msi_full_redownload_verified": false,
+  "msi_full_redownload_note": "GitHub SHA256 and size equal local MSI; full MSI re-download stopped for low speed per user request for lightweight checks; not counted as re-download PASS",
+  "installed_rc4_debug": {
+    "product_version": "3.34.6332.100",
+    "server_pid_at_check": 23680,
+    "scope": "installed server IPC seven cases, not native TSF UI; no input commit/config reset",
+    "files_matching_public_msi": 29,
+    "known_remaining_second_space": "ちょ止まってください"
+  },
+  "native_rc5_acceptance": "pending; user installs after release",
+  "native_rc4_tsf_display": "unverified; installed server IPC confirmed",
+  "previous_standard_result": {
+    "source_commit": "3a962f4554bf8edfb72afc8872835ecd3df43df0",
+    "correct": 183,
+    "total": 200,
+    "percent": 91.5,
+    "minimum_percent": 90,
+    "scope": "prior converter with context, not a measurement of the new MSI; only GUI and version changed",
+    "not_rerun_for_gui_only_change": true,
+    "source_overlay_sha256": "6b7c8aa90af32786e7bffa2dcbf6ce1c4041000b78dad182666abf07afb822c8",
+    "converter_sha256": "962c4bfb16f83cb472f5289da909f601d300a2df4a3953195047f4e8a16a40cd"
+  }
+}

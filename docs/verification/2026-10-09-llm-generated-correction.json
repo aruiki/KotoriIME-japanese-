@@ -1,0 +1,215 @@
+{
+  "date": "2026-10-09",
+  "scope": "experimental shared adoption guard and standalone session_handler_main; not installed Windows TSF acceptance",
+  "default_enabled": false,
+  "normal_adoption": {
+    "scope": "Actual shared GenerateSafeCorrection with production Mozc dictionary and both scoring models; not TSF/first display",
+    "normal_counts": {
+      "unchanged": 100,
+      "accepted_spelling": 0,
+      "changed_wrong": 0
+    },
+    "normal_items": 100,
+    "normal_budget_exceeded": 0,
+    "foot": {
+      "reading": "あしをいためたのでびょういんにいきます",
+      "original": "足を炒めたので病院に行きます",
+      "expected": [
+        "足を痛めたので病院に行きます"
+      ],
+      "category": "requested_correction",
+      "result": "足を痛めたので病院に行きます",
+      "elapsed_ms": 265.331,
+      "adopted": true,
+      "status": "accepted_spelling",
+      "budget_exceeded": false
+    },
+    "warmups": [
+      {
+        "reading": "あしをいためたので",
+        "original": "足を炒めたので",
+        "expected": [
+          "足を痛めたので"
+        ],
+        "category": "warmup",
+        "result": "足を痛めたので",
+        "elapsed_ms": 284.554,
+        "adopted": true,
+        "status": "accepted_spelling",
+        "budget_exceeded": false
+      },
+      {
+        "reading": "あしをいためたので",
+        "original": "足を炒めたので",
+        "expected": [
+          "足を痛めたので"
+        ],
+        "category": "warmup",
+        "result": "足を痛めたので",
+        "elapsed_ms": 234.174,
+        "adopted": true,
+        "status": "accepted_spelling",
+        "budget_exceeded": false
+      }
+    ],
+    "elapsed_seconds": 24.675817100011045,
+    "budget_ms": 2000,
+    "beams": 2,
+    "weights": {
+      "zenz": 1.0,
+      "llm": 0.7
+    },
+    "margin": 5.0,
+    "cpu_forced": false,
+    "normal_data_sha256": "a5fd3bcd0d45f34ea2788f4f864645386e5676e85f44e26f3f78b2679835ea38",
+    "exe_sha256": "7eb4a7a26d3c7719c2fdac727e2bc27dc057e3efc5747a5a6e17ab2279dc1c92",
+    "data_sha256": "720d0cb42651fe35692578ea5f3c752940b8357fc24efc46230c904d2f5d5d70",
+    "models": {
+      "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c",
+      "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8"
+    },
+    "runtime": "C:\\Program Files (x86)\\Kotori",
+    "source_hashes": {
+      "lm_rewriter.cc": "998be5d17bea90d54b5cadbc8ced85ac2c84ab1a84eef3d86270f7136a419fd0",
+      "lm_rewriter.h": "27ab9f96a96462c185e42b25bf5f9750f89f2b66ee9b336fa59b13abe1a7a864",
+      "zenz_scorer.cc": "df41ef0b22606d12be140f687469c8e7f2b21bd6e37130110046468f3d2de88d",
+      "zenz_scorer.h": "d562e7c148b1027cb7b5d44804214cf9d814481d94e7d630c779efc45bb5fecc",
+      "llm_correction_eval_main.cc": "3f689e4fb51a3251d5e547edf96f7782684cb202a1cd31c3652ecb56b140c148"
+    }
+  },
+  "controlled_session": {
+    "romaji": "ashiwoitametanodebyouinnniikimasu",
+    "reading": "あしをいためたのでびょういんにいきます",
+    "key_interval_seconds": 0.03,
+    "warm_seconds": 12,
+    "common_overrides": {
+      "KOTORI_LM_NSENT": "1",
+      "KOTORI_LM_BEAMS": "0",
+      "KOTORI_LM_PREDICT": "0",
+      "KOTORI_LM_TYPO": "0"
+    },
+    "comparison": {
+      "off": {
+        "exe_sha256": "b0bb015a2cb846f297c8a4c8a9f7510cca83b4d0206a7cb05622de0149e536c6",
+        "first": "足を炒めたので病院に行きます",
+        "first_since_last_key_ms": 1051.5643999970052,
+        "space": "足を痛めたので病院に行きます",
+        "space_ms": 267.89849999477156,
+        "artifact": "C:\\Users\\aruik\\kotori-first-check\\llm-single-final-off-20261009.json",
+        "artifact_sha256": "3dac9a76adf23dbcbc6541011c314831a7d45415cf23319c7bcc76b23028db52"
+      },
+      "on": {
+        "exe_sha256": "b0bb015a2cb846f297c8a4c8a9f7510cca83b4d0206a7cb05622de0149e536c6",
+        "first": "足を痛めたので病院に行きます",
+        "first_since_last_key_ms": 847.7378000097815,
+        "space": "足を痛めたので病院に行きます",
+        "space_ms": 1.9991000008303672,
+        "artifact": "C:\\Users\\aruik\\kotori-first-check\\llm-single-final-on-20261009.json",
+        "artifact_sha256": "3bde2058ea95f00b89c0cc2fa2e7f30a003bbe428c97f1331e3e6f5ebb20f3be"
+      }
+    }
+  },
+  "guard_unit_tests": {
+    "tests": 24,
+    "failures": 0,
+    "errors": 0
+  },
+  "unperformed": [
+    "session/input-generation publication and display guard",
+    "protected-field and configuration/model-change integration",
+    "100 normal sentences through the full session/TSF path",
+    "standard AJIMEE regression after experimental adoption",
+    "updated MSI CI",
+    "real application Windows TSF acceptance"
+  ],
+  "latest_integrated_source": {
+    "patch_changed_files": [
+      "src/rewriter/BUILD.bazel",
+      "src/rewriter/llama_runtime.cc",
+      "src/rewriter/llm_correction_eval_main.cc",
+      "src/rewriter/llm_correction_main.cc",
+      "src/rewriter/lm_rewriter.cc",
+      "src/rewriter/lm_rewriter.h",
+      "src/rewriter/lm_rewriter_test.cc",
+      "src/rewriter/rewriter.cc",
+      "src/rewriter/zenz_scorer.cc",
+      "src/rewriter/zenz_scorer.h"
+    ],
+    "patch_sha256": "87f94058ad5821bb73c1eb686b5c80d455c0ae8c0d93ff5eaee29ccedeb9e136",
+    "build": {
+      "targets": [
+        "converter_main",
+        "session_handler_main",
+        "llm_correction_main",
+        "llm_correction_eval_main"
+      ],
+      "success": true,
+      "log": "C:\\Users\\aruik\\kotori-first-check\\llm-integrated-build-20261009.log"
+    },
+    "tests": {
+      "targets": [
+        "lm_rewriter_test",
+        "english_variants_rewriter_test",
+        "engine_converter_test",
+        "session_test",
+        "kotori_diagnostics_test"
+      ],
+      "success": true,
+      "log": "C:\\Users\\aruik\\kotori-first-check\\llm-integrated-tests-20261009.log"
+    },
+    "fresh_patch_application": true,
+    "generated_first_candidate": {
+      "exe_sha256": "e972779207ca82b3125a567f6ecca809c9db3c5fa6a4e0131dbe741335565e0d",
+      "value": "足を痛めたので病院に行きます",
+      "since_last_key_ms": 848.2657999848016,
+      "space_response_ms": 1.8322999821975827,
+      "strict_reading_and_first_space_assertions_passed": true
+    },
+    "english_index_initial_tab_space_assertions_passed": true,
+    "MSI_CI": false
+  },
+  "standard_ranking_regression": {
+    "before_correct": 183,
+    "after_correct": 183,
+    "items": 200,
+    "changed_output": 0,
+    "correct_to_wrong": [],
+    "wrong_to_correct": [],
+    "after_conditions": {
+      "data": {
+        "path": "eval/data/ajimee-bench.json",
+        "sha256": "e9eb668fd6aa14b1e26436f429b5550108af0a1dfd443b8cea0bcb3ab3028fca",
+        "items": 200
+      },
+      "context": true,
+      "profile": "C:\\Users\\aruik\\AppData\\Local\\Temp\\kotori-ajimee-i17v7906",
+      "tracked_working_changes": true,
+      "acc": 91.5,
+      "converter_main": {
+        "path": "C:\\Users\\aruik\\_bazel_aruik\\3t2nb4uk\\execroot\\_main\\bazel-out\\x64_windows-opt\\bin\\converter\\converter_main.exe",
+        "sha256": "833b71dd18d84b8f71dc4da6741ab074660a5f8655b84d2aa17c3b1a80492d51"
+      },
+      "models": {
+        "C:/Program Files (x86)/Kotori/tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+        "C:\\Program Files (x86)\\Kotori\\tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+        "C:\\Program Files (x86)\\Kotori\\zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+        "C:\\Program Files (x86)\\Kotori\\zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+      },
+      "env": {
+        "KOTORI_LLM_MODEL": "C:/Program Files (x86)/Kotori/tinyswallow-1.5b-q5_k_m.gguf",
+        "KOTORI_LM_BEAMS": "4",
+        "KOTORI_LM_CONTEXT_MAP": "C:\\Users\\aruik\\AppData\\Local\\Temp\\tmp8pxnbm4b.tsv",
+        "KOTORI_LM_CORRECTION": "0",
+        "KOTORI_LM_LLM_TOP": "4",
+        "KOTORI_LM_PRELOAD": "0",
+        "KOTORI_MODEL_DIR": "C:\\Program Files (x86)\\Kotori",
+        "KOTORI_RUNTIME_DIR": "C:\\Program Files (x86)\\Kotori"
+      },
+      "commit": "236ddbfbc0ac8ea8deddef8fc9ccbb4247f0cae6",
+      "gpu": "NVIDIA GeForce RTX 3060, 617.14",
+      "time": "2026-10-09T09:42:15+0900"
+    },
+    "experimental_adoption_evaluated": false,
+    "note": "synchronous Standard ranking regression with correction off; previous baseline did not explicitly select a fresh profile"
+  }
+}

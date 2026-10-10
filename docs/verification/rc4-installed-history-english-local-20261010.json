@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-10",
+  "scope": "local source/unit/real-model evidence; not native Windows TSF acceptance",
+  "installed_version": "3.34.6331.100",
+  "installed_native_result": "user-observed FAIL: 脚を炒めた",
+  "new_candidate_version": "3.34.6332.100",
+  "input_manifest_sha256": "6b7c8aa90af32786e7bffa2dcbf6ce1c4041000b78dad182666abf07afb822c8",
+  "source_input_count": 117,
+  "three_patch_apply": "PASS",
+  "source_canonical_cache_fresh_identity": "PASS",
+  "dictionary": {
+    "previous_manual_spellings": 24,
+    "upstream_commit": "7d241dafcf6ee1f9eafefc0ae7a929c095860246",
+    "raw_rows": 46001,
+    "readings": 31068,
+    "pairs": 36402,
+    "max_variants": 4,
+    "license": "CC-BY-SA-3.0",
+    "tsv_sha256": "91748ec2fa4bfe310793d38badbdb0c7b05aeff221e0241d91aaaa017fe1e6dd"
+  },
+  "real_model_history_copy": {
+    "passed": 18,
+    "english_cases": 12,
+    "medical_food_typo_nuance": 6,
+    "session_exe_sha256": "9d6026a8f6f8aa1bb026a20f660baa84d86c8d861ccf4c4684c06c58b583532e",
+    "native_tsf": false
+  },
+  "standard": {
+    "correct": 183,
+    "total": 200,
+    "percent": 91.5,
+    "minimum_percent": 90,
+    "converter_sha256": "962c4bfb16f83cb472f5289da909f601d300a2df4a3953195047f4e8a16a40cd",
+    "native_tsf": false
+  },
+  "unit_targets": [
+    "engine_converter_test",
+    "session_test",
+    "engine_test",
+    "user_segment_history_rewriter_test",
+    "lm_rewriter_test",
+    "kotori_nuance_rewriter_test",
+    "english_variants_rewriter_test"
+  ],
+  "unit_result": "7 targets PASS; latest English visibility change full 17 tests PASS",
+  "installed_identity_checks": [
+    "server/tool/TIP32/TIP64/renderer equal BUILD6331 MSI",
+    "24 payload hashes equal installer: 3 models/18 runtimes/3 binaries",
+    "loaded runtime modules use Kotori install directory",
+    "TIP registry32/64 uses Kotori installed DLL",
+    "no user/machine KOTORI override found"
+  ],
+  "not_verified": [
+    "new installer installation/update/uninstall",
+    "native TSF first display and Tab/Space with new installed binaries",
+    "all typo correction or cold-load initial correction"
+  ],
+  "local_evidence_directory": "C:/Users/aruik/kotori-first-check",
+  "private_history_data_committed": false,
+  "source_commit": "3a962f4554bf8edfb72afc8872835ecd3df43df0",
+  "local_installer": {
+    "version": "3.34.6332.100",
+    "build_exit_code": 0,
+    "build_seconds": 622.4,
+    "payload_file_count": 48,
+    "size_bytes": 1569157120,
+    "sha256": "2e88913147adbe49da5f32624590980b11a938ed58872fc0235d0206b4467e17",
+    "signature": "NotSigned",
+    "contents_verified": true,
+    "native_input_verified": false
+  },
+  "publication_order": "explicit user request to publish verified local candidate before native installation/debug"
+}

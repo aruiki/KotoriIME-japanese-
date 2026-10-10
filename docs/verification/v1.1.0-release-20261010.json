@@ -1,0 +1,13 @@
+{
+  "release_id": 408766172,
+  "tag": "v1.1.0",
+  "latest": true,
+  "draft": false,
+  "prerelease": false,
+  "source_commit": "e6e35a101fc2849a50489f41e757a471427b39b9",
+  "msi_size_bytes": 1569173504,
+  "msi_digest": "sha256:7136ea32e39092ecdc7069cd0834e09d7fc0c2053fb89f3586410d5c8a7a599a",
+  "small_assets_redownload_match": true,
+  "large_msi_redownload": false,
+  "url": "https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0"
+}

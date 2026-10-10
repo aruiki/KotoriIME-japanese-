@@ -1,0 +1,165 @@
+{
+  "build": {
+    "source_commit": "b217ad4197db2d7ad1594ae98aae4d21398e65b9",
+    "input_manifest_sha256": "9a458bb78212d52e16f03190ef760b3bc9115d02974c2658f324f59190b08d0d",
+    "started": "2026-10-10T00:50:07.0488470+09:00",
+    "ended": "2026-10-10T01:00:15.6952590+09:00",
+    "elapsed_seconds": 608.6372277,
+    "exit_code": 0,
+    "log": "C:\\Users\\aruik\\kotori-first-check\\medical-package-build.log",
+    "scope": "local build; not installed native TSF acceptance"
+  },
+  "package": {
+    "source_commit": "b217ad4197db2d7ad1594ae98aae4d21398e65b9",
+    "input_manifest_sha256": "9a458bb78212d52e16f03190ef760b3bc9115d02974c2658f324f59190b08d0d",
+    "method": "WiX 5.0.2 read-only decompile / cabinet extraction; same content criteria as check_release.py",
+    "scope": "MSI contents verified; revised MSI native input/update/uninstall not verified",
+    "checked_at": "2026-10-10T01:02:40.319767+09:00",
+    "product_version": "3.34.6331.100",
+    "previous_version": "3.34.6330.100",
+    "size_bytes": 1568374784,
+    "msi_sha256": "ed1a3ed93ebd3c81dd8ebdfe39509ad7cc40c0f3cba01bd2d064d73c804cb575",
+    "payload_file_count": 45,
+    "required_files": [
+      "mozc_server.exe",
+      "mozc_tool.exe",
+      "mozc_renderer.exe",
+      "mozc_tip64.dll",
+      "llama.dll",
+      "zenz-v2.5-small-q8_0.gguf",
+      "zenz-v2.5-medium-q8_0.gguf",
+      "tinyswallow-1.5b-q5_k_m.gguf",
+      "NOTICE-zenz.txt",
+      "NOTICE-tinyswallow.txt",
+      "NOTICE-third-party.txt",
+      "LICENSE-llama.cpp.txt",
+      "LICENSE-llvm-openmp.txt",
+      "LICENSE-GPL-3.0.txt",
+      "documents/credits_en.html"
+    ],
+    "absent_files": [
+      "ggml-rpc.dll"
+    ],
+    "model_sha256": {
+      "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+      "zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+      "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+    },
+    "runtime": {
+      "ggml-base.dll": {
+        "sha256": "0396d453898eff5f105baf187cd7bfd0d83edba62ebfda0c76c5a2be40170b49",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-alderlake.dll": {
+        "sha256": "da2ce899d47ab23f1542865e57f2df80b1d738b6ebba23a548596b966f7a5d6a",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-cannonlake.dll": {
+        "sha256": "b497e0bdf3e1ead781cb2e10f1601596d3d1afce436a9251ce1368e2168df184",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-cascadelake.dll": {
+        "sha256": "47b6a5490b2a81a253cc3e3b61f68f9ae0338779a95079d5947eae5794e2330b",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-cooperlake.dll": {
+        "sha256": "6ec3ed84e477af453a0879c352e299b690cce2fb1bfa09c55d8304f03dcdc0e5",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-haswell.dll": {
+        "sha256": "48ff33c73c3cc747522822c4d088621a66e15f7c4ff98b6c7689b833913d7e31",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-icelake.dll": {
+        "sha256": "ef5669772ac6e26c223a6930f7c99cb6a2985e315320d0a5ca3edbde4b418fff",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-ivybridge.dll": {
+        "sha256": "b6aebe67cd03d570e05d3aa6f20ab5553a66c755f03d623901800a8dfe0e2754",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-piledriver.dll": {
+        "sha256": "0f51a00760ad893c44a8e4488bd2d54a6a4e260df7feaa67e6ea6e9968d39fd9",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-sandybridge.dll": {
+        "sha256": "f60089e2b0d2e4402b18ce1424c327ddf382b3cbaeca32598820cef354c233d0",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-sapphirerapids.dll": {
+        "sha256": "dc1aa0a345af0a75acce01a6baea881b663cd9320acf3272e8bbf3ec96247390",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-skylakex.dll": {
+        "sha256": "cf95e711a1f0863a61217b94fdbda9f68f87c40507838493360c1f5c1eca3cc5",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-sse42.dll": {
+        "sha256": "33920a25b6855a69169355fae4d9d4b4f968e11a22a8ea95b79c3611a909f7fa",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-x64.dll": {
+        "sha256": "08a7bb90a1640518a5b27a643b8a8b73f18abcd7fe6f92019236c699ea427481",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-cpu-zen4.dll": {
+        "sha256": "5775c2cafa9bd74be8c14cc77d58163461f8f4ec709b859e26041ee023041135",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml-vulkan.dll": {
+        "sha256": "d2d767cc2360cd5fbb4b5301660463605f3d16d433b5a4a94c822c073ee1036d",
+        "same_as_evaluated_runtime": true
+      },
+      "ggml.dll": {
+        "sha256": "92b3d587f6e539077932598941fc2a3f33a679480951d0ddc995554d03158a45",
+        "same_as_evaluated_runtime": true
+      },
+      "llama.dll": {
+        "sha256": "11b7b693e5ba137a88be44b1cd2cd21dda64e046a333253acdff3d23bda33d7c",
+        "same_as_evaluated_runtime": true
+      }
+    },
+    "compiled_file_sha256": {
+      "mozc_server.exe": "aae5a17d0711c136831850ce499999f7197ef6d2b7fd3499a1a3b75f0de06cae",
+      "mozc_tool.exe": "d0db9c47b046b06ec40446675d69498f7fb2dfd0dcd5bcdf2214a9d585fdb06f",
+      "mozc_tip64.dll": "3b1f4e7cf53e2e7c06fb0dbde0cc522a03843b20122140f5a3fc315d1b9ed66b"
+    },
+    "source_assets_identical": {
+      "Icon/add_remove_program_icon.ico": "data/images/win/product_icon.ico",
+      "Icon/KotoriSettingsIcon.ico": "data/images/win/tools_properties.ico",
+      "Icon/KotoriDictionaryIcon.ico": "data/images/win/tools_dictionary.ico",
+      "Binary/WixUI_Bmp_Banner": "data/kotori/banner.bmp",
+      "Binary/WixUI_Bmp_Dialog": "data/kotori/dialog.bmp"
+    },
+    "shortcuts": {
+      "KotoriDesktopSettings": "Kotori",
+      "KotoriMenuSettings": "Kotori",
+      "KotoriMenuDictionary": "Kotori日本語入力の辞書ツール"
+    },
+    "native_acceptance": "pending",
+    "signature": "NotSigned",
+    "server_file_version": "3.34.6331.100",
+    "standard_final": {
+      "correct": 183,
+      "total": 200,
+      "percent": 91.5,
+      "minimum_percent": 90,
+      "scope": "converter with context; not native TSF or competitor comparison",
+      "source_overlay_sha256": "9a458bb78212d52e16f03190ef760b3bc9115d02974c2658f324f59190b08d0d",
+      "manifest": "C:\\Users\\aruik\\kotori-first-check\\medical-ajimee-after.json.manifest.json"
+    },
+    "medical_model_cases": {
+      "passed": 5,
+      "native_tsf": false,
+      "exe_sha256": "fd91474576c8c6ef70bd811dd1479e68eef8b68dfb1a20302815a7dc0ed71af3"
+    },
+    "known_boundary": "During model loading, immediate Space can fall back to uncorrected Mozc output. Native acceptance of reported initial output remains pending.",
+    "prior_failure": {
+      "product_version": "3.34.6330.100",
+      "source_commit": "25cd371b1b916cdb81577c87beff37e0def12bc9",
+      "msi_sha256": "86dc529a3d1ce6e10f0a51dfd7e033b3620eea9b3c8373daf9004e0b8c4094ec",
+      "native_acceptance": "user-observed FAIL"
+    },
+    "status": "local repaired candidate; native acceptance pending; not public release"
+  }
+}

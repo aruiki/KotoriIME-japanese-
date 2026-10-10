@@ -88,8 +88,11 @@ jobs:
           if ($s -notmatch '(?m)^BUILD_OSS = (\d+)\s*$') { throw "$f に BUILD_OSS = <数> がない" }
           $build = [int]$Matches[1] + ${{ github.run_number }}
           if ($build -gt 65535) { throw "BUILD $build が 16 bit を超える" }
-          if ($s -notmatch '(?m)^BUILD = BUILD_OSS\s*$') { throw "$f に BUILD = BUILD_OSS がない" }
-          $s = $s -replace '(?m)^BUILD = BUILD_OSS\s*$', "BUILD = $build"
+          # ローカルMSIも数値のBUILDを持つ。将来のCIはその公開番号より大きくする。
+          if ($s -notmatch '(?m)^BUILD = (BUILD_OSS|\d+)\s*$') { throw "$f に BUILD の数値または BUILD_OSS がない" }
+          if ($Matches[1] -ne 'BUILD_OSS' -and [int]$Matches[1] -ge $build) { $build = [int]$Matches[1] + 1 }
+          if ($build -gt 65535) { throw "BUILD $build が 16 bit を超える" }
+          $s = $s -replace '(?m)^BUILD = (BUILD_OSS|\d+)\s*$', "BUILD = $build"
           [IO.File]::WriteAllText((Resolve-Path $f), $s)
           $out = New-TemporaryFile
           python mozc-src/src/build_tools/mozc_version.py --template_path $f --output $out --target_platform=Windows
@@ -184,7 +187,7 @@ jobs:
         working-directory: .\mozc-src\src
         env:
           ANDROID_NDK_HOME: ""
-        run: bazelisk test //rewriter:lm_rewriter_test //base:kotori_diagnostics_test //session:session_test --config release_build --disk_cache=D:\bazel-disk-cache
+        run: bazelisk test //request:conversion_request_test //engine:engine_converter_test //rewriter:kotori_model_identity_test //rewriter:kotori_nuance_rewriter_test //rewriter:lm_rewriter_test //rewriter:english_variants_rewriter_test //base:kotori_diagnostics_test //session:session_test --config release_build --disk_cache=D:\bazel-disk-cache
       # 実際のMSIで導入・TSF経由の日本語入力・アンインストールを確認する。
       # 開発者のPCではなく、この使い捨てWindowsランナーだけを変更する。
       - name: インストーラーの導入・実入力・削除を確かめる

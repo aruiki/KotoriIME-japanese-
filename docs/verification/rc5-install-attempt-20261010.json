@@ -1,0 +1,81 @@
+{
+  "checked_at": "2026-10-10T11:35:02.2379128+09:00",
+  "scope": "Read-only installed identity and Windows installation events; dedicated IPC diagnostic without commit; not native TSF UI",
+  "requested_release": "v1.1.0-rc.5",
+  "expected_version": "3.34.6333.100",
+  "installed_version": "3.34.6332.100",
+  "upgrade_completed": false,
+  "installer_error": 1602,
+  "installer_error_meaning": "ERROR_INSTALL_USEREXIT; trigger not established",
+  "files": [
+    {
+      "name": "mozc_server.exe",
+      "version": "3.34.6332.100",
+      "sha256": "952cdc9e6ff4219d47ef69def817ec2b7b4a3ce23c7fc778754060b8b2dab833",
+      "matches_rc4": true,
+      "matches_rc5": false,
+      "rc5_sha256": "dcd7adc00c78b5f289bd9b89ae17173e6be28d338f34d9082e83d90fe6201a24"
+    },
+    {
+      "name": "mozc_tool.exe",
+      "version": "3.34.6332.100",
+      "sha256": "9f735b84be78452fa505726a2a4a6db9281e401160af0168f93530c5a4f3d615",
+      "matches_rc4": true,
+      "matches_rc5": false,
+      "rc5_sha256": "2dda6ed5222d7701a65f847f6d7afd313aec7e0e80dff452d421a87f2b2b1400"
+    },
+    {
+      "name": "mozc_tip64.dll",
+      "version": "3.34.6332.100",
+      "sha256": "933f11aa56770f9b33cf8cff6769ec2c3fba4339575597ca9858a7b60f3a6249",
+      "matches_rc4": true,
+      "matches_rc5": false,
+      "rc5_sha256": "ac15bccb3be188478a31d9905e32005db9913c2135d2974256f2e3437b4ced31"
+    },
+    {
+      "name": "mozc_renderer.exe",
+      "version": "3.34.6332.100",
+      "sha256": "ca51c01cee9fa5113686702af76b6fc0648f5d419586cdf988f4c5cd9298613b",
+      "matches_rc4": true,
+      "matches_rc5": false,
+      "rc5_sha256": "7a15085ad007fc1d107434d26d50a993498e7ed58726f61b6a0cb4069c963a4b"
+    }
+  ],
+  "active_msiexec_count": 0,
+  "dedicated_ipc_probe": {
+    "exit_code": 0,
+    "server_pid": 23680,
+    "enabled": 1,
+    "quality": 3,
+    "model": 2,
+    "predict": 1,
+    "correction": 1,
+    "reading": "あしをいためた",
+    "refreshed_candidate": "足を痛めた",
+    "tab": "足を痛めた",
+    "space1": "足を痛めた",
+    "space2": "脚を痛めた",
+    "input_committed": false,
+    "settings_changed": false,
+    "native_ui_verified": false
+  },
+  "installation_events": [
+    {
+      "time": "2026-10-10T11:27:43.0781473+09:00",
+      "id": 1033
+    },
+    {
+      "time": "2026-10-10T11:27:43.0778352+09:00",
+      "id": 11708
+    },
+    {
+      "time": "2026-10-10T11:26:08.5534253+09:00",
+      "id": 1042
+    },
+    {
+      "time": "2026-10-10T11:24:02.9328158+09:00",
+      "id": 1040
+    }
+  ],
+  "source_commit": "4b50257746f8de22a9cc27f9ec1072e1a07e3461"
+}

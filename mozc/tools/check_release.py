@@ -23,6 +23,7 @@ REPO = "aruiki/KotoriIME-japanese-"
 BUNDLED = ["mozc_server.exe", "mozc_tool.exe", "mozc_renderer.exe", "mozc_tip64.dll", "llama.dll",
            "zenz-v2.5-small-q8_0.gguf", "zenz-v2.5-medium-q8_0.gguf", "tinyswallow-1.5b-q5_k_m.gguf",
            "NOTICE-zenz.txt", "NOTICE-tinyswallow.txt",
+           "KotoriEnglish.tsv", "KotoriEnglish-source.json", "NOTICE-katakana-english.txt",
            # 第三者の表示(作業カード 41、REQ-16-1)
            "NOTICE-third-party.txt", "LICENSE-llama.cpp.txt", "LICENSE-llvm-openmp.txt", "LICENSE-GPL-3.0.txt",
            "documents/credits_en.html"]

@@ -1,0 +1,89 @@
+{
+  "checked_at": "2026-10-10T16:28:26.823845+09:00",
+  "source_commit": "e6e35a101fc2849a50489f41e757a471427b39b9",
+  "product_version": "3.34.6334.100",
+  "msi_sha256": "7136ea32e39092ecdc7069cd0834e09d7fc0c2053fb89f3586410d5c8a7a599a",
+  "scope": "Actual Windows upgrade and native Notepad input before requested reboot; not a fresh post-reboot TIP acceptance",
+  "installer": {
+    "Started": "2026-10-10T16:14:11.5480291+09:00",
+    "Ended": "2026-10-10T16:15:35.7556089+09:00",
+    "ExitCode": 3010,
+    "ElapsedSeconds": 84.2075798,
+    "NoAutomaticRestart": true
+  },
+  "installed_payload_exact_matches": 43,
+  "installed_payload_total": 48,
+  "newer_microsoft_runtime_preserved": [
+    {
+      "name": "msvcp140.dll",
+      "installed_sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca",
+      "installed_version": "14.51.36247.0",
+      "payload_version": "14.44.35211.0"
+    },
+    {
+      "name": "msvcp140_1.dll",
+      "installed_sha256": "206c931bf90fdad8816de3b5e2ef80b2bcaa9406c89ecc05fe6fddffe251e982",
+      "installed_version": "14.51.36247.0",
+      "payload_version": "14.44.35211.0"
+    },
+    {
+      "name": "msvcp140_2.dll",
+      "installed_sha256": "d50d7883f20d1dc6191768d3746f52dd9cac89c346ffaed5be1f110c2f34a838",
+      "installed_version": "14.51.36247.0",
+      "payload_version": "14.44.35211.0"
+    },
+    {
+      "name": "vcruntime140.dll",
+      "installed_sha256": "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7",
+      "installed_version": "14.51.36247.0",
+      "payload_version": "14.44.35211.0"
+    },
+    {
+      "name": "vcruntime140_1.dll",
+      "installed_sha256": "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e",
+      "installed_version": "14.51.36247.0",
+      "payload_version": "14.44.35211.0"
+    }
+  ],
+  "core_models_inference_dictionary_notices_match_payload": true,
+  "profile_config_and_user_dictionary_unchanged": true,
+  "server": [
+    {
+      "name": "mozc_renderer",
+      "pid": 5732,
+      "started": "2026-10-10T16:15:38.2051071+09:00",
+      "path": "C:\\Program Files (x86)\\Kotori\\mozc_renderer.exe",
+      "version": "3.34.6334.100"
+    },
+    {
+      "name": "mozc_server",
+      "pid": 34120,
+      "started": "2026-10-10T16:15:33.4171223+09:00",
+      "path": "C:\\Program Files (x86)\\Kotori\\mozc_server.exe",
+      "version": "3.34.6334.100"
+    }
+  ],
+  "notepad_pid": 32188,
+  "notepad_started_before_upgrade": true,
+  "loaded_tip_identity": "Old process loaded RC.5 TIP before upgrade; disk TIP is6334. Existing mapped image not revalidated. Reboot required by installer.",
+  "input_method": "Computer Use press_key individual romanization keys in own blank Notepad tab, F13 to enable IME, no literal type_text",
+  "reading": "ちょとまってください",
+  "romanization": "chotomattekudasai",
+  "observations": {
+    "before_space": "Prediction text did not establish correction before selection in this pre-reboot process; retain this as a limitation.",
+    "space1": "ちょっと待ってください",
+    "space2": "ちょっとまってください",
+    "space3": "ちょっと待って下さい",
+    "tab_after_returning_to_reading": "ちょっと待ってください",
+    "corrected_candidates_description": "補正した読み"
+  },
+  "native_corrected_reading_alternatives": "PASS for tested case using new6334 server with existing Notepad process",
+  "unperformed": [
+    "fresh post-reboot TIP input",
+    "CPU-only laptop",
+    "all-app acceptance",
+    "24-hour stress",
+    "new6334 uninstall"
+  ],
+  "data_preservation": "No Enter/commit; cancelled composition; no history or dictionary reset; no raw user documents, screenshots or installer logs published."
+}

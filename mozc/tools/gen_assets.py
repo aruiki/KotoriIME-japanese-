@@ -91,9 +91,10 @@ Kotori日本語入力(以下 Kotori)は Mozc(Copyright 2010-2026 Google Inc.、B
 ・zenz-v2.5-small: CC BY-SA 4.0(© Keita Miwa。元は ku-nlp/gpt2-small-japanese-char)。8 bit に量子化して同梱
 ・zenz-v2.5-medium: CC BY-SA 4.0(© Keita Miwa。元は ku-nlp/gpt2-medium-japanese-char)。8 bit に量子化して同梱
 ・TinySwallow-1.5B: Apache-2.0(Sakana AI)。5 bit に量子化して同梱
+・カタカナ英語辞書: CC BY-SA 3.0(カタカナ語英字辞典コミュニティ、KEINOS、EDICT/EDRDG)。加工済みデータと出所は KotoriEnglish.tsv、KotoriEnglish-source.json、NOTICE-katakana-english.txt
 ・Microsoft Visual C++ ランタイム: Microsoft のライセンス
 
-各ライセンスの全文と帰属表示は、インストール先(C:\\Program Files (x86)\\Kotori)の NOTICE-*.txt と documents フォルダにあります。
+各ライセンスの内容・参照先と帰属表示は、インストール先(C:\\Program Files (x86)\\Kotori)の NOTICE-*.txt と documents フォルダにあります。
 
 Kotori はインターネットに接続しません。変換と AI の処理は、すべてこの PC の中で行います。
 """
@@ -118,7 +119,8 @@ rtf = ("{\\rtf1\\ansi\\ansicpg932\\deff0{\\fonttbl{\\f0\\fnil\\fcharset128 Yu Go
 (out / "NOTICE-third-party.txt").write_text(
     "Kotori日本語入力に同梱している第三者のソフトウェア\n\n"
     "この PC のインストール先(C:\\Program Files (x86)\\Kotori)にあるファイルと、そのライセンスの一覧です。\n"
-    "AI のモデルは NOTICE-zenz.txt と NOTICE-tinyswallow.txt にあります。\n\n"
+    "AI のモデルは NOTICE-zenz.txt と NOTICE-tinyswallow.txt にあります。\n"
+    "カタカナ英語辞書は NOTICE-katakana-english.txt、加工済みデータは KotoriEnglish.tsv にあります。\n\n"
     "■ Mozc(mozc_*.exe、mozc_tip*.dll、辞書)\n"
     "  BSD-3-Clause、Copyright Google Inc. https://github.com/google/mozc\n"
     "  Kotori は Mozc を改変したもので、Google が提供・推奨するものではありません。\n"

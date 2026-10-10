@@ -1,0 +1,31 @@
+{
+  "input_manifest_sha256": "3ca8f4653fe5e6fb058d3d9e2e99925e521cee78fd849bc3cf01a8330eca01d5",
+  "source_scope": "canonical/cache/fresh patch sources identical",
+  "real_models": {
+    "rows": 18,
+    "failures": [],
+    "history_rewriter": true,
+    "copied_installed_history": true,
+    "exe_sha256": "14c4ed0eb4d407b00262c371df6151cd6a5f685014c6d39c09c902f4ebf7f84b",
+    "scope": "real models, copied installed history, history rewriter ON; not native TSF",
+    "space2_typo": "ちょっとまってください"
+  },
+  "standard": {
+    "percent": 91.5,
+    "items": 200,
+    "converter_sha256": "543b041396ed83ca1ae98801a44c35af436f2b10b463b0b1046751caa014fc3a",
+    "data_sha256": "e9eb668fd6aa14b1e26436f429b5550108af0a1dfd443b8cea0bcb3ab3028fca",
+    "context": true,
+    "gpu": "NVIDIA GeForce RTX 3060, 617.14"
+  },
+  "tests": {
+    "targets": [
+      "engine_converter_test",
+      "candidate_test",
+      "lm_rewriter_test",
+      "english_variants_rewriter_test"
+    ],
+    "exit": 0
+  },
+  "native": "installed RC5 settings success; corrected binary native TSF first display not verified"
+}
