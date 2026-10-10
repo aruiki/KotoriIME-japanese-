@@ -1,0 +1,78 @@
+{
+  "prototype": {
+    "scope": "local prototype package only; not installed or published",
+    "base_source": "4b50257746f8de22a9cc27f9ec1072e1a07e3461",
+    "target_source": "e6e35a101fc2849a50489f41e757a471427b39b9",
+    "base_msi_sha256": "563045647e34f21edec2fdb6643783ed041bfbea4d66844f4dc8847739d245be",
+    "target_msi_sha256": "7136ea32e39092ecdc7069cd0834e09d7fc0c2053fb89f3586410d5c8a7a599a",
+    "base_identity": {
+      "product_code": "{81BEBF6E-1119-458D-92EB-9B0DA81381A9}",
+      "upgrade_code": "{45FB8DEB-0CFE-4924-96FB-9022888112E1}",
+      "version": "3.34.6333.100",
+      "language": "1041"
+    },
+    "target_identity": {
+      "product_code": "{ECB18676-89C0-4969-9F06-8A9FCFBB0BC1}",
+      "upgrade_code": "{45FB8DEB-0CFE-4924-96FB-9022888112E1}",
+      "version": "3.34.6334.100",
+      "language": "1041"
+    },
+    "private_update_identity": {
+      "product_code": "{81BEBF6E-1119-458D-92EB-9B0DA81381A9}",
+      "upgrade_code": "{45FB8DEB-0CFE-4924-96FB-9022888112E1}",
+      "version": "3.34.6334.100",
+      "language": "1041"
+    },
+    "model_sha256": {
+      "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+      "zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+      "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+    },
+    "patch_sha256": "97a9465764a0a153facb4646fdbe2b6bcb694d2fcb2473e74ae10899533d4d97",
+    "patch_size_bytes": 21921792,
+    "original_msi_unchanged": true,
+    "native_install": "unperformed",
+    "rollback": "unperformed",
+    "later_major_upgrade": "unperformed"
+  },
+  "cabinet": {
+    "scope": "read-only MSP cabinet inspection, not an install test",
+    "patch_sha256": "97a9465764a0a153facb4646fdbe2b6bcb694d2fcb2473e74ae10899533d4d97",
+    "payload_files": [
+      {
+        "id": "mozc_broker.exe",
+        "name": "mozc_broker.exe"
+      },
+      {
+        "id": "mozc_cache_service.exe",
+        "name": "mozc_cache_service.exe"
+      },
+      {
+        "id": "mozc_server.exe",
+        "name": "mozc_server.exe"
+      },
+      {
+        "id": "mozc_tool.exe",
+        "name": "mozc_tool.exe"
+      },
+      {
+        "id": "mozc_tip64.dll",
+        "name": "mozc_tip64.dll"
+      },
+      {
+        "id": "mozc_renderer.exe",
+        "name": "mozc_renderer.exe"
+      },
+      {
+        "id": "mozc_tip32.dll",
+        "name": "mozc_tip32.dll"
+      }
+    ],
+    "model_files_absent": true
+  },
+  "negative_guards": {
+    "same_package": "rejected before output",
+    "model_hash_mismatch": "rejected before output"
+  },
+  "production_status": "not installed, not released, no rollback or future MSI upgrade acceptance"
+}
