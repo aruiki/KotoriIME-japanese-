@@ -1,0 +1,79 @@
+{
+  "checked_at": "2026-10-10T14:34:48.052428+09:00",
+  "scope": "Actual native Windows Notepad input using installed RC.5; not the uninstalled local6334 MSI",
+  "installed_version": "3.34.6333.100",
+  "release": "v1.1.0-rc.5",
+  "source_commit": "4b50257746f8de22a9cc27f9ec1072e1a07e3461",
+  "app": "Microsoft.WindowsNotepad_11.2607.14.0_x64",
+  "notepad_process_id": 32188,
+  "server_process_id": 23700,
+  "loaded_tip_path": "C:/Program Files (x86)/Kotori/mozc_tip64.dll",
+  "files_rechecked": [
+    {
+      "name": "mozc_server.exe",
+      "sha256": "dcd7adc00c78b5f289bd9b89ae17173e6be28d338f34d9082e83d90fe6201a24",
+      "matches_rc5": true
+    },
+    {
+      "name": "mozc_tip64.dll",
+      "sha256": "ac15bccb3be188478a31d9905e32005db9913c2135d2974256f2e3437b4ced31",
+      "matches_rc5": true
+    },
+    {
+      "name": "mozc_renderer.exe",
+      "sha256": "7a15085ad007fc1d107434d26d50a993498e7ed58726f61b6a0cb4069c963a4b",
+      "matches_rc5": true
+    },
+    {
+      "name": "mozc_tool.exe",
+      "sha256": "2dda6ed5222d7701a65f847f6d7afd313aec7e0e80dff452d421a87f2b2b1400",
+      "matches_rc5": true
+    }
+  ],
+  "input_method": "Computer Use press_key individual physical romanization keys, no literal type_text; blank scratch document",
+  "mode_setup": "User selected Kotori. A newly created Notepad tab received committed ASCII. F13, present in Mozc MS-IME keymap as IMEOn, enabled Japanese composition in the focused scratch tab. New tabs required enabling IME again.",
+  "observations": [
+    {
+      "reading": "あしをいためた",
+      "romanization": "asiwoitameta",
+      "before_space_first_candidate": "足を痛めた",
+      "tab_preedit": "足を痛めた",
+      "space1": "足を痛めた",
+      "space2": "脚を痛めた",
+      "result": "PASS for this observed case; 炒めた was a lower suggestion only"
+    },
+    {
+      "reading": "ちょとまってください",
+      "romanization": "chotomattekudasai",
+      "before_space_first_candidate": "ちょっと待ってください",
+      "tab_preedit": "ちょっと待ってください",
+      "space1": "ちょっと待ってください",
+      "space2": "ちょ止まってください",
+      "result": "FAIL for corrected-reading retention in installed6333; local6334 contains the fix"
+    },
+    {
+      "reading": "いんでっくす",
+      "romanization": "indekkusu",
+      "before_space_candidates": [
+        "インデックス",
+        "index",
+        "indices"
+      ],
+      "space1": "インデックス",
+      "space2": "index",
+      "result": "PASS for English candidate availability and Space2 selection; English is not the default first candidate"
+    }
+  ],
+  "input_committed": false,
+  "enter_pressed": false,
+  "history_or_dictionary_reset": false,
+  "screenshots_uploaded": false,
+  "raw_user_document_or_history_included": false,
+  "limits": [
+    "One PC and one native app, warmed model, slow individual keys with about 3 seconds for each capture. Not a latency or cold-start guarantee.",
+    "Original typed hiragana remains in composition before selecting a candidate. Corrected first candidate was observed, not automatic replacement of the composition.",
+    "No native validation of local6334 yet; installation approval was requested.",
+    "Long medical sentence, nuance sentence, CPU-only and other apps were not repeated in native UI during this run."
+  ],
+  "formal_release_published": false
+}
