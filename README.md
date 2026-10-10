@@ -1,4 +1,5 @@
 <h1 align="center">Kotori日本語入力IME</h1>
+<img src="">
 <p align="center">Windowsで使える、オープンソースの日本語入力ソフトです。</p>
 
 <p align="center">
