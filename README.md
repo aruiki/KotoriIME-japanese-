@@ -11,13 +11,13 @@
 </p>
 
 <h3 align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0-rc.4/Kotori64.msi">⬇ 最新の試用版 v1.1.0-rc.4 をダウンロード</a>
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0-rc.5/Kotori64.msi">⬇ 最新の試用版 v1.1.0-rc.5 をダウンロード</a>
 </h3>
 
 <p align="center">
-  大規模な英語辞書と、入力中の候補・学習履歴の修正を含みます。<br>
-  リリース候補・未署名です。BUILD6332の実機確認は公開後に進めます。
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.4">変更内容を見る</a>
+  設定の適用結果の表示と、保存失敗時の再試行を改善しました。<br>
+  リリース候補・未署名です。実機の候補画面とBUILD6333の導入確認は継続中です。
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.5">変更内容を見る</a>
 </p>
 
 <p align="center">
