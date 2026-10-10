@@ -11,13 +11,13 @@
 </p>
 
 <h3 align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0-rc.5/Kotori64.msi">⬇ 最新の試用版 v1.1.0-rc.5 をダウンロード</a>
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0/Kotori64.msi">⬇ 正式版 v1.1.0 をダウンロード</a>
 </h3>
 
 <p align="center">
   設定の適用結果の表示と、保存失敗時の再試行を改善しました。<br>
-  リリース候補・未署名です。実機の候補画面とBUILD6333の導入確認は継続中です。
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.5">変更内容を見る</a>
+  Windows Installerの版は3.34.6334.100です。未署名です。更新後、Windowsから再起動を求められた場合は再起動してください。確認範囲と制限はリリースノートに記載しています。
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0">変更内容を見る</a>
 </p>
 
 <p align="center">
