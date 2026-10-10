@@ -1,301 +1,220 @@
-<h1 align="center">Kotori日本語入力IME</h1>
-<p align="center">AIが文脈より変換先を最適化する次世代IME</p>
+<h1 align="center">Kotori日本語入力</h1>
+
+<p align="center">
+  <strong>文脈を読んで、変換を選び直すAI日本語IME。</strong><br>
+  Mozcの使いやすさはそのまま。AIはPC内だけで動作します。
+</p>
 
 <p align="center">
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest"><img alt="正式版" src="https://img.shields.io/github/v/release/aruiki/KotoriIME-japanese-?label=%E6%AD%A3%E5%BC%8F%E7%89%88&color=242C5C"></a>
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases"><img alt="ダウンロード数" src="https://img.shields.io/github/downloads/aruiki/KotoriIME-japanese-/total?label=%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89&color=242C5C"></a>
   <img alt="Windows 10 / 11" src="https://img.shields.io/badge/Windows-10%20%2F%2011-242C5C?logo=windows">
-  <img alt="オフラインで動作" src="https://img.shields.io/badge/%E3%82%AA%E3%83%95%E3%83%A9%E3%82%A4%E3%83%B3-%E9%80%9A%E4%BF%A1%E3%81%97%E3%81%AA%E3%81%84-F25C2E">
-  <img alt="実入力 AJIMEE-Bench 88.4%" src="https://img.shields.io/badge/%E5%AE%9F%E5%85%A5%E5%8A%9B%20AJIMEE--Bench-88.4%25-F25C2E">
-  <a href="#ライセンス"><img alt="ライセンス" src="https://img.shields.io/badge/license-Apache--2.0%20%2F%20MIT-5B6070"></a>
+  <img alt="オフライン" src="https://img.shields.io/badge/%E3%82%AA%E3%83%95%E3%83%A9%E3%82%A4%E3%83%B3-%E9%80%9A%E4%BF%A1%E3%81%AA%E3%81%97-F25C2E">
 </p>
 
-<h3 align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0/Kotori64.msi">⬇ 正式版 v1.1.0 をダウンロード</a>
-</h3>
-
-
-<p align="center">
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest">正式版のダウンロード</a> ・
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases">すべてのリリース</a>
-</p>
+<h2 align="center">
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0/Kotori64.msi">⬇ Kotori日本語入力をダウンロード</a>
+</h2>
 
 <p align="center">
-  <a href="#変換の例">変換の例</a> ・
-  <a href="#変換の正確さ">正確さ</a> ・
-  <a href="#ほかの-ime-と比べる">ほかの IME と比較</a> ・
-  <a href="#入力中の-ai-予測">AI 予測</a> ・
-  <a href="#軽さ">軽さ</a> ・
-  <a href="#しくみ">しくみ</a> ・
-  <a href="#必要な環境">必要な環境</a> ・
-  <a href="#インストール">インストール</a> ・
-  <a href="#よくある質問">よくある質問</a>
+  Windows 10 / 11・64bit
 </p>
 
 ---
 
-## ほかの IME と比べる
+## 「こうえん」を、公園だけで終わらせない
 
-<p align="center"><img src="docs/images/ime-comparison.png" alt="実入力 AJIMEE-Bench 198問: Kotori beta.8 88.4%、Microsoft IME 59.6%、Google日本語入力58.1%。差は28.8、30.3ポイント。2026-10-01、全IME前の文なし。" width="880"></p>
+通常のIMEが候補を作ったあと、KotoriはAIで**文全体の意味を見て候補を選び直します**。
 
-AJIMEE-Benchの198問で、Kotoriの正解率は88.4%、Microsoft IMEは59.6%、Google日本語入力は58.1%でした。差はそれぞれ28.8、30.3ポイントです。
+<p align="center">
+  <img src="docs/images/examples.png" alt="Kotori日本語入力の変換例" width="880">
+</p>
 
-2026-10-01、RTX 3060。Kotoriは **beta.8 / Unreal**、Microsoft IMEは **Windows 11付属版**、
-Google日本語入力は **3.34.6260**。以下はこの版・環境での測定値で、現在のv1.0.0 / v1.1の再測定ではありません。
-
-Google 日本語入力と Microsoft IME には変換だけを呼び出す方法がないので、**実際に IME で入力して**測りました。
-読みをキーで打ち、Space で変換、Enter で確定した文字を正解と比べます。3 つとも同じ道具・同じ条件です
-([eval/imebench/](eval/imebench/))。公開済みの結果は[CSVでも取得できます](eval/imebench/comparison-2026-10-01.csv)。
-
-| | AJIMEE-Bench (198問) | 日常の文 (81問) | 同音語 (40問) | 人名・地名・新語 (40問) | 打ち間違い (40問) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| **Kotori日本語入力 beta.8**(Unreal) | **88.4%** | **97.5%** | **97.5%** | **97.5%** | 5.0% |
-| Microsoft IME | 59.6% | 86.4% | 82.5% | 82.5% | 5.0% |
-| Google 日本語入力 | 58.1% | 81.5% | 65.0% | 95.0% | 10.0% |
-
-
-### AJIMEE-Benchでは、どんな文を変換する？
-
-単語を知っているだけでなく、文の意味に合う漢字を選ぶ必要があります。実際の評価データから3問を抜粋しました。
-
-| 問題ID | 読み（原文） | 許容される正解の一例 | 難しさ |
-| --- | --- | --- | --- |
-| 1890 | カケイヲタスケルタメ、リョウシュノイエニホウコウシ | 家計を助けるため、領主の家に奉公し | 「かけい」「りょうしゅ」「ほうこう」を、家計・領主・奉公として文全体で選ぶ。 |
-| 1982 | シュウシカテイホケンカガク | 修士課程保健科学 | 「しゅうしかてい」「ほけんかがく」を、大学院の修士課程・保健科学として選ぶ。 |
-| 2128 | ノケッカ、ジャッカンジュウサンサイニシ | の結果、弱冠１３歳にし | 「じゃっかん」は、年齢を述べるこの文では「若干」ではなく「弱冠」。数字表記の許容解もある。 |
-
-これは問題の難しさを示すための例で、Microsoft IME・Google日本語入力・Kotoriの個別の出力結果を示すものではありません。上の実入力比較は全198問の集計です。
-
-出典: [azooKey/AJIMEE-Bench](https://github.com/azooKey/AJIMEE-Bench/blob/401666cd56d1a570c2021798b64b6da4396bfd45/JWTD_v2/v1/evaluation_items.json)（元データ: [日本語Wikipedia入力誤りデータセット v2](https://nlp.ist.i.kyoto-u.ac.jp/?日本語Wikipedia入力誤りデータセット)）。読み・正解は [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) の抜粋、文は原文のまま。難しさの説明は当プロジェクトによるものです。
-
-- 全IMEで前の文なし、Space 1回の第1候補。NFKCで表記を揃え、AJIMEEの入力できない2問は除外しています。
-- 学習は各IMEの既定設定のままです。フォーカスとテキストを問ごとにリセットしています。
-- 下の91.5〜93.0%は前の文を渡す別の評価です。この3製品比較とは条件・問題数が違います。
-- 同音語・人名・打ち間違いのセット(各 40 問)は、このプロジェクトで作ったものです([eval/sets/](eval/sets/))。
-- **打ち間違いの補正**(「ありがとうごさいます」→「ありがとうございます」など)は、どの IME もほとんどできません。
-  このセットではKotoriはMicrosoft IMEと同率で、Google日本語入力を下回りました。改善を進めています。
-- ATOK は手元にないため測っていません。
-
-<p align="center"><img src="docs/images/features.png" alt="特長: 文脈で選ぶ、先回りの予測、待たせない、外に出さない、GPU に優しい、MSI ひとつ" width="880"></p>
-
-## 変換の例
-
-<p align="center"><img src="docs/images/examples.png" alt="変換の例: こうえんをした → 公演をした、せいどがあがった → 精度が上がった、じゅうじから → 10時から、このやく → この訳、きものをぬいで → 履物を脱いで" width="880"></p>
-
-<details>
-<summary>表で見る(コピーできる形)</summary>
-
-実際の出力です(Standard、2026-10-01)。「前の文」は、直前に確定した文として AI に渡したものです。
-
-| 読み | 前の文 | Mozc 単体 | Kotori日本語入力 |
-| --- | --- | --- | --- |
-| かれはこうえんでこうえんをした | | 彼は公園で公園をした | 彼は公園で**公演**をした |
-| おんせいにんしきのせいどがあがった | | 音声認識の制度が上がった | 音声認識の**精度**が上がった |
-| あしたのかいぎはじゅうじからです | | 明日の会議は従事からです | 明日の会議は**１０時**からです |
-| このやくはむずかしい | 英語の文を日本語にしています。 | この薬は難しい | この**訳**は難しい |
-| いしをつたえる | 自分の | 医師を伝える | **意思**を伝える |
-| ここではきものをぬいでください | 玄関で靴を脱いで。 | ここでは着物を脱いでください | **ここで履物**を脱いでください |
-
-</details>
-
-## 変換の正確さ
-
-この節は変換器を直接呼ぶ評価です。前の文を渡すため、上のMicrosoft IME・Google日本語入力との実入力比較とは分けてご覧ください。
-
-<p align="center"><img src="docs/images/accuracy.png" alt="AJIMEE-Bench の第 1 候補の正解率。Kotori日本語入力 Unreal 93.0%、High 92.5%、Standard 91.5%、Low 88.0%、GPU のない PC 83.0%、azooKey + Zenzai 85.0%、Mozc 51.0%。日常の文 81 問は Kotori 97.5%、Mozc 80.2%" width="880"></p>
-
-- [AJIMEE-Bench](https://github.com/azooKey/AJIMEE-Bench) は、かな漢字変換の難しい 200 問(同音異義語、文脈で
-  決まる語など)の評価セットです。1 番目の候補が正解と一致した割合を数えています。
-- 調整に一度も使っていない **最終評価用のセット 300 問**(ニュース・ビジネス・日常・固有名詞・数字など)では、
-  Mozc 単体 82.3% → **96.3%**(Standard)。過学習していないかの確認に使っています。
-- 測り方と記録はすべて [eval/README.md](eval/README.md) にあります。
-
-## 入力中の AI 予測
-
-入力している間、AI が文の続きを裏で考え、次の打鍵のときに候補の先頭に「AI」と付けて出します。
-Tab で予測の候補に移って選べます。
-
-**手を止めると、Space を押す前に AI の変換が出ます**(v1.1)。打ち終わって手を止めると、候補の先頭が Space を押したときと
-同じ AI の変換(「彼は公園で公園をした」ではなく「彼は公園で**公演**をした」)に変わり、裏で作った文の続きも並びます。
-Space を押すと、そのまま同じ変換になります。
-
-| | Mozc 単体 | Kotori日本語入力 |
-| --- | ---: | ---: |
-| 決まった言い回し 29 問で、正しい続きが上位 3 件に出た割合 | 17.2% | **58.6%** |
-| 1 打鍵の応答 | 1〜3 ms | 1〜3 ms(予測は裏で計算し、打鍵を待たせない) |
-| 手を止めてから Tab | — | 約 0.04 秒 |
-
-入力の邪魔になるだけの予測(脱線した文、読みを写しただけのカタカナ、1 文字だけの続き)は出しません。
-
-## 軽さ
-
-<p align="center"><img src="docs/images/lightness.png" alt="軽さ: 入力中の GPU の計算 68.6% → 42.6%、使っていないときの VRAM 1.66 GB → 0 GB、GPU のない PC の変換 380 ms → 162 ms" width="880"></p>
-
-- **入力中の GPU の負荷**: 前の打鍵の計算を使い回し、まとめて計算することで、AI が GPU を使う時間を約 4 割減らしました。
-- **使っていないとき**: 10 分入力がなければ AI のモデルを外し、VRAM を空けます(ゲームや動画の編集の邪魔をしない)。
-  次に入力すると裏で読み込み直します。
-- **固まらない**: 変換で AI に使う時間には上限があり、間に合わなければ Mozc の結果をそのまま出します。
-  内蔵 GPU には AI を載せません(反応が遅く、入力が止まるため)。
-
-## カタカナ語から英語を選ぶ
-
-v1.1.0-rc.4には、**31,068の読み・36,402組の英語表記**を含む辞書を組み込んでいます。
-アーキテクチャ → architecture、アクセシビリティ → accessibility、コンフィギュレーション → configuration、
-レストラン → restaurantなどを候補から選べます。辞書の手動インポートは不要です。
-日本語の先頭候補を保持し、同じ読みで綴りが分かれる場合も選択肢を残します。
-
-出典は[KEINOSのカタカナ語英字辞典](https://github.com/KEINOS/google-ime-user-dictionary-ja-en)で、
-収録データを検査・加工して使っています。変更済みデータと出典・ライセンス情報をMSIへ同梱しています。
-辞書データはCC BY-SA 3.0です。詳しくは[rc.4のリリースノート](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.4)を参照してください。
-
-## しくみ
-
-<p align="center"><img src="docs/images/how.png" alt="しくみ: 読み → 候補を集める(Mozc の辞書と変換用 AI)→ AI が選ぶ(zenz と日本語 LLM)→ 結果" width="880"></p>
-
-1. **候補を集める**: Mozc が辞書から文を組み立て、変換用の小さな AI(zenz)も読みから文を書きます。
-2. **AI が選ぶ**: zenz と日本語の言語モデル(TinySwallow-1.5B)が、「前の文に続けて自然な日本語か」を
-   それぞれ点数にします。点数の合計がいちばん高い文を選び、文節の区切りもそれに合わせます。
-3. **辞書で確かめる**: AI が書いた文は、読みと合っているかを Mozc の辞書で確かめ、合わないものは捨てます。
-   AI が読みにない語を足したり、読みを落としたりすることはありません。
-
-AI が働くのは変換(Space)と予測のときだけで、1 文字ずつの入力はこれまでどおり Mozc が処理します。
-ユーザー辞書に登録した語は、AI が書き換えません。詳しい設計は [docs/adr/](docs/adr/) にあります(0012 以降)。
-
-```mermaid
-flowchart LR
-  K[キー入力] --> M[Mozc<br/>辞書・ラティス]
-  M -->|文の候補| R{AI が選ぶ}
-  Z[zenz<br/>変換用 AI] -->|生成した文| R
-  R -->|採点| Z
-  R -->|採点| L[TinySwallow-1.5B<br/>日本語 LLM]
-  R --> O[候補ウィンドウ]
-  K -. 裏で .-> P[AI 予測] -.-> O
-```
-
-## 設定
-
-<p align="center"><img src="docs/images/settings.png" alt="設定画面の「AI 変換」タブ: 品質、AI の状態、入力中の AI 予測、AI モデル" width="880"></p>
-
-## 必要な環境
-
-| | 最低限 | おすすめ |
+| 入力 | 一般的な変換例 | Kotori |
 | --- | --- | --- |
-| OS | Windows 10 1809 以降(64 bit) | Windows 11 |
-| GPU | なくても動く(自動で Low) | 専用 GPU、Vulkan 対応、VRAM 3 GB 以上(NVIDIA / AMD / Intel Arc) |
-| メモリ | 8 GB | 16 GB |
-| ディスク | 1.7 GB | |
+| かれはこうえんでこうえんをした | 彼は公園で公園をした | 彼は公園で**公演**をした |
+| おんせいにんしきのせいどがあがった | 音声認識の制度が上がった | 音声認識の**精度**が上がった |
+| あしたのかいぎはじゅうじからです | 明日の会議は従事からです | 明日の会議は**10時**からです |
+| このやくはむずかしい | この薬は難しい | 文脈に応じて **この訳は難しい** |
 
-GPU は自動で見つけて使います。ドライバー以外の準備は要りません。内蔵 GPU(CPU に付いている GPU)は使わず、
-その場合は CPU で動きます。動作を確かめた GPU は RTX 3060 です。
+直前に確定した文章も文脈として利用できます。
 
-### 品質の段階
+---
 
-設定の「AI 変換」タブで選べます。数値は RTX 3060(GPU のない PC の行はデスクトップの CPU)で測りました。
+## Kotoriで変わること
 
-| 品質 | AJIMEE-Bench | 変換 1 回(中央値) | VRAM | 向いている環境 |
-| --- | ---: | ---: | ---: | --- |
-| Low | 88.0% | 0.06 秒 | 約 0.5 GB | GPU が小さい |
-| **Standard(既定)** | **91.5%** | **0.06 秒** | 約 1.5 GB | GPU あり |
-| High | 92.5% | 0.08 秒 | 約 1.5 GB | 速い GPU |
-| Unreal | 93.0% | 0.26 秒 | High より多い | とても速い GPU |
-| (GPU のない PC) | 83.0% | 0.12〜0.16 秒 | — | ノート PC。どの品質を選んでも自動でこれ |
+<p align="center">
+  <img src="docs/images/features.png" alt="Kotori日本語入力の特長" width="880">
+</p>
+
+**文脈で変換**  
+同じ読みでも、文章の意味に合う候補をAIが選びます。
+
+**Spaceを押す前から予測**  
+入力を止めるとAIが裏で変換と続きを考えます。Tabから予測候補も選べます。
+
+**完全オフライン**  
+辞書もAIモデルもPC内にあります。入力した文章を外部サーバーへ送りません。
+
+**Mozcベース**  
+操作感、学習、ユーザー辞書はMozcをそのまま利用できます。
+
+**GPUがなくても動作**  
+専用GPUがなければ自動的にCPU向け設定になります。
+
+**使わないときはVRAMを解放**  
+10分間入力がなければAIモデルを外し、GPUメモリを空けます。
+
+---
+
+## 実入力で88.4%
+
+<p align="center">
+  <img src="docs/images/ime-comparison.png" alt="IME実入力比較" width="880">
+</p>
+
+AJIMEE-Bench 198問を**実際にIMEへ入力して比較**した結果です。
+
+| IME | 正解率 |
+| --- | ---: |
+| **Kotori日本語入力** | **88.4%** |
+| Microsoft IME | 59.6% |
+| Google 日本語入力 | 58.1% |
+
+同じ入力方法・同じ条件で、Space 1回目の候補を比較しています。
+
+> この比較は2026-10-01時点の Kotori beta.8 / Unreal で測定したものです。  
+> 現在版の再測定値ではありません。
+
+評価方法・CSV・追加ベンチマークは [eval/README.md](eval/README.md) に公開しています。
+
+---
 
 ## インストール
 
-1. [Releases](https://github.com/aruiki/KotoriIME-japanese-/releases/latest) から `Kotori64.msi` をダウンロードして実行します
-   (管理者の確認で「はい」)。「Windows によって PC が保護されました」と出たら「詳細情報」→「実行」。
-2. 入力方式に **Kotori日本語入力** が加わります。Windows キー + Space で切り替え、半角/全角キーでオン/オフ。
-3. 設定はデスクトップの「Kotori日本語入力の設定」から開けます。
+### 1. MSIをダウンロード
 
-新しい版は、前の版の上にそのまま入れられます(v0.3.0-beta.6 以降)。それより前の版が入っているときは、
-一度アンインストールしてから入れてください。アンインストールは「設定」→「アプリ」から行えます。
+**[Kotori64.msi をダウンロード](https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0/Kotori64.msi)**
 
-使い方、データの置き場、アンインストールで残るもの、困ったときの対処は **[使い方と困ったとき](docs/USER_GUIDE.md)** に
-まとめています。不具合・誤変換は [Issues](https://github.com/aruiki/KotoriIME-japanese-/issues/new/choose) へ、
-セキュリティの問題は [SECURITY.md](SECURITY.md) の方法で知らせてください。
+### 2. インストーラーを実行
 
-## 最近の更新
+`Kotori64.msi` を開いてインストールします。
 
-| 版 | 主な変更 |
-| --- | --- |
-| [v1.1.0-rc.3](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.3)(リリース候補) | 折り紙の小鳥のアイコン、設定・辞書のアイコン、インストーラーの背景を更新 |
-| [v1.1.0-rc.2](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.2)(リリース候補) | 最初の候補をAIの評価後に表示。モデル準備中の結果を覚えてしまう問題を修正し、候補欄の余白・選択色・文字種候補の表示を整理 |
-| [v1.1.0-rc.1](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.1)(リリース候補) | **手を止めると、Space を押す前に AI の変換が出る**。Tab の予測も手を止めると出る |
-| [v1.0.0](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.0.0) | **最初の公開版**(署名は 1.0.x で付ける)。診断情報の書き出し、落ちたときの記録(入力した文字は含まない)、通信の部品を外した、第三者の表示 |
-| [v0.3.0-beta.8](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.8) | GPU のない PC で、長い文の変換が速く正確に(打ってすぐ Space の正解 36 → 46 / 60 文) |
-| [v0.3.0-beta.7](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.7) | 10 分使わなければ VRAM を空ける。入力中の GPU の負荷をさらに約 1 割減 |
-| [v0.3.0-beta.6](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.6) | 上書きインストール、予測が邪魔になりにくく、Unreal 93.0%、VRAM 約 170 MB 減 |
-| [v0.3.0-beta.5](https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v0.3.0-beta.5) | ノート PC で固まらない、GPU のない PC 向けの Low、設定画面の不具合の修正 |
+Windowsから「PCが保護されました」と表示された場合は、
 
-すべての版は [Releases](https://github.com/aruiki/KotoriIME-japanese-/releases) にあります。
+**詳細情報 → 実行**
 
-## よくある質問
+を選択してください。
 
-<details>
-<summary><b>インターネットにつながりますか?</b></summary>
+### 3. Kotoriへ切り替える
 
-つながりません。辞書も AI も PC の中にあり、入力した文字を外に送りません。AI が覚えておく予測は
-シークレットモード(プライベートな入力)では作らず、使わないときは捨てます。
-</details>
+インストール後、
 
-<details>
-<summary><b>Google 日本語入力や Mozc と何が違いますか?</b></summary>
+**Windowsキー + Space**
 
-操作と辞書は Mozc と同じです。その上で、変換の最後に AI が文脈を見て候補を選び直し、入力中に文の続きを
-予測します。Kotori日本語入力は Google が提供・推奨するものではありません。
-</details>
+から **Kotori日本語入力** を選択します。
 
-<details>
-<summary><b>GPU がないと使えませんか?</b></summary>
+これで使えます。
 
-使えます。GPU がない PC(内蔵 GPU だけの PC を含む)では、どの品質を選んでも自動で CPU 向けの設定になります
-(AJIMEE-Bench 83.0%、日常の文 97.5%)。AI が時間内に終わらないときは Mozc の結果を出すので、入力が固まりません。
-</details>
+設定はデスクトップの **「Kotori日本語入力の設定」** から変更できます。
 
-<details>
-<summary><b>ゲーム中に VRAM を取られませんか?</b></summary>
+---
 
-日本語を 10 分入力しなければ、AI のモデルを外して VRAM を空けます。次に入力したときに裏で読み込み直します
-(その最初の 1 回だけ、AI なしの変換になることがあります)。
-</details>
+## 必要な環境
 
-<details>
-<summary><b>AI の状態はどこで見られますか?</b></summary>
+| | 必須 | おすすめ |
+| --- | --- | --- |
+| OS | Windows 10 1809以降 / 64bit | Windows 11 |
+| メモリ | 8GB | 16GB |
+| GPU | なくても動作 | Vulkan対応GPU / VRAM 3GB以上 |
+| ディスク | 1.7GB | — |
 
-設定の「AI 変換」タブに、使っている GPU と、実際に動いている AI(読み込み中・休んでいる・動いていない理由)が出ます。
-</details>
+NVIDIA / AMD / Intel Arc の専用GPUは自動検出します。
 
-<details>
-<summary><b>学習やユーザー辞書は使えますか?</b></summary>
+GPUのために追加ソフトを設定する必要はありません。
 
-Mozc の学習とユーザー辞書がそのまま使えます。ユーザー辞書に登録した語は、AI が書き換えません。
-</details>
+---
 
-ほかの症状と対処は [使い方と困ったとき](docs/USER_GUIDE.md#困ったとき) にあります。
+## AIは入力を遅くしない？
 
-## 開発を支援する
+通常の1打鍵はMozcが処理するため、AIの計算完了を待ちません。
 
-Kotoriは無料のオープンソースとして開発しています。[Stripeの開発支援ページ](https://buy.stripe.com/cNi14m7jRdq005f0781ZS08)から支援できます。
-支援の有無によって機能を制限することはありません。
+AIが時間内に変換できなかった場合も、Mozcの結果をそのまま表示します。
+
+<p align="center">
+  <img src="docs/images/lightness.png" alt="Kotori日本語入力の性能" width="880">
+</p>
+
+標準設定ではRTX 3060環境で、AI変換1回の中央値は約 **0.06秒** です。
+
+---
+
+## 仕組み
+
+KotoriはMozcを置き換えるのではなく、**Mozcの変換結果をAIで補強します**。
+
+<p align="center">
+  <img src="docs/images/how.png" alt="Kotori日本語入力の仕組み" width="880">
+</p>
+
+1. Mozcと変換AIが候補を作る
+2. AIが文脈に合う候補を評価する
+3. 読みと一致することを辞書で確認する
+4. 最も自然な候補を表示する
+
+AIが読みにない単語を勝手に追加したり、ユーザー辞書の単語を書き換えたりすることはありません。
+
+詳しい設計は [docs/adr/](docs/adr/) にあります。
+
+---
+
+## 困ったとき
+
+使い方、アンインストール、データの保存場所、トラブル対処は
+
+**[使い方と困ったとき](docs/USER_GUIDE.md)**
+
+にまとめています。
+
+不具合・誤変換は [Issues](https://github.com/aruiki/KotoriIME-japanese-/issues/new/choose) へお願いします。
+
+---
 
 ## 開発者向け
 
-- 現状と次の作業: [docs/HANDOFF.md](docs/HANDOFF.md)、作業カード: [docs/tasks/](docs/tasks/)
-- Mozc への変更とビルド方法: [mozc/README.md](mozc/README.md)、[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)(Bazel、パッチ 3 本)
-- 精度の評価: [eval/README.md](eval/README.md)、性能: [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
-- 設計の記録: [docs/adr/](docs/adr/)、仕様: [docs/SPEC.md](docs/SPEC.md)、開発規約: [AGENTS.md](AGENTS.md)
-- README の画像は `python docs/images/gen_readme_images.py` で作り直せます。
-- Rust 版(以前の実装、参考として残す)は `cargo install just` のあと `just ci` でテストできます。
+- [開発方法](docs/DEVELOPMENT.md)
+- [評価方法](eval/README.md)
+- [性能測定](docs/PERFORMANCE.md)
+- [設計記録](docs/adr/)
+- [仕様](docs/SPEC.md)
+- [開発規約](AGENTS.md)
+
+---
+
+## 開発を支援する
+
+Kotoriは無料のオープンソースソフトウェアとして開発しています。
+
+**[Stripeから開発を支援する](https://buy.stripe.com/cNi14m7jRdq005f0781ZS08)**
+
+支援の有無による機能制限はありません。
+
+---
 
 ## ライセンス
 
-このリポジトリのコードは Apache License 2.0 または MIT License のいずれかを選べます([LICENSE-APACHE](LICENSE-APACHE)、
-[LICENSE-MIT](LICENSE-MIT))。Mozc への変更は Mozc と同じ BSD-3-Clause です。同梱するものは次のとおりです
-(詳しくは [docs/licenses.md](docs/licenses.md))。
+Kotoriのコードは **Apache License 2.0 / MIT License** のデュアルライセンスです。
 
-- Mozc: BSD-3-Clause(Google Inc.)
-- zenz-v2.5-small・medium: CC BY-SA 4.0(Keita Miwa)
-- TinySwallow-1.5B: Apache-2.0(Sakana AI)
-- llama.cpp / ggml: MIT、Qt 6: LGPL-3.0
+Mozcへの変更はBSD-3-Clauseです。
 
-アイコンと README の画像の文字には Noto Serif JP / Noto Sans JP(SIL Open Font License)を使っています。
+同梱コンポーネントを含む詳細は [docs/licenses.md](docs/licenses.md) を参照してください。
+
+---
+
+<h2 align="center">
+  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0/Kotori64.msi">⬇ Kotori日本語入力を試す</a>
+</h2>
+
+<p align="center">
+  Windows 10 / 11・オフライン動作・GPUなしでも利用可能
+</p>
