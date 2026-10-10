@@ -1,3 +1,19 @@
+# 動作状態の実装・軽量更新試作（2026-10-10）
+
+公開v1.1.0のsourceはPR149でmain92e0f32へ統合。今はcodex/runtime-ux-and-small-updates。
+6335の導入ファイル/稼働版と候補のAI評価状態を表示。候補文字列は記録せず、同期側はatomicだけ。
+5対象343ローカルテスト、Windows Qt表示、server/tool build成功。118入力正本/cache/新規clone一致、patch適用成功。
+MSP6333→6334試作21,921,792bytes、cabinetは7プログラム・モデルなし。公開MSIは不変。
+詳細verification/runtime-6335-local-20261010とsmall-update-prototype-20261010。
+
+利用者は「再起動してから確認する」を選択したが、最後に見たbootは11:37:21.5のまま。
+導入済みは6334。6335のMSIをbuild/導入/公開した事実はない。MSPも導入/公開していない。
+次: 再起動完了後にTIP/稼働版と、Space前/Tab/Space候補を少数の実入力で確認。
+その後6335 packageと6334→6335差分を作り、実機更新/取消し/rollback/後続MSIを確認する。
+古いプロセスの検証、mock画面、build成功を新TIPの受入れ成功へ数えない。
+
+以下は履歴。
+
 # v1.1.0正式版公開・6334導入成功（2026-10-10）
 
 利用者の「残りトークンが少ないので軽く確認したら正式版」を優先。全buildローカル、再build/大規模試験は繰り返さない。

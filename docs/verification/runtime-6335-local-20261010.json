@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-10",
+  "parent_commit": "92e0f32",
+  "scope": "local source and mock Windows Qt validation, not installed 6335 acceptance",
+  "build": 6335,
+  "product_version": "3.34.6335.100",
+  "input_count": 118,
+  "input_manifest_sha256": "154a58829202025c267cd98fbf1db396e99a3e0c6f725e5dd9b4e7dcd92b12fc",
+  "patches": [
+    {
+      "name": "0001-kotori-branding.patch",
+      "sha256": "7fc85afbdcd397a00d0fa52738415142b8ac483a00e6d457d1107173e852969b"
+    },
+    {
+      "name": "0002-kotori-lm-rerank.patch",
+      "sha256": "f94265c8535e99f40a9eebdfd312d4bea65e6f700578e218e13bc4d18c110f17"
+    },
+    {
+      "name": "0003-kotori-bundle-model.patch",
+      "sha256": "b75c5a74389cc2cac954776b08775bca46507894d85b04fecb224cbab5f6fb4b"
+    }
+  ],
+  "canonical_cache_fresh_identical": true,
+  "patch_apply_check": true,
+  "changed_source_files": [
+    "src/base/kotori_diagnostics.cc",
+    "src/base/kotori_diagnostics.h",
+    "src/base/kotori_diagnostics_test.cc",
+    "src/engine/engine_converter.cc",
+    "src/engine/engine_converter.h",
+    "src/engine/engine_converter_interface.h",
+    "src/gui/config_dialog/config_dialog.cc",
+    "src/gui/config_dialog/kotori_dashboard_test.cc",
+    "src/rewriter/BUILD.bazel",
+    "src/rewriter/lm_rewriter.cc",
+    "src/session/BUILD.bazel",
+    "src/session/session.cc",
+    "src/session/session.h",
+    "src/session/session_test.cc",
+    "src/version.bzl"
+  ],
+  "local_tests": {
+    "base:kotori_diagnostics_test": {
+      "cases": 7,
+      "status": "PASS"
+    },
+    "gui/config_dialog:kotori_dashboard_test": {
+      "cases": 4,
+      "status": "PASS",
+      "platform": "windows"
+    },
+    "session:session_test": {
+      "cases": 190,
+      "status": "PASS"
+    },
+    "engine:engine_converter_test": {
+      "cases": 90,
+      "status": "PASS"
+    },
+    "rewriter:lm_rewriter_test": {
+      "cases": 52,
+      "status": "PASS"
+    }
+  },
+  "compiled_binaries": {
+    "mozc_server.exe": {
+      "version": "3.34.6335.100",
+      "sha256": "211a7c246ed3a4f375b40482ac0b5bf7d4e28360768234eb973214314a01c285"
+    },
+    "mozc_tool.exe": {
+      "version": "3.34.6335.100",
+      "sha256": "e098502410cbe21977e9e852a1c3fa99d6c8b8e64b092d35a179ab388d931d06"
+    }
+  },
+  "installed_msi_build": 6334,
+  "last_observed_boot": "2026-10-10T11:37:21.5+09:00",
+  "fresh_tip_acceptance": "pending user reboot",
+  "new_msi_build": "unperformed",
+  "ci": "not requested; user requires all builds local",
+  "new_quality_benchmark": "unperformed; ranking, generation, model and confidence rules unchanged"
+}
