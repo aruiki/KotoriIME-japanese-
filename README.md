@@ -1,4 +1,4 @@
-<h1 align="center">Kotori日本語入力</h1>
+<h1 align="center">Kotori日本語入力（完全無料）</h1>
 
 <p align="center">
   <strong>AIで、日本語入力をもっと正確に。</strong><br>
