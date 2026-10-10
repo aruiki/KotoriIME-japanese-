@@ -1,3 +1,26 @@
+# 修正版6334ローカルMSI完成・正式版は実入力の確認待ち（2026-10-10）
+
+ソース e6e35a101fc2849a50489f41e757a471427b39b9。BUILD6334、全buildローカル、package終了0（1035.5秒）。
+MSI SHA 7136ea32e39092ecdc7069cd0834e09d7fc0c2053fb89f3586410d5c8a7a599a、1569173504bytes、48ファイル。
+正本/cache/新規clone118入力/3パッチ一致、WiX内容検査とcompiled binaries/モデル/runtime/英語辞書/元画像一致PASS。
+最終4テストと実モデル18例、Standard183/200=91.5%を維持。誤入力Space2を補正した読みの候補へ改善。
+詳細verification/local-6334-installer-20261010、corrected-alternatives-6334-validation、tasks66/ADR0053。
+成果物C:/Users/aruik/kotori-first-check/corrected-alternatives-6334-release/Kotori64.msi。
+
+Computer Useは接続切れSMB割当てのMXC認証1326を診断し、利用者の一時解除許可で復旧。
+保存済みの2接続プロファイルは保持、現在の割当ては一時切断中。通常sandbox読取りコマンドも復旧。
+導入済み6333の実設定画面で未適用/適用成功/適用無効を確認し、候補数3→4→3を復元保存。
+メモ帳はaが英数として確定し、利用者へKotoriの「あ」への切替えをasyncで依頼中。
+未返答を許可/切替え完了と扱わない。Nativeの初回候補/Tabはまだ未確認。
+
+公開最新版はv1.1.0-rc.5。6334を正式版や新RCとして公開した事実はない。現在の導入先は6333。
+ローカル候補6334の自動導入/ユーザーの再起動はしていない。新MSIの実機導入/更新/削除も未確認。
+次: 入力方式の切替え回答後にComputer Useの新しいWindowを選び、実入力の候補/Tab/Spaceを観測。
+必要なら利用者が6334を導入し、公開候補の版/稼働経路/候補を再照合してから正式版を判定する。
+過去の取消し/接続timeoutやCLI結果を実TSFのPASSへ書き換えない。私的な履歴・NAS割当先は公開しない。
+
+以下は履歴。
+
 # 補正後Space2の手直し・画面操作復旧（2026-10-10）
 
 ユーザーの「完成なら正式版、必要なら手直し」に対し、残る誤入力Space2を改善した。

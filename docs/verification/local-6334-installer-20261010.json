@@ -1,0 +1,334 @@
+{
+  "source_commit": "e6e35a101fc2849a50489f41e757a471427b39b9",
+  "input_manifest_sha256": "3ca8f4653fe5e6fb058d3d9e2e99925e521cee78fd849bc3cf01a8330eca01d5",
+  "product_version": "3.34.6334.100",
+  "previous_version": "3.34.6333.100",
+  "msi_sha256": "7136ea32e39092ecdc7069cd0834e09d7fc0c2053fb89f3586410d5c8a7a599a",
+  "size_bytes": 1569173504,
+  "payload_file_count": 48,
+  "signature": "NotSigned",
+  "local_build": {
+    "source_commit": "e6e35a101fc2849a50489f41e757a471427b39b9",
+    "input_manifest_sha256": "3ca8f4653fe5e6fb058d3d9e2e99925e521cee78fd849bc3cf01a8330eca01d5",
+    "scope": "local package build, no installation",
+    "started": "2026-10-10T13:25:00.2524811+09:00",
+    "ended": "2026-10-10T13:42:15.7102264+09:00",
+    "exit_code": 0,
+    "elapsed_seconds": 1035.4577453
+  },
+  "model_sha256": {
+    "tinyswallow-1.5b-q5_k_m.gguf": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+    "zenz-v2.5-medium-q8_0.gguf": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+    "zenz-v2.5-small-q8_0.gguf": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+  },
+  "runtime": {
+    "ggml-base.dll": {
+      "sha256": "0396d453898eff5f105baf187cd7bfd0d83edba62ebfda0c76c5a2be40170b49",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-alderlake.dll": {
+      "sha256": "da2ce899d47ab23f1542865e57f2df80b1d738b6ebba23a548596b966f7a5d6a",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-cannonlake.dll": {
+      "sha256": "b497e0bdf3e1ead781cb2e10f1601596d3d1afce436a9251ce1368e2168df184",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-cascadelake.dll": {
+      "sha256": "47b6a5490b2a81a253cc3e3b61f68f9ae0338779a95079d5947eae5794e2330b",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-cooperlake.dll": {
+      "sha256": "6ec3ed84e477af453a0879c352e299b690cce2fb1bfa09c55d8304f03dcdc0e5",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-haswell.dll": {
+      "sha256": "48ff33c73c3cc747522822c4d088621a66e15f7c4ff98b6c7689b833913d7e31",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-icelake.dll": {
+      "sha256": "ef5669772ac6e26c223a6930f7c99cb6a2985e315320d0a5ca3edbde4b418fff",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-ivybridge.dll": {
+      "sha256": "b6aebe67cd03d570e05d3aa6f20ab5553a66c755f03d623901800a8dfe0e2754",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-piledriver.dll": {
+      "sha256": "0f51a00760ad893c44a8e4488bd2d54a6a4e260df7feaa67e6ea6e9968d39fd9",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-sandybridge.dll": {
+      "sha256": "f60089e2b0d2e4402b18ce1424c327ddf382b3cbaeca32598820cef354c233d0",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-sapphirerapids.dll": {
+      "sha256": "dc1aa0a345af0a75acce01a6baea881b663cd9320acf3272e8bbf3ec96247390",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-skylakex.dll": {
+      "sha256": "cf95e711a1f0863a61217b94fdbda9f68f87c40507838493360c1f5c1eca3cc5",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-sse42.dll": {
+      "sha256": "33920a25b6855a69169355fae4d9d4b4f968e11a22a8ea95b79c3611a909f7fa",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-x64.dll": {
+      "sha256": "08a7bb90a1640518a5b27a643b8a8b73f18abcd7fe6f92019236c699ea427481",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-cpu-zen4.dll": {
+      "sha256": "5775c2cafa9bd74be8c14cc77d58163461f8f4ec709b859e26041ee023041135",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml-vulkan.dll": {
+      "sha256": "d2d767cc2360cd5fbb4b5301660463605f3d16d433b5a4a94c822c073ee1036d",
+      "same_as_evaluated_runtime": true
+    },
+    "ggml.dll": {
+      "sha256": "92b3d587f6e539077932598941fc2a3f33a679480951d0ddc995554d03158a45",
+      "same_as_evaluated_runtime": true
+    },
+    "llama.dll": {
+      "sha256": "11b7b693e5ba137a88be44b1cd2cd21dda64e046a333253acdff3d23bda33d7c",
+      "same_as_evaluated_runtime": true
+    }
+  },
+  "compiled_binaries": {
+    "mozc_server.exe": "0d5502d7b9626ad98033374b3c511a1bfb4eafd0d33e3fa497df738a922c87ce",
+    "mozc_tool.exe": "9c2bf04163b284ba5cfc5d2fa49ee5f92117552220eec0f9353714d575b53c3e",
+    "mozc_tip64.dll": "76eff95d44b7959240b170532763dc859b8ecb9b6d51e5629def81de0df27d6c"
+  },
+  "shortcuts": {
+    "KotoriDesktopSettings": "Kotori",
+    "KotoriMenuSettings": "Kotori",
+    "KotoriMenuDictionary": "Kotori日本語入力の辞書ツール"
+  },
+  "standard": {
+    "percent": 91.5,
+    "items": 200,
+    "converter_sha256": "543b041396ed83ca1ae98801a44c35af436f2b10b463b0b1046751caa014fc3a",
+    "data_sha256": "e9eb668fd6aa14b1e26436f429b5550108af0a1dfd443b8cea0bcb3ab3028fca",
+    "context": true,
+    "gpu": "NVIDIA GeForce RTX 3060, 617.14"
+  },
+  "real_model_cases": {
+    "rows": 18,
+    "failures": [],
+    "history_rewriter": true,
+    "copied_installed_history": true,
+    "exe_sha256": "14c4ed0eb4d407b00262c371df6151cd6a5f685014c6d39c09c902f4ebf7f84b",
+    "scope": "real models, copied installed history, history rewriter ON; not native TSF",
+    "space2_typo": "ちょっとまってください"
+  },
+  "tests": {
+    "targets": [
+      "engine_converter_test",
+      "candidate_test",
+      "lm_rewriter_test",
+      "english_variants_rewriter_test"
+    ],
+    "exit": 0
+  },
+  "scope": "local MSI contents verified; new MSI installed/native TSF/update/uninstall not verified",
+  "native_rc5_settings": "actual installed UI success; count restored to 3",
+  "checked_at": "2026-10-10T13:43:26.141236+09:00",
+  "payload": [
+    {
+      "name": "KotoriEnglish-source.json",
+      "sha256": "092885594c988c7f7f34bd4b3a84e1429d67e0edb21a24cda2ce9678aa67ca87"
+    },
+    {
+      "name": "KotoriEnglish.tsv",
+      "sha256": "91748ec2fa4bfe310793d38badbdb0c7b05aeff221e0241d91aaaa017fe1e6dd"
+    },
+    {
+      "name": "LICENSE-GPL-3.0.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "name": "LICENSE-llama.cpp.txt",
+      "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+    },
+    {
+      "name": "LICENSE-llvm-openmp.txt",
+      "sha256": "fdad1758a9e1f9d5a81e18879b3406772115edc92c24bfa36b70c654f325e8e4"
+    },
+    {
+      "name": "NOTICE-katakana-english.txt",
+      "sha256": "0d28376cedbb7ae9a39b4d06c61f07e67da49b00d0125e8f0fbcbc62e78275b3"
+    },
+    {
+      "name": "NOTICE-third-party.txt",
+      "sha256": "54c1dc9f1540cf56318ccdd88374820149205bd908f3dec24355bd52b5a6c124"
+    },
+    {
+      "name": "NOTICE-tinyswallow.txt",
+      "sha256": "f44e2579a09ebc059b8a9a59d80350950d3147dd0f564c76c305fbee0a40cc70"
+    },
+    {
+      "name": "NOTICE-zenz.txt",
+      "sha256": "eae7850eefbff66d0cd61594c09f96b6254b103980d20248ec534dafae137739"
+    },
+    {
+      "name": "Qt6Core.dll",
+      "sha256": "6a05a9b21ff3e604564bed338deaba6d65063387520d782a4a6ea367dd4e618a"
+    },
+    {
+      "name": "Qt6Gui.dll",
+      "sha256": "a85e6c59d5853205deb3c556f0776986b6dddbbdb133e48007a024236897045a"
+    },
+    {
+      "name": "Qt6Widgets.dll",
+      "sha256": "e209dc87f141128b6865ee966f3ef8e981949fb6ba770230ce0fb1289789e0fd"
+    },
+    {
+      "name": "documents/credits_en.html",
+      "sha256": "dd7c566382204f448040095e5d3c2f2b5199a1b85d44f427ceb94277dc04af50"
+    },
+    {
+      "name": "ggml-base.dll",
+      "sha256": "0396d453898eff5f105baf187cd7bfd0d83edba62ebfda0c76c5a2be40170b49"
+    },
+    {
+      "name": "ggml-cpu-alderlake.dll",
+      "sha256": "da2ce899d47ab23f1542865e57f2df80b1d738b6ebba23a548596b966f7a5d6a"
+    },
+    {
+      "name": "ggml-cpu-cannonlake.dll",
+      "sha256": "b497e0bdf3e1ead781cb2e10f1601596d3d1afce436a9251ce1368e2168df184"
+    },
+    {
+      "name": "ggml-cpu-cascadelake.dll",
+      "sha256": "47b6a5490b2a81a253cc3e3b61f68f9ae0338779a95079d5947eae5794e2330b"
+    },
+    {
+      "name": "ggml-cpu-cooperlake.dll",
+      "sha256": "6ec3ed84e477af453a0879c352e299b690cce2fb1bfa09c55d8304f03dcdc0e5"
+    },
+    {
+      "name": "ggml-cpu-haswell.dll",
+      "sha256": "48ff33c73c3cc747522822c4d088621a66e15f7c4ff98b6c7689b833913d7e31"
+    },
+    {
+      "name": "ggml-cpu-icelake.dll",
+      "sha256": "ef5669772ac6e26c223a6930f7c99cb6a2985e315320d0a5ca3edbde4b418fff"
+    },
+    {
+      "name": "ggml-cpu-ivybridge.dll",
+      "sha256": "b6aebe67cd03d570e05d3aa6f20ab5553a66c755f03d623901800a8dfe0e2754"
+    },
+    {
+      "name": "ggml-cpu-piledriver.dll",
+      "sha256": "0f51a00760ad893c44a8e4488bd2d54a6a4e260df7feaa67e6ea6e9968d39fd9"
+    },
+    {
+      "name": "ggml-cpu-sandybridge.dll",
+      "sha256": "f60089e2b0d2e4402b18ce1424c327ddf382b3cbaeca32598820cef354c233d0"
+    },
+    {
+      "name": "ggml-cpu-sapphirerapids.dll",
+      "sha256": "dc1aa0a345af0a75acce01a6baea881b663cd9320acf3272e8bbf3ec96247390"
+    },
+    {
+      "name": "ggml-cpu-skylakex.dll",
+      "sha256": "cf95e711a1f0863a61217b94fdbda9f68f87c40507838493360c1f5c1eca3cc5"
+    },
+    {
+      "name": "ggml-cpu-sse42.dll",
+      "sha256": "33920a25b6855a69169355fae4d9d4b4f968e11a22a8ea95b79c3611a909f7fa"
+    },
+    {
+      "name": "ggml-cpu-x64.dll",
+      "sha256": "08a7bb90a1640518a5b27a643b8a8b73f18abcd7fe6f92019236c699ea427481"
+    },
+    {
+      "name": "ggml-cpu-zen4.dll",
+      "sha256": "5775c2cafa9bd74be8c14cc77d58163461f8f4ec709b859e26041ee023041135"
+    },
+    {
+      "name": "ggml-vulkan.dll",
+      "sha256": "d2d767cc2360cd5fbb4b5301660463605f3d16d433b5a4a94c822c073ee1036d"
+    },
+    {
+      "name": "ggml.dll",
+      "sha256": "92b3d587f6e539077932598941fc2a3f33a679480951d0ddc995554d03158a45"
+    },
+    {
+      "name": "libomp.dll",
+      "sha256": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c"
+    },
+    {
+      "name": "llama.dll",
+      "sha256": "11b7b693e5ba137a88be44b1cd2cd21dda64e046a333253acdff3d23bda33d7c"
+    },
+    {
+      "name": "mozc_broker.exe",
+      "sha256": "464582559978e04230dea78708ee428934a52a66d135fbb7a8964d0597f43a4c"
+    },
+    {
+      "name": "mozc_cache_service.exe",
+      "sha256": "f9108b910874dd44ebfc2261f81d2e5a6b96812b6089cafbec9850e38f5335f0"
+    },
+    {
+      "name": "mozc_renderer.exe",
+      "sha256": "e805d4afa14f3da27cebb393341b33fe28ffa68dd8fc34e762f200e369128953"
+    },
+    {
+      "name": "mozc_server.exe",
+      "sha256": "0d5502d7b9626ad98033374b3c511a1bfb4eafd0d33e3fa497df738a922c87ce"
+    },
+    {
+      "name": "mozc_tip32.dll",
+      "sha256": "ec9ad2941f5cc56e116b51262fbe340f67b208774858a7dbab450cf7de259093"
+    },
+    {
+      "name": "mozc_tip64.dll",
+      "sha256": "76eff95d44b7959240b170532763dc859b8ecb9b6d51e5629def81de0df27d6c"
+    },
+    {
+      "name": "mozc_tool.exe",
+      "sha256": "9c2bf04163b284ba5cfc5d2fa49ee5f92117552220eec0f9353714d575b53c3e"
+    },
+    {
+      "name": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "name": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "name": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "name": "platforms/qwindows.dll",
+      "sha256": "2f2ce5db5d40afc8c6b776aac45f6d1d0ba2145d363b0d1cd335d3ad762aa33f"
+    },
+    {
+      "name": "tinyswallow-1.5b-q5_k_m.gguf",
+      "sha256": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8"
+    },
+    {
+      "name": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "name": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "name": "zenz-v2.5-medium-q8_0.gguf",
+      "sha256": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac"
+    },
+    {
+      "name": "zenz-v2.5-small-q8_0.gguf",
+      "sha256": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c"
+    }
+  ],
+  "artifact_kind": "local installer candidate, not published stable",
+  "latest_public_tag": "v1.1.0-rc.5",
+  "native_conversion_status": "User asked to select Kotori hiragana mode in Notepad; confirmation pending. New6334 native input/update/uninstall unverified."
+}

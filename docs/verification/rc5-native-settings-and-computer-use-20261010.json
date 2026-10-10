@@ -9,7 +9,8 @@
     "authorized_action": "Temporarily remove active SMB mappings, keep saved reconnect profiles",
     "after": "Trivial JS, sky initialization, list_windows, installed Kotori settings capture and interaction succeeded",
     "saved_mapping_profiles_retained": true,
-    "private_diagnostic_folder": "computer-use-recovery-20261010"
+    "private_diagnostic_folder": "computer-use-recovery-20261010",
+    "sandbox_readonly_shell_restored": true
   },
   "settings_native": {
     "window_title": "Kotori",
