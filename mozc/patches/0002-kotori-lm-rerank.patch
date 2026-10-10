@@ -681,23 +681,25 @@ index 000000000..cbd6e6dc7
 +    }),
 +)
 diff --git a/src/converter/candidate.cc b/src/converter/candidate.cc
-index 18a83698f..5372cc894 100644
+index 18a83698f..bc10c35c0 100644
 --- a/src/converter/candidate.cc
 +++ b/src/converter/candidate.cc
-@@ -59,6 +59,8 @@ void Candidate::Clear() {
+@@ -59,6 +59,10 @@ void Candidate::Clear() {
    content_value.clear();
    content_key.clear();
    consumed_key_size = 0;
 +  kotori_confident_prediction = false;
 +  kotori_ai_evaluated = false;
++  kotori_corrected_reading.clear();
++  kotori_nuance_alternative = false;
    converted_segment_count = 1;
    prefix.clear();
    suffix.clear();
 diff --git a/src/converter/candidate.h b/src/converter/candidate.h
-index b75c095d5..1f473158e 100644
+index b75c095d5..411f91543 100644
 --- a/src/converter/candidate.h
 +++ b/src/converter/candidate.h
-@@ -84,6 +84,13 @@ class Candidate {
+@@ -84,6 +84,15 @@ class Candidate {
  
    uint32_t consumed_key_size = 0;
  
@@ -705,12 +707,38 @@ index b75c095d5..1f473158e 100644
 +  // 保存・学習用の属性ではなく、この要求の候補だけに付ける。
 +  bool kotori_confident_prediction = false;
 +  bool kotori_ai_evaluated = false;
++  // Kotori: 同じ入力世代で検証した、誤入力補正後の読み。保存・学習しない。
++  std::string kotori_corrected_reading;
 +  // Kotori: 意味の別候補を選んだら変更箇所へ焦点を移す。
 +  bool kotori_nuance_alternative = false;
 +
    // Number of whole conversion segments covered/consumed by this candidate,
    // starting from the current segment.
    //
+diff --git a/src/converter/candidate_test.cc b/src/converter/candidate_test.cc
+index c77da1f3b..f6b15e279 100644
+--- a/src/converter/candidate_test.cc
++++ b/src/converter/candidate_test.cc
+@@ -177,6 +177,19 @@ TEST(CandidateTest, InnerSegmentIterator) {
+   }
+ }
+ 
++TEST(CandidateTest, ClearRemovesTransientKotoriCorrectionAndFocus) {
++  Candidate candidate;
++  candidate.kotori_corrected_reading = "ちょっとまってください";
++  candidate.kotori_ai_evaluated = true;
++  candidate.kotori_confident_prediction = true;
++  candidate.kotori_nuance_alternative = true;
++  candidate.Clear();
++  EXPECT_TRUE(candidate.kotori_corrected_reading.empty());
++  EXPECT_FALSE(candidate.kotori_ai_evaluated);
++  EXPECT_FALSE(candidate.kotori_confident_prediction);
++  EXPECT_FALSE(candidate.kotori_nuance_alternative);
++}
++
+ TEST(CandidateTest, EffectiveConvertedSegmentCount) {
+   Candidate candidate;
+ 
 diff --git a/src/converter/immutable_converter.cc b/src/converter/immutable_converter.cc
 index 448b6c25a..d62a1ff22 100644
 --- a/src/converter/immutable_converter.cc
@@ -19903,7 +19931,7 @@ zL@613W7Zf1G&4<#nt(BZ;xoE2_j8mrXY(!KeiIne+sK-zQeq6KNh!`3eBt9B?)?Em
 Ce@$lq
 
 diff --git a/src/engine/engine_converter.cc b/src/engine/engine_converter.cc
-index fd03a6c0c..fdaf00e70 100644
+index fd03a6c0c..0ebf41883 100644
 --- a/src/engine/engine_converter.cc
 +++ b/src/engine/engine_converter.cc
 @@ -130,6 +130,39 @@ EngineConverter::EngineConverter(
@@ -19962,7 +19990,101 @@ index fd03a6c0c..fdaf00e70 100644
            .SetComposer(composer)
            .SetRequestView(*request_)
            .SetContextView(context)
-@@ -490,6 +525,7 @@ bool EngineConverter::SwitchKanaType(const composer::Composer& composer) {
+@@ -170,6 +205,7 @@ bool EngineConverter::Convert(const composer::Composer& composer,
+     return false;
+   }
+ 
++  KotoriPopulateCorrectedAlternatives(conversion_request);
+   segment_index_ = 0;
+   state_ = CONVERSION;
+   // If TalkBack is enabled, the candidate list should be always visible to
+@@ -181,6 +217,85 @@ bool EngineConverter::Convert(const composer::Composer& composer,
+   return true;
+ }
+ 
++// Kotori: 補正前の読みの別候補へ戻らないよう、補正済みの読みで辞書候補を作る。
++// 入力の読みは変更せず、AI/モデル読込みを省く。元の候補も明示して残す。
++void EngineConverter::KotoriPopulateCorrectedAlternatives(
++    const ConversionRequest& request) {
++  if (!request.config().kotori_lm_enabled() || request.incognito_mode() ||
++      request.context().input_field_type() == commands::Context::PASSWORD ||
++      !request.kotori_input_generation().IsCurrent() ||
++      segments_.conversion_segments_size() != 1) return;
++  const Segment& original = segments_.conversion_segment(0);
++  if (original.candidates_size() == 0) return;
++  const converter::Candidate top = original.candidate(0);
++  const std::string typed_reading(original.key());
++  if (!top.kotori_ai_evaluated || top.kotori_corrected_reading.empty() ||
++      top.kotori_corrected_reading == typed_reading || top.key != typed_reading ||
++      typed_reading != request.key()) return;
++
++  ConversionRequest::Options options = request.options();
++  options.skip_slow_rewriters = true;
++  options.kotori_preview = false;
++  const ConversionRequest corrected_request = ConversionRequestBuilder()
++      .SetConversionRequestView(request)
++      .SetOptions(options)
++      .SetKey(top.kotori_corrected_reading)
++      .Build();
++  Segments corrected = segments_;
++  corrected.clear_conversion_segments();
++  if (!converter_->StartConversion(corrected_request, &corrected) ||
++      corrected.conversion_segments_size() == 0) return;
++  std::string corrected_key, base_value;
++  for (const Segment& segment : corrected.conversion_segments()) {
++    if (segment.candidates_size() == 0) return;
++    corrected_key += segment.key();
++    base_value += segment.candidate(0).value;
++  }
++  if (corrected_key != top.kotori_corrected_reading) return;
++  constexpr size_t kMaxAlternatives = 8;
++  std::vector<std::string> values;
++  auto add = [&](const std::string& value) {
++    if (!value.empty() && value != top.value && values.size() < kMaxAlternatives &&
++        std::find(values.begin(), values.end(), value) == values.end()) {
++      values.push_back(value);
++    }
++  };
++  add(base_value);
++  for (const auto& candidate : corrected.kotori_sentences()) {
++    if (candidate.key == corrected_key) add(candidate.value);
++  }
++  // 全文候補が少ないときも、補正した読みの文節候補を文全体として選べる。
++  size_t offset = 0;
++  for (const Segment& segment : corrected.conversion_segments()) {
++    const std::string& value = segment.candidate(0).value;
++    for (size_t i = 1; i < std::min<size_t>(segment.candidates_size(), 5); ++i) {
++      const auto& candidate = segment.candidate(i);
++      if (candidate.key != segment.key() ||
++          candidate.effective_converted_segment_count() != 1) continue;
++      add(base_value.substr(0, offset) + candidate.value +
++          base_value.substr(offset + value.size()));
++    }
++    offset += value.size();
++  }
++  add(corrected_key);
++  Segment* destination = segments_.mutable_conversion_segment(0);
++  for (size_t i = 1; i < destination->candidates_size(); ++i) {
++    auto* candidate = destination->mutable_candidate(i);
++    if (candidate->description.empty()) candidate->description = "補正前の読み";
++  }
++  size_t insert_at = 1;
++  for (const std::string& value : values) {
++    converter::Candidate candidate;
++    candidate.key = candidate.content_key = typed_reading;
++    candidate.value = candidate.content_value = value;
++    candidate.consumed_key_size = Util::CharsLen(typed_reading);
++    candidate.attributes = converter::Attribute::SPELLING_CORRECTION |
++                           converter::Attribute::NO_LEARNING;
++    candidate.description = candidate.a11y_description = "補正した読み";
++    *destination->insert_candidate(insert_at++) = std::move(candidate);
++  }
++}
++
+ bool EngineConverter::GetReadingText(absl::string_view source_text,
+                                      std::string* reading) {
+   DCHECK(reading);
+@@ -490,6 +605,7 @@ bool EngineConverter::SwitchKanaType(const composer::Composer& composer) {
  bool EngineConverter::Suggest(const composer::Composer& composer,
                                const commands::Context& context,
                                const ConversionPreferences& preferences) {
@@ -19970,7 +20092,7 @@ index fd03a6c0c..fdaf00e70 100644
    DCHECK(CheckState(COMPOSITION | SUGGESTION));
    candidate_list_visible_ = false;
  
-@@ -541,6 +577,7 @@ bool EngineConverter::Suggest(const composer::Composer& composer,
+@@ -541,6 +657,7 @@ bool EngineConverter::Suggest(const composer::Composer& composer,
    DCHECK(config_);
    const ConversionRequest conversion_request =
        ConversionRequestBuilder()
@@ -19978,7 +20100,7 @@ index fd03a6c0c..fdaf00e70 100644
            .SetComposer(composer)
            .SetRequestView(*request_)
            .SetContextView(context)
-@@ -604,6 +641,79 @@ bool EngineConverter::Suggest(const composer::Composer& composer,
+@@ -604,6 +721,79 @@ bool EngineConverter::Suggest(const composer::Composer& composer,
    return true;
  }
  
@@ -20058,7 +20180,7 @@ index fd03a6c0c..fdaf00e70 100644
  bool EngineConverter::IsEmptySegment(const Segment& segment) const {
    return ((segment.candidates_size() == 0) &&
            (segment.meta_candidates_size() == 0));
-@@ -612,6 +722,7 @@ bool EngineConverter::IsEmptySegment(const Segment& segment) const {
+@@ -612,6 +802,7 @@ bool EngineConverter::IsEmptySegment(const Segment& segment) const {
  bool EngineConverter::Predict(const composer::Composer& composer,
                                const commands::Context& context,
                                const ConversionPreferences& preferences) {
@@ -20066,7 +20188,7 @@ index fd03a6c0c..fdaf00e70 100644
    // TODO(komatsu): DCHECK should be
    // DCHECK(CheckState(COMPOSITION | SUGGESTION | PREDICTION));
    DCHECK(CheckState(COMPOSITION | SUGGESTION | CONVERSION | PREDICTION));
-@@ -626,6 +737,7 @@ bool EngineConverter::Predict(const composer::Composer& composer,
+@@ -626,6 +817,7 @@ bool EngineConverter::Predict(const composer::Composer& composer,
    options.use_actual_converter_for_realtime_conversion = true;
    const ConversionRequest conversion_request =
        ConversionRequestBuilder()
@@ -20074,7 +20196,7 @@ index fd03a6c0c..fdaf00e70 100644
            .SetComposer(composer)
            .SetRequestView(*request_)
            .SetContextView(context)
-@@ -690,7 +802,27 @@ void EngineConverter::MaybeExpandPrediction(
+@@ -690,7 +882,27 @@ void EngineConverter::MaybeExpandPrediction(
    UpdateSelectedCandidateIndex();
  }
  
@@ -20102,7 +20224,7 @@ index fd03a6c0c..fdaf00e70 100644
    DCHECK(CheckState(SUGGESTION | PREDICTION | CONVERSION));
    ResetResult();
  
-@@ -700,6 +832,7 @@ void EngineConverter::Cancel() {
+@@ -700,6 +912,7 @@ void EngineConverter::Cancel() {
  }
  
  void EngineConverter::Reset() {
@@ -20110,7 +20232,7 @@ index fd03a6c0c..fdaf00e70 100644
    DCHECK(CheckState(COMPOSITION | SUGGESTION | PREDICTION | CONVERSION));
  
    // Even if composition mode, call ResetConversion
-@@ -717,6 +850,7 @@ void EngineConverter::Reset() {
+@@ -717,6 +930,7 @@ void EngineConverter::Reset() {
  
  void EngineConverter::Commit(const composer::Composer& composer,
                               const commands::Context& context) {
@@ -20118,7 +20240,7 @@ index fd03a6c0c..fdaf00e70 100644
    DCHECK(CheckState(PREDICTION | CONVERSION));
    ResetResult();
  
-@@ -748,6 +882,7 @@ void EngineConverter::Commit(const composer::Composer& composer,
+@@ -748,6 +962,7 @@ void EngineConverter::Commit(const composer::Composer& composer,
  
  void EngineConverter::CommitContext(const composer::Composer& composer,
                                      const commands::Context& context) {
@@ -20126,7 +20248,7 @@ index fd03a6c0c..fdaf00e70 100644
    const ConversionRequest conversion_request = ConversionRequestBuilder()
                                                     .SetComposer(composer)
                                                     .SetRequestView(*request_)
-@@ -760,6 +895,7 @@ void EngineConverter::CommitContext(const composer::Composer& composer,
+@@ -760,6 +975,7 @@ void EngineConverter::CommitContext(const composer::Composer& composer,
  bool EngineConverter::CommitSuggestionInternal(
      const composer::Composer& composer, const commands::Context& context,
      size_t* consumed_key_size) {
@@ -20134,7 +20256,7 @@ index fd03a6c0c..fdaf00e70 100644
    DCHECK(consumed_key_size);
    DCHECK(CheckState(SUGGESTION));
    ResetResult();
-@@ -860,6 +996,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
+@@ -860,6 +1076,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
                                               const commands::Context& context,
                                               size_t segments_to_commit,
                                               size_t* consumed_key_size) {
@@ -20142,7 +20264,7 @@ index fd03a6c0c..fdaf00e70 100644
    DCHECK(CheckState(PREDICTION | CONVERSION));
    DCHECK(segments_.conversion_segments_size() >= segments_to_commit);
    ResetResult();
-@@ -919,6 +1056,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
+@@ -919,6 +1136,7 @@ void EngineConverter::CommitSegmentsInternal(const composer::Composer& composer,
  
  void EngineConverter::CommitPreedit(const composer::Composer& composer,
                                      const commands::Context& context) {
@@ -20150,7 +20272,7 @@ index fd03a6c0c..fdaf00e70 100644
    const std::string key = composer.GetQueryForConversion();
    const std::string preedit = composer.GetStringForSubmission();
    std::string normalized_preedit = TextNormalizer::NormalizeText(preedit);
-@@ -956,6 +1094,7 @@ void EngineConverter::CommitPreedit(const composer::Composer& composer,
+@@ -956,6 +1174,7 @@ void EngineConverter::CommitPreedit(const composer::Composer& composer,
  void EngineConverter::CommitHead(size_t count,
                                   const composer::Composer& composer,
                                   size_t* consumed_key_size) {
@@ -20158,7 +20280,7 @@ index fd03a6c0c..fdaf00e70 100644
    std::string preedit = composer.GetStringForSubmission();
    if (count > preedit.length()) {
      *consumed_key_size = preedit.length();
-@@ -1112,14 +1251,121 @@ void EngineConverter::SegmentWidthShrink(const composer::Composer& composer) {
+@@ -1112,14 +1331,121 @@ void EngineConverter::SegmentWidthShrink(const composer::Composer& composer) {
    ResizeSegmentWidth(composer, -1);
  }
  
@@ -20280,7 +20402,7 @@ index fd03a6c0c..fdaf00e70 100644
    SegmentFocus();
  }
  
-@@ -1128,6 +1374,11 @@ void EngineConverter::CandidateNextPage() {
+@@ -1128,6 +1454,11 @@ void EngineConverter::CandidateNextPage() {
    ResetResult();
  
    candidate_list_.MoveNextPage();
@@ -20292,7 +20414,7 @@ index fd03a6c0c..fdaf00e70 100644
    candidate_list_visible_ = true;
    UpdateSelectedCandidateIndex();
    SegmentFocus();
-@@ -1138,6 +1389,11 @@ void EngineConverter::CandidatePrev() {
+@@ -1138,6 +1469,11 @@ void EngineConverter::CandidatePrev() {
    ResetResult();
  
    candidate_list_.MovePrev();
@@ -20304,7 +20426,7 @@ index fd03a6c0c..fdaf00e70 100644
    candidate_list_visible_ = true;
    UpdateSelectedCandidateIndex();
    SegmentFocus();
-@@ -1148,6 +1404,11 @@ void EngineConverter::CandidatePrevPage() {
+@@ -1148,6 +1484,11 @@ void EngineConverter::CandidatePrevPage() {
    ResetResult();
  
    candidate_list_.MovePrevPage();
@@ -20316,7 +20438,7 @@ index fd03a6c0c..fdaf00e70 100644
    candidate_list_visible_ = true;
    UpdateSelectedCandidateIndex();
    SegmentFocus();
-@@ -1297,6 +1558,7 @@ void EngineConverter::FillOutput(const composer::Composer& composer,
+@@ -1297,6 +1638,7 @@ void EngineConverter::FillOutput(const composer::Composer& composer,
    if (CheckState(SUGGESTION | PREDICTION | CONVERSION) &&
        candidate_list_visible_) {
      FillCandidateWindow(output->mutable_candidate_window());
@@ -20324,7 +20446,7 @@ index fd03a6c0c..fdaf00e70 100644
    }
  
    // All candidate words
-@@ -1319,6 +1581,9 @@ EngineConverter* EngineConverter::Clone() const {
+@@ -1319,6 +1661,9 @@ EngineConverter* EngineConverter::Clone() const {
    EngineConverter* engine_converter =
        new EngineConverter(converter_, request_, config_);
    *engine_converter = *this;
@@ -20334,7 +20456,7 @@ index fd03a6c0c..fdaf00e70 100644
  
    if (engine_converter->CheckState(SUGGESTION | PREDICTION | CONVERSION)) {
      // UpdateCandidateList() is not simple setter and it uses some members.
-@@ -1712,6 +1977,26 @@ void EngineConverter::FillCandidateWindow(
+@@ -1712,6 +2057,26 @@ void EngineConverter::FillCandidateWindow(
    output::FillCandidateWindow(segment, candidate_list_, position,
                                candidate_window);
  
@@ -20361,7 +20483,7 @@ index fd03a6c0c..fdaf00e70 100644
    // Shortcut keys
    if (CheckState(PREDICTION | CONVERSION)) {
      output::FillShortcuts(GetCandidateShortcuts(selection_shortcut_),
-@@ -1823,12 +2108,18 @@ void EngineConverter::FillIncognitoCandidateWords(
+@@ -1823,12 +2188,18 @@ void EngineConverter::FillIncognitoCandidateWords(
  void EngineConverter::SetRequest(
      std::shared_ptr<const commands::Request> request) {
    DCHECK(request);
@@ -20380,7 +20502,7 @@ index fd03a6c0c..fdaf00e70 100644
    config_ = std::move(config);
    updated_command_ = converter::Candidate::DEFAULT_COMMAND;
    selection_shortcut_ = config_->selection_shortcut();
-@@ -1836,6 +2127,7 @@ void EngineConverter::SetConfig(std::shared_ptr<const config::Config> config) {
+@@ -1836,6 +2207,7 @@ void EngineConverter::SetConfig(std::shared_ptr<const config::Config> config) {
  }
  
  void EngineConverter::OnStartComposition(const commands::Context& context) {
@@ -20389,7 +20511,7 @@ index fd03a6c0c..fdaf00e70 100644
    if (context.has_revision()) {
      revision_changed = (context.revision() != client_revision_);
 diff --git a/src/engine/engine_converter.h b/src/engine/engine_converter.h
-index 6d061cfca..893ed574c 100644
+index 6d061cfca..481c6578b 100644
 --- a/src/engine/engine_converter.h
 +++ b/src/engine/engine_converter.h
 @@ -32,6 +32,7 @@
@@ -20429,7 +20551,7 @@ index 6d061cfca..893ed574c 100644
  
    // Clears conversion segments and the context.
    void Reset() override;
-@@ -274,6 +283,19 @@ class EngineConverter : public EngineConverterInterface {
+@@ -274,6 +283,20 @@ class EngineConverter : public EngineConverterInterface {
  
    friend class EngineConverterTest;
  
@@ -20437,6 +20559,7 @@ index 6d061cfca..893ed574c 100644
 +  ConversionRequest::KotoriInputGeneration KotoriObserveInput(
 +      const composer::Composer& composer);
 +  void KotoriInvalidateInput();
++  void KotoriPopulateCorrectedAlternatives(const ConversionRequest& request);
 +  std::shared_ptr<std::atomic<uint64_t>> kotori_input_generation_ =
 +      std::make_shared<std::atomic<uint64_t>>(1);
 +  std::string kotori_last_input_;
@@ -20449,7 +20572,7 @@ index 6d061cfca..893ed574c 100644
    // Resets the result value stored at the previous command.
    void ResetResult();
  
-@@ -344,6 +366,8 @@ class EngineConverter : public EngineConverterInterface {
+@@ -344,6 +367,8 @@ class EngineConverter : public EngineConverterInterface {
    // Returns true if the selected candidate on the first segment covers all
    // conversion segments.
    bool IsFullSentenceCandidateSelected() const;
@@ -20491,7 +20614,7 @@ index f8e3b43ec..cdc093111 100644
    virtual void Reset() = 0;
  
 diff --git a/src/engine/engine_converter_test.cc b/src/engine/engine_converter_test.cc
-index 808058c64..4b1821399 100644
+index 808058c64..705f1c208 100644
 --- a/src/engine/engine_converter_test.cc
 +++ b/src/engine/engine_converter_test.cc
 @@ -111,6 +111,7 @@ class EngineConverterTest : public testing::TestWithTempUserProfile {
@@ -20550,10 +20673,97 @@ index 808058c64..4b1821399 100644
  TEST_F(EngineConverterTest, AppendCandidateListForRequestTypes) {
    auto mock_converter = std::make_shared<MockConverter>();
    EngineConverter converter(mock_converter, request_, config_);
-@@ -3970,6 +4005,94 @@ TEST_F(EngineConverterTest, PredictWithContext) {
+@@ -3970,6 +4005,181 @@ TEST_F(EngineConverterTest, PredictWithContext) {
    EXPECT_TRUE(converter.Predict(*composer_, context));
  }
  
++TEST_F(EngineConverterTest, CorrectedReadingAlternativesKeepTypoFixed) {
++  config_->set_kotori_lm_enabled(true);
++  auto mock = std::make_shared<MockConverter>();
++  EngineConverter converter(mock, request_, config_);
++  Segments original;
++  AddSegmentWithSingleCandidate(&original, "ちょとまってください", "ちょっと待ってください");
++  auto* top = original.mutable_conversion_segment(0)->mutable_candidate(0);
++  top->kotori_ai_evaluated = true;
++  top->kotori_corrected_reading = "ちょっとまってください";
++  auto* old = original.mutable_conversion_segment(0)->add_candidate();
++  old->key = old->content_key = "ちょとまってください";
++  old->value = old->content_value = "ちょ止まってください";
++  Segments corrected;
++  AddSegmentWithSingleCandidate(&corrected, "ちょっとまってください", "ちょっと待って下さい");
++  EXPECT_CALL(*mock, StartConversion(_, _))
++      .WillOnce(DoAll(SetArgPointee<1>(original), Return(true)))
++      .WillOnce([&](const ConversionRequest& request, Segments* output) {
++        EXPECT_EQ(request.key(), "ちょっとまってください");
++        EXPECT_TRUE(request.options().skip_slow_rewriters);
++        EXPECT_TRUE(request.kotori_input_generation().IsCurrent());
++        *output = corrected;
++        return true;
++      });
++  composer_->InsertCharacterPreedit("ちょとまってください");
++  ASSERT_TRUE(converter.Convert(*composer_));
++  commands::Output output;
++  converter.FillOutput(*composer_, &output);
++  EXPECT_EQ(output.preedit().segment(0).value(), "ちょっと待ってください");
++  EXPECT_CALL(*mock, CommitSegmentValue(_, _, _)).Times(0);
++  EXPECT_CALL(*mock, FocusSegmentValue(_, 0, 1)).WillOnce(Return(true));
++  converter.CandidateNext(*composer_);
++  output.Clear();
++  converter.FillOutput(*composer_, &output);
++  EXPECT_FALSE(output.has_result());
++  ASSERT_EQ(output.preedit().segment_size(), 1);
++  EXPECT_EQ(output.preedit().segment(0).key(), "ちょとまってください");
++  EXPECT_EQ(output.preedit().segment(0).value(), "ちょっと待って下さい");
++  const auto& segment = GetSegments(converter).conversion_segment(0);
++  EXPECT_EQ(segment.candidate(1).key, "ちょとまってください");
++  EXPECT_EQ(segment.candidate(1).attributes & converter::Attribute::NO_LEARNING,
++            converter::Attribute::NO_LEARNING);
++  EXPECT_EQ(segment.candidate(segment.candidates_size() - 1).value, "ちょ止まってください");
++  EXPECT_EQ(segment.candidate(segment.candidates_size() - 1).description, "補正前の読み");
++  EXPECT_EQ(composer_->GetQueryForConversion(), "ちょとまってください");
++}
++
++TEST_F(EngineConverterTest, CorrectedReadingRejectsDisabledAndProtectedInput) {
++  for (int mode = 0; mode < 3; ++mode) {
++    config_->set_kotori_lm_enabled(mode != 0);
++    config_->set_incognito_mode(mode == 1);
++    auto mock = std::make_shared<MockConverter>();
++    EngineConverter converter(mock, request_, config_);
++    Segments segments;
++    AddSegmentWithSingleCandidate(&segments, "ちょとまってください", "ちょっと待ってください");
++    auto* top = segments.mutable_conversion_segment(0)->mutable_candidate(0);
++    top->kotori_ai_evaluated = true;
++    top->kotori_corrected_reading = "ちょっとまってください";
++    EXPECT_CALL(*mock, StartConversion(_, _))
++        .WillOnce(DoAll(SetArgPointee<1>(segments), Return(true)));
++    commands::Context context;
++    if (mode == 2) context.set_input_field_type(commands::Context::PASSWORD);
++    composer_->Reset();
++    composer_->InsertCharacterPreedit("ちょとまってください");
++    ASSERT_TRUE(converter.Convert(*composer_, context));
++  }
++}
++
++TEST_F(EngineConverterTest, CorrectedReadingDictionaryFailureKeepsTop) {
++  config_->set_kotori_lm_enabled(true);
++  auto mock = std::make_shared<MockConverter>();
++  EngineConverter converter(mock, request_, config_);
++  Segments segments;
++  AddSegmentWithSingleCandidate(&segments, "ちょとまってください", "ちょっと待ってください");
++  auto* top = segments.mutable_conversion_segment(0)->mutable_candidate(0);
++  top->kotori_ai_evaluated = true;
++  top->kotori_corrected_reading = "ちょっとまってください";
++  EXPECT_CALL(*mock, StartConversion(_, _))
++      .WillOnce(DoAll(SetArgPointee<1>(segments), Return(true)))
++      .WillOnce(Return(false));
++  composer_->InsertCharacterPreedit("ちょとまってください");
++  ASSERT_TRUE(converter.Convert(*composer_));
++  commands::Output output;
++  converter.FillOutput(*composer_, &output);
++  EXPECT_EQ(output.preedit().segment(0).value(), "ちょっと待ってください");
++  EXPECT_FALSE(output.has_result());
++}
++
 +TEST_F(EngineConverterTest, NuanceAlternativeFocusesChangedSegment) {
 +  for (bool fixed_boundary : {false, true}) {
 +  for (bool whole_top : {true, false}) {
@@ -20645,7 +20855,7 @@ index 808058c64..4b1821399 100644
  TEST_F(EngineConverterTest, FullSentenceCandidateInConversion) {
    auto mock_converter = std::make_shared<MockConverter>();
    EngineConverter converter(mock_converter, request_, config_);
-@@ -4822,5 +4945,147 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
+@@ -4822,5 +5032,147 @@ TEST_F(EngineConverterTest, CommitFirstSegmentSingleSegmentCandidate) {
    EXPECT_EQ(consumed_key_size, Util::CharsLen("きょうは"));
  }
  
@@ -23118,7 +23328,7 @@ index 4bbcddeca..20a5baad2 100644
 +    ],
 +)
 diff --git a/src/rewriter/english_variants_rewriter.cc b/src/rewriter/english_variants_rewriter.cc
-index b75c03feb..e1603f1c7 100644
+index b75c03feb..54188c42c 100644
 --- a/src/rewriter/english_variants_rewriter.cc
 +++ b/src/rewriter/english_variants_rewriter.cc
 @@ -29,16 +29,20 @@
@@ -23175,7 +23385,7 @@ index b75c03feb..e1603f1c7 100644
  // Add space-prefixed variants to enable Space-joined English words conversion.
  // 'Google Japan' consists of 'ぐーぐる': 'Google', and 'じゃぱん': 'Japan'
  // Therefore, when a user types 'ぐーぐるじゃぱん', it will be 'GoogleJapan'
-@@ -141,28 +171,87 @@ bool EnglishVariantsRewriter::IsEnglishCandidate(
+@@ -141,28 +171,88 @@ bool EnglishVariantsRewriter::IsEnglishCandidate(
  }
  
  bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
@@ -23247,6 +23457,7 @@ index b75c03feb..e1603f1c7 100644
 +          new_candidate->inner_segment_boundary.clear();
 +          new_candidate->description.clear();
 +          new_candidate->kotori_ai_evaluated = false;
++          new_candidate->kotori_corrected_reading.clear();
 +          new_candidate->kotori_confident_prediction = false;
 +          new_candidate->attributes |= converter::Attribute::NO_VARIANTS_EXPANSION;
 +        }
@@ -23270,7 +23481,7 @@ index b75c03feb..e1603f1c7 100644
        continue;
      }
  
-@@ -246,10 +335,7 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
+@@ -246,10 +336,7 @@ bool EnglishVariantsRewriter::ExpandEnglishVariantsWithSegment(
  
  int EnglishVariantsRewriter::capability(
      const ConversionRequest& request) const {
@@ -23282,7 +23493,7 @@ index b75c03feb..e1603f1c7 100644
  }
  
  bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
-@@ -266,7 +352,10 @@ bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
+@@ -266,7 +353,10 @@ bool EnglishVariantsRewriter::Rewrite(const ConversionRequest& request,
      // need_space_prefix = true
      const bool need_space_prefix =
          enable_space_insersion && is_previous_candidate_english;
@@ -24850,10 +25061,10 @@ index 000000000..c31037864
 +}
 diff --git a/src/rewriter/lm_rewriter.cc b/src/rewriter/lm_rewriter.cc
 new file mode 100644
-index 000000000..f88fcdd46
+index 000000000..04b1228ab
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.cc
-@@ -0,0 +1,3118 @@
+@@ -0,0 +1,3134 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -26783,6 +26994,10 @@ index 000000000..f88fcdd46
 +    best.values = {fixed};
 +    best.correction = CorrectionOrigin{request.kotori_input_generation(),
 +        correction_models, MemoKey(request.config(), reading, context)};
++    if (!MatchesReading(*dictionary_, single_kanji_, fixed, reading, false)) {
++      best.corrected_reading = kotori_internal::MechanicalCorrectionReading(
++          *dictionary_, reading, fixed);
++    }
 +  } else if (typo_correct_ && llm != nullptr && llogp && dictionary_ != nullptr && !over() &&
 +      Util::CharsLen(reading) <= kMaxTypoChars &&
 +      FindTypoCorrection(scorer, llm, context, reading, values[top],
@@ -26858,12 +27073,24 @@ index 000000000..f88fcdd46
 +  }
 +  if (i != best.keys.size()) return false;
 +
++  auto mark_top = [&](converter::Candidate* candidate) {
++    candidate->kotori_ai_evaluated = true;
++    candidate->kotori_corrected_reading = best.corrected_reading;
++    if (!best.corrected_reading.empty()) {
++      candidate->attributes |= converter::Attribute::SPELLING_CORRECTION |
++                               converter::Attribute::NO_LEARNING;
++    }
++  };
 +  bool changed = false;
 +  i = 0;
 +  for (Segment& seg : segments->conversion_segments()) {
 +    const std::string& value = best.values[i++];
 +    if (seg.candidates_size() > 0) {
-+      seg.mutable_candidate(0)->kotori_ai_evaluated = true;
++      auto* current = seg.mutable_candidate(0);
++      current->kotori_ai_evaluated = true;
++      current->kotori_corrected_reading.clear();
++      // ユーザー辞書を保持したときや、元の候補が下へ残るときは補正の印を付けない。
++      if (current->value == value) mark_top(current);
 +    }
 +    if (seg.candidates_size() == 0 || seg.candidate(0).value == value) {
 +      continue;
@@ -26890,7 +27117,7 @@ index 000000000..f88fcdd46
 +      c.inner_segment_boundary.clear();
 +    }
 +    *seg.insert_candidate(0) = std::move(c);
-+    seg.mutable_candidate(0)->kotori_ai_evaluated = true;
++    mark_top(seg.mutable_candidate(0));
 +    changed = true;
 +  }
 +  *changed_out = changed;
@@ -27974,10 +28201,10 @@ index 000000000..f88fcdd46
 +}  // namespace mozc
 diff --git a/src/rewriter/lm_rewriter.h b/src/rewriter/lm_rewriter.h
 new file mode 100644
-index 000000000..d725b2461
+index 000000000..4d79021ad
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter.h
-@@ -0,0 +1,457 @@
+@@ -0,0 +1,458 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +//
 +// Kotori: AI による変換(docs/adr/0013、0015、0016)。
@@ -28132,6 +28359,7 @@ index 000000000..d725b2461
 +    std::vector<std::string> keys;
 +    std::vector<std::string> values;
 +    std::optional<CorrectionOrigin> correction = std::nullopt;
++    std::string corrected_reading;
 +  };
 +
 +  // 設定に合わせてモデルを用意する。zenz を返し(使えなければ nullptr)、*llm に LLM
@@ -28437,10 +28665,10 @@ index 000000000..d725b2461
 +#endif  // MOZC_REWRITER_LM_REWRITER_H_
 diff --git a/src/rewriter/lm_rewriter_test.cc b/src/rewriter/lm_rewriter_test.cc
 new file mode 100644
-index 000000000..c2e5a0b44
+index 000000000..7c1ff3ef0
 --- /dev/null
 +++ b/src/rewriter/lm_rewriter_test.cc
-@@ -0,0 +1,817 @@
+@@ -0,0 +1,859 @@
 +// Copyright 2026, Kotori IME contributors (BSD-3-Clause, same as Mozc)
 +
 +#include "rewriter/lm_rewriter.h"
@@ -29044,6 +29272,40 @@ index 000000000..c2e5a0b44
 +    EXPECT_EQ(changed, accepted);
 +    return accepted;
 +  }
++  void CheckCorrectedReadingMetadata(bool protected_user_word) const {
++    auto owner = std::make_shared<std::atomic<uint64_t>>(1);
++    auto best = Corrected({owner, 1});
++    best.reading = "ちょとまってください";
++    best.keys = {best.reading};
++    best.values = {"ちょっと待ってください"};
++    best.corrected_reading = "ちょっとまってください";
++    best.correction->config_key = rewriter_->MemoKey(config_, best.reading, "");
++    Segments segments;
++    auto* segment = segments.add_segment();
++    segment->set_key(best.reading);
++    auto* original = segment->add_candidate();
++    original->key = original->content_key = best.reading;
++    original->value = original->content_value = "ちょと待ってください";
++    if (protected_user_word) original->attributes |= converter::Attribute::USER_DICTIONARY;
++    bool changed = false;
++    ASSERT_TRUE(rewriter_->ApplyBestFrom(best, Request({owner, 1}), &segments, "", &changed));
++    EXPECT_EQ(changed, !protected_user_word);
++    if (protected_user_word) {
++      ASSERT_EQ(segment->candidates_size(), 1);
++      EXPECT_EQ(segment->candidate(0).value, "ちょと待ってください");
++      EXPECT_TRUE(segment->candidate(0).kotori_corrected_reading.empty());
++      EXPECT_EQ(segment->candidate(0).attributes & converter::Attribute::SPELLING_CORRECTION, 0);
++    } else {
++      ASSERT_EQ(segment->candidates_size(), 2);
++      EXPECT_EQ(segment->candidate(0).value, best.values[0]);
++      EXPECT_EQ(segment->candidate(0).kotori_corrected_reading, best.corrected_reading);
++      EXPECT_EQ(segment->candidate(0).attributes & converter::Attribute::NO_LEARNING,
++                converter::Attribute::NO_LEARNING);
++      EXPECT_EQ(segment->candidate(1).value, "ちょと待ってください");
++      EXPECT_TRUE(segment->candidate(1).kotori_corrected_reading.empty());
++      EXPECT_EQ(segment->candidate(1).attributes & converter::Attribute::SPELLING_CORRECTION, 0);
++    }
++  }
 +  bool SavePredictionBase(const Best& best) const {
 +    return rewriter_->StoreMemo(
 +        rewriter_->MemoKey(config_, best.reading, best.context), best, true,
@@ -29082,6 +29344,14 @@ index 000000000..c2e5a0b44
 +  config::Config config_;
 +  std::unique_ptr<LmRewriter> rewriter_;
 +};
++
++TEST_F(LmRewriterGenerationTest, OnlyAdoptedCandidateCarriesCorrectedReading) {
++  CheckCorrectedReadingMetadata(false);
++}
++
++TEST_F(LmRewriterGenerationTest, ProtectedUserDictionaryDoesNotCarryUnadoptedCorrection) {
++  CheckCorrectedReadingMetadata(true);
++}
 +
 +TEST_F(LmRewriterGenerationTest, RejectsMalformedPredictionsEvenWithFullCoveredReading) {
 +  EXPECT_EQ(CachedPredictionCountWithMalformedText(), 1);
@@ -31182,7 +31452,7 @@ index 012d822a5..21ac2b3ec 100644
  }  // namespace session
  }  // namespace mozc
 diff --git a/src/version.bzl b/src/version.bzl
-index ada11a64a..209c0c8dc 100644
+index ada11a64a..2de85c4a8 100644
 --- a/src/version.bzl
 +++ b/src/version.bzl
 @@ -32,10 +32,10 @@ MAJOR = 3
@@ -31194,7 +31464,7 @@ index ada11a64a..209c0c8dc 100644
  
  # Number to be increased. This value may be replaced by other tools.
 -BUILD = BUILD_OSS
-+BUILD = 6333
++BUILD = 6334
  
  # Represent the platform and release channel.
  REVISION = 100
