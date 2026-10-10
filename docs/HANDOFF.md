@@ -1,3 +1,20 @@
+# rc.5導入試行は取消し終了・実機は6332を維持（2026-10-10）
+
+利用者の「インストールしましたができてますか？」を受けて現在の実物を再確認。
+11:24に正しいrc.5ローカルMSIの処理が開始されたが、11:27のMsiInstaller 11708/1033は失敗・状態1602。
+Windowsの取消し終了（ERROR_INSTALL_USEREXIT）であり、取消しのきっかけは詳細ログ不在のため不明。
+登録版とserver/tool/TIP64/rendererは3.34.6332.100。4ハッシュはrc.4と一致し、rc.5とは不一致。
+稼働server PID23680も02:54起動の6332。確認時にmsiexecプロセスなし。
+したがって6333設定保存UXの実機導入/表示は未確認のまま。再起動待ちの成功とは扱わない。
+専用IPCで「あしをいためた」は補正後/Tab/Space1で「足を痛めた」、Space2で「脚を痛めた」、終了0。
+AI/予測/補正有効。品質Unrealの設定を維持し、入力確定・履歴リセット・自動再インストールは行っていない。
+原票はkotori-first-check/rc5-install-attempt-20261010-1124/installation-check.json。
+公開用要約docs/verification/rc5-install-attempt-20261010.json。
+次は利用者が既存の完全なrc.5 MSIで導入を完了後、6333の版/稼働経路と実UIを再確認する。
+既存のMSIは公開SHAと照合済み。低速なGitHubから再ダウンロードする必要はない。
+
+以下は履歴。rc.5公開とこのPCへの導入成功を取り違えない。
+
 # 設定保存UX修正版rc.5公開・実機デバッグの続き（2026-10-10）
 
 rc.5公開済み。https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0-rc.5
