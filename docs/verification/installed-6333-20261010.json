@@ -1,0 +1,266 @@
+{
+  "checked_at": "2026-10-10T11:45:07.350200+09:00",
+  "source_commit": "4b50257746f8de22a9cc27f9ec1072e1a07e3461",
+  "release": "v1.1.0-rc.5",
+  "installed_version": "3.34.6333.100",
+  "scope": "Installed server dedicated IPC sessions with user configuration preserved; no input commit; not native Windows TSF display",
+  "installed_file_count_checked": 29,
+  "all_29_payload_hashes_match": true,
+  "files": [
+    {
+      "name": "mozc_server.exe",
+      "sha256": "dcd7adc00c78b5f289bd9b89ae17173e6be28d338f34d9082e83d90fe6201a24",
+      "expected_sha256": "dcd7adc00c78b5f289bd9b89ae17173e6be28d338f34d9082e83d90fe6201a24",
+      "matches_rc5": true
+    },
+    {
+      "name": "mozc_tool.exe",
+      "sha256": "2dda6ed5222d7701a65f847f6d7afd313aec7e0e80dff452d421a87f2b2b1400",
+      "expected_sha256": "2dda6ed5222d7701a65f847f6d7afd313aec7e0e80dff452d421a87f2b2b1400",
+      "matches_rc5": true
+    },
+    {
+      "name": "mozc_tip64.dll",
+      "sha256": "ac15bccb3be188478a31d9905e32005db9913c2135d2974256f2e3437b4ced31",
+      "expected_sha256": "ac15bccb3be188478a31d9905e32005db9913c2135d2974256f2e3437b4ced31",
+      "matches_rc5": true
+    },
+    {
+      "name": "tinyswallow-1.5b-q5_k_m.gguf",
+      "sha256": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+      "expected_sha256": "0aa55c79e7741c4c58fe25a6a24fc45f1587bbd5fdd0b0a1482fc6244626ebc8",
+      "matches_rc5": true
+    },
+    {
+      "name": "zenz-v2.5-medium-q8_0.gguf",
+      "sha256": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+      "expected_sha256": "2a48bc3cab80a68a249ff09e65dc82b373756cf83ce0250fc1df714565a81fac",
+      "matches_rc5": true
+    },
+    {
+      "name": "zenz-v2.5-small-q8_0.gguf",
+      "sha256": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c",
+      "expected_sha256": "4edf21153454bdbb51f7c51326d9c842c5c392fd52cf0947698f29d4fd9faa4c",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-base.dll",
+      "sha256": "0396d453898eff5f105baf187cd7bfd0d83edba62ebfda0c76c5a2be40170b49",
+      "expected_sha256": "0396d453898eff5f105baf187cd7bfd0d83edba62ebfda0c76c5a2be40170b49",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-alderlake.dll",
+      "sha256": "da2ce899d47ab23f1542865e57f2df80b1d738b6ebba23a548596b966f7a5d6a",
+      "expected_sha256": "da2ce899d47ab23f1542865e57f2df80b1d738b6ebba23a548596b966f7a5d6a",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-cannonlake.dll",
+      "sha256": "b497e0bdf3e1ead781cb2e10f1601596d3d1afce436a9251ce1368e2168df184",
+      "expected_sha256": "b497e0bdf3e1ead781cb2e10f1601596d3d1afce436a9251ce1368e2168df184",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-cascadelake.dll",
+      "sha256": "47b6a5490b2a81a253cc3e3b61f68f9ae0338779a95079d5947eae5794e2330b",
+      "expected_sha256": "47b6a5490b2a81a253cc3e3b61f68f9ae0338779a95079d5947eae5794e2330b",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-cooperlake.dll",
+      "sha256": "6ec3ed84e477af453a0879c352e299b690cce2fb1bfa09c55d8304f03dcdc0e5",
+      "expected_sha256": "6ec3ed84e477af453a0879c352e299b690cce2fb1bfa09c55d8304f03dcdc0e5",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-haswell.dll",
+      "sha256": "48ff33c73c3cc747522822c4d088621a66e15f7c4ff98b6c7689b833913d7e31",
+      "expected_sha256": "48ff33c73c3cc747522822c4d088621a66e15f7c4ff98b6c7689b833913d7e31",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-icelake.dll",
+      "sha256": "ef5669772ac6e26c223a6930f7c99cb6a2985e315320d0a5ca3edbde4b418fff",
+      "expected_sha256": "ef5669772ac6e26c223a6930f7c99cb6a2985e315320d0a5ca3edbde4b418fff",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-ivybridge.dll",
+      "sha256": "b6aebe67cd03d570e05d3aa6f20ab5553a66c755f03d623901800a8dfe0e2754",
+      "expected_sha256": "b6aebe67cd03d570e05d3aa6f20ab5553a66c755f03d623901800a8dfe0e2754",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-piledriver.dll",
+      "sha256": "0f51a00760ad893c44a8e4488bd2d54a6a4e260df7feaa67e6ea6e9968d39fd9",
+      "expected_sha256": "0f51a00760ad893c44a8e4488bd2d54a6a4e260df7feaa67e6ea6e9968d39fd9",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-sandybridge.dll",
+      "sha256": "f60089e2b0d2e4402b18ce1424c327ddf382b3cbaeca32598820cef354c233d0",
+      "expected_sha256": "f60089e2b0d2e4402b18ce1424c327ddf382b3cbaeca32598820cef354c233d0",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-sapphirerapids.dll",
+      "sha256": "dc1aa0a345af0a75acce01a6baea881b663cd9320acf3272e8bbf3ec96247390",
+      "expected_sha256": "dc1aa0a345af0a75acce01a6baea881b663cd9320acf3272e8bbf3ec96247390",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-skylakex.dll",
+      "sha256": "cf95e711a1f0863a61217b94fdbda9f68f87c40507838493360c1f5c1eca3cc5",
+      "expected_sha256": "cf95e711a1f0863a61217b94fdbda9f68f87c40507838493360c1f5c1eca3cc5",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-sse42.dll",
+      "sha256": "33920a25b6855a69169355fae4d9d4b4f968e11a22a8ea95b79c3611a909f7fa",
+      "expected_sha256": "33920a25b6855a69169355fae4d9d4b4f968e11a22a8ea95b79c3611a909f7fa",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-x64.dll",
+      "sha256": "08a7bb90a1640518a5b27a643b8a8b73f18abcd7fe6f92019236c699ea427481",
+      "expected_sha256": "08a7bb90a1640518a5b27a643b8a8b73f18abcd7fe6f92019236c699ea427481",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-cpu-zen4.dll",
+      "sha256": "5775c2cafa9bd74be8c14cc77d58163461f8f4ec709b859e26041ee023041135",
+      "expected_sha256": "5775c2cafa9bd74be8c14cc77d58163461f8f4ec709b859e26041ee023041135",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml-vulkan.dll",
+      "sha256": "d2d767cc2360cd5fbb4b5301660463605f3d16d433b5a4a94c822c073ee1036d",
+      "expected_sha256": "d2d767cc2360cd5fbb4b5301660463605f3d16d433b5a4a94c822c073ee1036d",
+      "matches_rc5": true
+    },
+    {
+      "name": "ggml.dll",
+      "sha256": "92b3d587f6e539077932598941fc2a3f33a679480951d0ddc995554d03158a45",
+      "expected_sha256": "92b3d587f6e539077932598941fc2a3f33a679480951d0ddc995554d03158a45",
+      "matches_rc5": true
+    },
+    {
+      "name": "llama.dll",
+      "sha256": "11b7b693e5ba137a88be44b1cd2cd21dda64e046a333253acdff3d23bda33d7c",
+      "expected_sha256": "11b7b693e5ba137a88be44b1cd2cd21dda64e046a333253acdff3d23bda33d7c",
+      "matches_rc5": true
+    },
+    {
+      "name": "mozc_tip32.dll",
+      "sha256": "05e636e9ecb43b1f1e5de84dea89a823244d32e227d03ce82f550ce3296ece15",
+      "expected_sha256": "05e636e9ecb43b1f1e5de84dea89a823244d32e227d03ce82f550ce3296ece15",
+      "matches_rc5": true
+    },
+    {
+      "name": "mozc_renderer.exe",
+      "sha256": "7a15085ad007fc1d107434d26d50a993498e7ed58726f61b6a0cb4069c963a4b",
+      "expected_sha256": "7a15085ad007fc1d107434d26d50a993498e7ed58726f61b6a0cb4069c963a4b",
+      "matches_rc5": true
+    },
+    {
+      "name": "KotoriEnglish.tsv",
+      "sha256": "91748ec2fa4bfe310793d38badbdb0c7b05aeff221e0241d91aaaa017fe1e6dd",
+      "expected_sha256": "91748ec2fa4bfe310793d38badbdb0c7b05aeff221e0241d91aaaa017fe1e6dd",
+      "matches_rc5": true
+    },
+    {
+      "name": "KotoriEnglish-source.json",
+      "sha256": "092885594c988c7f7f34bd4b3a84e1429d67e0edb21a24cda2ce9678aa67ca87",
+      "expected_sha256": "092885594c988c7f7f34bd4b3a84e1429d67e0edb21a24cda2ce9678aa67ca87",
+      "matches_rc5": true
+    },
+    {
+      "name": "NOTICE-katakana-english.txt",
+      "sha256": "0d28376cedbb7ae9a39b4d06c61f07e67da49b00d0125e8f0fbcbc62e78275b3",
+      "expected_sha256": "0d28376cedbb7ae9a39b4d06c61f07e67da49b00d0125e8f0fbcbc62e78275b3",
+      "matches_rc5": true
+    }
+  ],
+  "server_pid": 23700,
+  "restart_completed": true,
+  "actual_quality": "Unreal (user setting preserved)",
+  "ai_enabled": true,
+  "prediction_enabled": true,
+  "correction_enabled": true,
+  "settings_modified": false,
+  "input_committed": false,
+  "rows": [
+    {
+      "label": "foot",
+      "exit_code": 0,
+      "refreshed_first": "足を痛めた",
+      "tab": "足を痛めた",
+      "space1": "足を痛めた",
+      "space2": "脚を痛めた"
+    },
+    {
+      "label": "medical",
+      "exit_code": 0,
+      "refreshed_first": "足を痛めてしまったため今日は医者に行こう",
+      "tab": "足を痛めてしまったため今日は医者に行こう",
+      "space1": "足を痛めてしまったため今日は医者に行こう",
+      "space2": "脚を痛めてしまったため今日は医者に行こう"
+    },
+    {
+      "label": "cooking",
+      "exit_code": 0,
+      "refreshed_first": "玉ねぎを炒めた",
+      "tab": "玉ねぎを炒めた",
+      "space1": "玉ねぎを炒めた",
+      "space2": "たまねぎを炒めた"
+    },
+    {
+      "label": "typo-cancel",
+      "exit_code": 0,
+      "refreshed_first": "ちょっと待ってください",
+      "tab": "ちょっと待ってください",
+      "space1": "ちょっと待ってください",
+      "space2": "ちょ止まってください"
+    },
+    {
+      "label": "english-architecture",
+      "exit_code": 0,
+      "refreshed_first": "アーキテクチャ",
+      "tab": "アーキテクチャ",
+      "space1": "アーキテクチャ",
+      "space2": "architecture"
+    },
+    {
+      "label": "english-accessibility",
+      "exit_code": 0,
+      "refreshed_first": "アクセシビリティ",
+      "tab": "アクセシビリティ",
+      "space1": "アクセシビリティ",
+      "space2": "accessibility"
+    },
+    {
+      "label": "english-configuration",
+      "exit_code": 0,
+      "refreshed_first": "コンフィギュレーション",
+      "tab": "コンフィギュレーション",
+      "space1": "コンフィギュレーション",
+      "space2": "configuration"
+    }
+  ],
+  "tip_loaded_module_count": 3,
+  "tip_loaded_version": [
+    "3.34.6333.100",
+    "3.34.6333.100",
+    "3.34.6333.100"
+  ],
+  "active_tip_not_verified_from_module_loading": true,
+  "settings_ui_contains_rc5_fix_by_binary_identity": true,
+  "native_settings_ui_verified": false,
+  "native_tsf_ui_verified": false,
+  "computer_use": "Initialization timed out after reboot at 20s and one 30s recovery; no UI action taken",
+  "unresolved": [
+    "Space2 typo alternate remains uncorrected: ちょ止まってください",
+    "Live Windows first display/Tab focus/save label not verified"
+  ]
+}
