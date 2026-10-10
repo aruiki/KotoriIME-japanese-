@@ -1,5 +1,5 @@
 <h1 align="center">Kotori日本語入力IME</h1>
-<p align="center">文脈を考慮する次世代のAI-IMEです。</p>
+<p align="center">文脈をAIが読み変換先を最適化する次世代IME</p>
 
 <p align="center">
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest"><img alt="正式版" src="https://img.shields.io/github/v/release/aruiki/KotoriIME-japanese-?label=%E6%AD%A3%E5%BC%8F%E7%89%88&color=242C5C"></a>
