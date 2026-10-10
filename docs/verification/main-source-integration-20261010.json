@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-10-10T18:47:14.266601+09:00",
+  "source_release": "v1.1.0",
+  "release_commit": "e6e35a101fc2849a50489f41e757a471427b39b9",
+  "merged_main": "69152dd8d275a9190746c16d2039e8697d579797",
+  "patches": [
+    {
+      "path": "mozc/patches/0001-kotori-branding.patch",
+      "sha256": "7fc85afbdcd397a00d0fa52738415142b8ac483a00e6d457d1107173e852969b",
+      "same_as_released_source": true
+    },
+    {
+      "path": "mozc/patches/0002-kotori-lm-rerank.patch",
+      "sha256": "e5c5c0bfe1611a3616ee305f5a2173b94ddef304bdb4303fe8bc7b19a4207e03",
+      "same_as_released_source": true
+    },
+    {
+      "path": "mozc/patches/0003-kotori-bundle-model.patch",
+      "sha256": "b75c5a74389cc2cac954776b08775bca46507894d85b04fecb224cbab5f6fb4b",
+      "same_as_released_source": true
+    }
+  ],
+  "validation": "Existing local4 tests,18 model cases,Standard91.5%,MSI48 payload and native corrected Space2 evidence reused; patches unchanged. No new cloud build. Native post-reboot and general acceptance still pending."
+}
