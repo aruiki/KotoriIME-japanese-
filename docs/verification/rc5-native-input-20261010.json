@@ -30,7 +30,7 @@
       "matches_rc5": true
     }
   ],
-  "input_method": "Computer Use press_key individual physical romanization keys, no literal type_text; blank scratch document",
+  "input_method": "Computer Use press_key individual injected romanization key events, no literal type_text; blank scratch document",
   "mode_setup": "User selected Kotori. A newly created Notepad tab received committed ASCII. F13, present in Mozc MS-IME keymap as IMEOn, enabled Japanese composition in the focused scratch tab. New tabs required enabling IME again.",
   "observations": [
     {
