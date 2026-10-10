@@ -14,11 +14,6 @@
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/download/v1.1.0/Kotori64.msi">⬇ 正式版 v1.1.0 をダウンロード</a>
 </h3>
 
-<p align="center">
-  設定の適用結果の表示と、保存失敗時の再試行を改善しました。<br>
-  Windows Installerの版は3.34.6334.100です。未署名です。更新後、Windowsから再起動を求められた場合は再起動してください。確認範囲と制限はリリースノートに記載しています。
-  <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/tag/v1.1.0">変更内容を見る</a>
-</p>
 
 <p align="center">
   <a href="https://github.com/aruiki/KotoriIME-japanese-/releases/latest">正式版のダウンロード</a> ・
@@ -38,14 +33,6 @@
 </p>
 
 ---
-
-**Kotori日本語入力**は、無料で使える、オープンソースのWindows用日本語入力ソフト(IME)です。Google 日本語入力のオープンソース版である
-**Mozc** の変換エンジンと辞書をそのまま土台にし、その上で **AI が前後の文脈を読んで候補を選び直します**。
-使い慣れた Mozc の操作はそのままに、同音異義語や言い回しの取り違えを減らします。
-
-> [!TIP]
-> MSI をひとつ実行するだけで使えます。AI のモデルと GPU の実行環境も同梱しているので、CUDA などの準備は要りません。
-> GPU がない PC(ノート PC など)でも動きます。
 
 ## ほかの IME と比べる
 
