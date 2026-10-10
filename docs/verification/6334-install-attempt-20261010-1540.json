@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-10-10T15:46:39.515904+09:00",
+  "target_msi_version": "3.34.6334.100",
+  "target_msi_sha256": "7136ea32e39092ecdc7069cd0834e09d7fc0c2053fb89f3586410d5c8a7a599a",
+  "source_commit": "e6e35a101fc2849a50489f41e757a471427b39b9",
+  "user_authorized_install": true,
+  "attempt": {
+    "started": "2026-10-10T15:40:13.3888904+09:00",
+    "ended": "2026-10-10T15:42:21.7086051+09:00",
+    "exit_code": 1602,
+    "elapsed_seconds": 128.3197147,
+    "uac_hresult": "0x800704C7",
+    "phase": "UAC elevation request before install execution",
+    "automatic_reboot_suppressed": true,
+    "restart_manager_shutdown_disabled": true
+  },
+  "post_attempt": {
+    "installed_product_version": "3.34.6333.100",
+    "all_4_core_hashes_still_rc5": true,
+    "config_unchanged": true,
+    "user_dictionary_unchanged": true,
+    "new_6334_install_complete": false,
+    "new_6334_native_input_verified": false,
+    "formal_release_published": false
+  },
+  "private_evidence_folder": "installed-6334-debug-20261010",
+  "next": "User approval of the actual UAC prompt after a fresh launch; do not treat cancellation as installation success.",
+  "notes": [
+    "Installer log and settings/history snapshots remain local. Raw private data was not uploaded.",
+    "Copying open history files is a supplemental snapshot, not a transactionally verified backup. Snapshot hashes were generated from copies after live hash reads failed due to file locks.",
+    "Local formal release notes prepared; no draft or published GitHub release was created in this attempt."
+  ]
+}
